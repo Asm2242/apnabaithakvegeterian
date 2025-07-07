@@ -1,0 +1,3 @@
+change file name from .envtemplate to .env
+
+VITE_RAZORPAY_KEY_ID="#RazorPay KEY_ID"

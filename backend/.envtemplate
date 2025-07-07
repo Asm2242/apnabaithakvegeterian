@@ -1,0 +1,7 @@
+change filename from .envtemplate to .env
+
+JWT_SECRET="random#secret"
+
+
+RAZORPAY_KEY_ID="#razorpay Key_id"
+RAZORPAY_SECRET="#Razorpay secret"
