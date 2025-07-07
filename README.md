@@ -1,37 +1,32 @@
-Here’s a professional and detailed `README.md` file for your **Khana Khazana - Food Delivery App (MERN Stack)** project based on the documentation you provided:
+🍽️ Food Delivery App
 
----
-
-```markdown
-# 🍽️ Khana Khazana - Food Delivery App
-
-Khana Khazana is a modern, full-stack food delivery web application built using the **MERN Stack** (MongoDB, Express.js, React.js, and Node.js). It offers a seamless food ordering experience for customers, efficient order management for admins, and real-time delivery tracking for delivery personnel.
+Food-Delivery-App is a modern, full-stack food delivery web application built using the **MERN Stack** (MongoDB, Express.js, React.js, and Node.js). It offers a seamless food ordering experience for customers, efficient order management for admins, and real-time delivery tracking for delivery personnel.
 
 
 ---
 
-## 📦 Features
+📦 Features
 
-### 👤 Customer
+👤 Customer
 - User registration and login (JWT-based)
 - Browse food items by category
 - Add to cart and place orders
 - Razorpay integration for payments
 - Track order status in real-time
 
-### 👨‍🍳 Admin
+👨‍🍳 Admin
 - Secure login for admin panel
 - Add/update/delete food items
 - View all orders
 - Update order status
 
-### 🚚 Delivery Personnel
+🚚 Delivery Personnel
 - Login to view assigned orders
 - Update order delivery status
 
 ---
 
-## 🧩 Project Structure
+🧩 Project Structure
 
 ```
 
@@ -48,7 +43,7 @@ Food-Delivery-App/
 
 ---
 
-## ⚙️ Tech Stack
+⚙️ Tech Stack
 
 - **Frontend**: React.js, Axios, React Router, Toastify
 - **Backend**: Node.js, Express.js, MongoDB, Mongoose
@@ -59,45 +54,45 @@ Food-Delivery-App/
 
 ---
 
-## 🔐 API Endpoints (Sample)
+🔐 API Endpoints (Sample)
 
-### 🔸 Cart Routes
+🔸 Cart Routes
 - `GET /cart` - Get cart contents
 - `POST /cart` - Add to cart
 - `DELETE /cart` - Clear cart
 
-### 🔸 Food Routes
+🔸 Food Routes
 - `GET /foods` - Get all food items
 - `POST /foods` - Add new food
 - `DELETE /foods/:id` - Delete food item
 
-### 🔸 Order Routes
+🔸 Order Routes
 - `GET /orders` - Get all orders
 - `POST /orders` - Create new order
 - `PUT /orders/:id` - Update status
 
-### 🔸 Auth Routes
+🔸 Auth Routes
 - `POST /login`
 - `POST /register`
 - `POST /logout`
 
 ---
 
-## 🖥️ Setup Instructions
+ 🖥️ Setup Instructions
 
-### 🧪 Prerequisites
+🧪 Prerequisites
 - Node.js (v14+)
 - MongoDB (local or Atlas)
 - Razorpay account (for payments)
 
-### 📥 Clone the Repository
+📥 Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/khana-khazana.git
+git clone https://github.com/your-username/Food-Delivery-App.git
 cd khana-khazana
 ````
 
-### 🚀 Backend Setup
+ 🚀 Backend Setup
 
 ```bash
 cd backend
@@ -106,7 +101,7 @@ npm install
 npm start
 ```
 
-### 🌐 Frontend Setup
+🌐 Frontend Setup
 
 ```bash
 cd frontend
@@ -114,7 +109,7 @@ npm install
 npm start
 ```
 
-### 🛠️ Admin Panel Setup
+🛠️ Admin Panel Setup
 
 ```bash
 cd admin
@@ -124,7 +119,7 @@ npm start
 
 ---
 
-## 📸 Screenshots
+📸 Screenshots
 
 * ✅ Responsive Design
 * ✅ Clean Admin Dashboard
@@ -133,7 +128,7 @@ npm start
 
 ---
 
-## 🚧 Limitations
+🚧 Limitations
 
 * No live GPS tracking for delivery
 * No ratings/reviews system
@@ -142,7 +137,7 @@ npm start
 
 ---
 
-## 🚀 Future Scope
+🚀 Future Scope
 
 * Live map tracking using Google Maps API
 * Customer reviews and ratings
@@ -153,20 +148,20 @@ npm start
 
 ---
 
-## 🤝 Contributions
+🤝 Contributions
 
 Pull requests and suggestions are welcome!
 Please open an issue first to discuss what you would like to change.
 
 ---
 
-## 🧾 License
+🧾 License
 
 This project is for academic and learning purposes only.
 
 ---
 
-## 👨‍💻 Developed By
+👨‍💻 Developed By
 
 **Rahul Kumar**
 MCA Graduate | MERN Developer
