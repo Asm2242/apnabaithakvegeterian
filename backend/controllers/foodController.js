@@ -1,5 +1,7 @@
 import foodModel from "../models/foodModel.js";
 import fs from 'fs'
+import path from 'path';
+import AdmZip from "adm-zip";
 import { v2 as cloudinary } from "cloudinary";
 
 // Permanent photo storage: Cloudinary when keys exist, else local uploads/.
@@ -119,4 +121,59 @@ const removeFood = async (req, res) => {
 
 }
 
-export { listFood, addFood, updateFood, removeFood }
+export { listFood, addFood, updateFood, removeFood, bulkPhotos }
+
+// POST /api/food/bulk-photos (admin) — photos.zip: match filenames to dishes.
+// "Paneer-Pizza.jpg" -> Paneer Pizza. Uploads to Cloudinary, updates DB.
+const bulkPhotos = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.json({ success: false, message: "photos.zip file bhejo" });
+        }
+        const zip = new AdmZip(req.file.buffer);
+        const entries = zip.getEntries().filter((e) =>
+            !e.isDirectory && /\.(jpe?g|png|webp)$/i.test(e.entryName)
+        );
+        if (entries.length === 0) {
+            return res.json({ success: false, message: "Zip me koi photo nahi mili (jpg/png/webp)" });
+        }
+        const foods = await foodModel.find({});
+        const norm = (s) => String(s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+        const updated = [];
+        const unmatched = [];
+        for (const entry of entries.slice(0, 200)) {
+            const base = path.basename(entry.entryName).replace(/\.(jpe?g|png|webp)$/i, "");
+            const key = norm(base);
+            const dish = foods.find((f) =>
+                norm(f.name) === key ||
+                norm(f._id || "") === key ||
+                (key.length > 3 && norm(f.name).includes(key)) ||
+                (key.length > 3 && key.includes(norm(f.name)))
+            );
+            if (!dish) {
+                unmatched.push(path.basename(entry.entryName));
+                continue;
+            }
+            const tmp = path.join("uploads", `bulk-${Date.now()}-${Math.round(Math.random() * 1e6)}.jpg`);
+            fs.writeFileSync(tmp, entry.getData());
+            try {
+                const url = await storeImage({ path: tmp });
+                dish.image = url;
+                await dish.save();
+                updated.push({ dish: dish.name, file: path.basename(entry.entryName) });
+            } catch (e) {
+                unmatched.push(path.basename(entry.entryName) + " (upload fail)");
+            }
+            fs.unlink(tmp, () => {});
+        }
+        res.json({
+            success: true,
+            message: `${updated.length} photos lag gayi, ${unmatched.length} match nahi hui.`,
+            updated,
+            unmatched
+        });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: "Zip process fail" });
+    }
+}

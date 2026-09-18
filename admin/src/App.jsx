@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./App.css";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:4000";
@@ -312,6 +312,92 @@ function Coupons({ token }) {
   );
 }
 
+function Chat({ token }) {
+  const [msgs, setMsgs] = useState([
+    { from: "bot", text: "Namaste! 🙏 Main Apna Baithak helper hun. Neeche button dabao ya likho — jaise 'advance all', 'report', 'chai hide karo'." }
+  ]);
+  const [input, setInput] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [zipBusy, setZipBusy] = useState(false);
+  const bottom = useRef(null);
+
+  useEffect(() => {
+    bottom.current?.scrollIntoView({ behavior: "smooth" });
+  }, [msgs]);
+
+  const send = async (text) => {
+    const msg = (text ?? input).trim();
+    if (!msg || busy) return;
+    setInput("");
+    setMsgs((m) => [...m, { from: "me", text: msg }]);
+    setBusy(true);
+    try {
+      const res = await api(token).post("/api/admin/bot", { message: msg });
+      setMsgs((m) => [...m, { from: "bot", text: res.data.reply || res.data.message }]);
+    } catch {
+      setMsgs((m) => [...m, { from: "bot", text: "Bot error. Phir try karo." }]);
+    }
+    setBusy(false);
+  };
+
+  const uploadZip = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setZipBusy(true);
+    setMsgs((m) => [...m, { from: "me", text: `📦 ${file.name} upload kar raha hun…` }]);
+    try {
+      const fd = new FormData();
+      fd.append("zip", file);
+      const res = await api(token).post("/api/food/bulk-photos", fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+        timeout: 300000
+      });
+      const d = res.data;
+      let text = d.message || "Done";
+      if (d.unmatched?.length) text += `\n❌ Match nahi hui (${d.unmatched.length}): ` + d.unmatched.slice(0, 10).join(", ");
+      setMsgs((m) => [...m, { from: "bot", text }]);
+    } catch {
+      setMsgs((m) => [...m, { from: "bot", text: "Zip upload fail. 50MB se chhota .zip bhejo." }]);
+    }
+    setZipBusy(false);
+    e.target.value = "";
+  };
+
+  return (
+    <div className="chat">
+      <div className="chat-msgs">
+        {msgs.map((m, i) => (
+          <div key={i} className={m.from === "me" ? "msg me" : "msg bot"}>{m.text}</div>
+        ))}
+        <div ref={bottom} />
+      </div>
+      <div className="chat-quick">
+        {["report", "advance all", "assign riders", "help"].map((q) => (
+          <button key={q} onClick={() => send(q)} disabled={busy}>{q}</button>
+        ))}
+        <label className="zip-btn">
+          {zipBusy ? "Uploading…" : "📦 photos.zip"}
+          <input type="file" accept=".zip" hidden onChange={uploadZip} disabled={zipBusy} />
+        </label>
+      </div>
+      <form
+        className="chat-input"
+        onSubmit={(e) => {
+          e.preventDefault();
+          send();
+        }}
+      >
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Likho… jaise 'samosa hide karo'"
+        />
+        <button type="submit" disabled={busy}>➤</button>
+      </form>
+    </div>
+  );
+}
+
 function App() {
   const [token, setToken] = useState(localStorage.getItem("ab_admin_token") || "");
   const [tab, setTab] = useState("orders");
@@ -329,8 +415,8 @@ function App() {
       <header>
         <b>Apna Baithak Admin</b>
         <nav>
-          {["orders", "foods", "riders", "customers", "coupons"].map((t) => (
-            <button key={t} className={tab === t ? "active" : ""} onClick={() => setTab(t)}>{t}</button>
+          {["orders", "foods", "riders", "customers", "coupons", "chat"].map((t) => (
+            <button key={t} className={tab === t ? "active" : ""} onClick={() => setTab(t)}>{t === "chat" ? "🤖 chat" : t}</button>
           ))}
           <button onClick={logout}>Logout</button>
         </nav>
@@ -341,6 +427,7 @@ function App() {
         {tab === "riders" && <Riders token={token} />}
         {tab === "customers" && <Customers token={token} />}
         {tab === "coupons" && <Coupons token={token} />}
+        {tab === "chat" && <Chat token={token} />}
       </main>
     </div>
   );
