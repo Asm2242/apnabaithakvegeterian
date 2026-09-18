@@ -78,3 +78,36 @@ const registerUser = async (req,res) => {
 }
 
 export {loginUser, registerUser}
+
+// saved delivery address — GET returns, POST saves (autofill next order)
+const getAddress = async (req, res) => {
+    try {
+        const user = await userModel.findById(req.body.userId).select("savedAddress");
+        res.json({ success: true, address: user?.savedAddress || {} });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: "Error" });
+    }
+}
+
+const saveAddress = async (req, res) => {
+    try {
+        const { street, city, state, zipcode, country, landmark } = req.body;
+        await userModel.findByIdAndUpdate(req.body.userId, {
+            savedAddress: {
+                street: String(street || "").slice(0, 500),
+                city: String(city || "Lucknow").slice(0, 100),
+                state: String(state || "Uttar Pradesh").slice(0, 100),
+                zipcode: String(zipcode || "").slice(0, 20),
+                country: String(country || "India").slice(0, 100),
+                landmark: String(landmark || "").slice(0, 200)
+            }
+        });
+        res.json({ success: true });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: "Error" });
+    }
+}
+
+export { getAddress, saveAddress };

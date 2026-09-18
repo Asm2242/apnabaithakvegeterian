@@ -72,6 +72,24 @@ const PlaceOrder = () => {
     else toast.error(res.message);
   };
 
+  const saveAddr = () => {
+    // remember address for next time (idea #1) — silent fail ok
+    axios
+      .post(
+        url + "/api/user/address",
+        {
+          street: data.street,
+          city: data.city,
+          state: data.state,
+          zipcode: data.zipcode,
+          country: data.country,
+          landmark: data.landmark,
+        },
+        { headers: { token } }
+      )
+      .catch(() => {});
+  };
+
   const placeOrder = async (e) => {
     e.preventDefault();
     if (placing) return;
@@ -116,6 +134,7 @@ const PlaceOrder = () => {
 
       // COD: no Razorpay, straight to confirmation
       if (response.data.cod) {
+        saveAddr();
         toast.success("Order placed! Pay cash on delivery");
         navigate("/verify?success=true&orderId=" + response.data.orderId + "&cod=1");
         return;
@@ -149,6 +168,7 @@ const PlaceOrder = () => {
             { headers: { token } }
           );
           if (verifyRes.data.success) {
+            saveAddr();
             toast.success("Payment successful");
             navigate("/verify?success=true&orderId=" + orderId);
           } else {
@@ -187,6 +207,16 @@ const PlaceOrder = () => {
       setShowLogin(true);
     } else if (getTotalCartAmount() === 0) {
       navigate("/cart");
+    } else {
+      // saved address autofill (idea #1)
+      axios
+        .get(url + "/api/user/address", { headers: { token } })
+        .then((res) => {
+          if (res.data.success && res.data.address?.street) {
+            setData((d) => ({ ...d, ...res.data.address }));
+          }
+        })
+        .catch(() => {});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
