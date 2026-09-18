@@ -20,6 +20,32 @@
     text-align: center;
     margin: 20px 0px;
     overflow-x: scroll;
+    flex: 1;
+}
+.explore-menu-wrap{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.cat-arrow{
+    display: none;
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid #d4a017;
+    background: #fff;
+    color: #9a3412;
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 4px 12px #00000018;
+}
+/* PC (mouse walo) ko arrow dikhao, phone par swipe hi kaafi */
+@media (hover: hover) and (pointer: fine){
+    .cat-arrow{
+        display: block;
+    }
 }
 .explore-menu-list::-webkit-scrollbar{
     display: none;
