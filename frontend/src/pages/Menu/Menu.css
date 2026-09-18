@@ -1,0 +1,18 @@
+.menu-page{padding:20px 0 40px 0}
+.menu-hero{
+    background: linear-gradient(120deg, #3b1d0c, #9a3412);
+    border: 1px solid #d4a017;
+    border-radius: 20px;
+    padding: 30px 28px;
+    margin-bottom: 18px;
+}
+.menu-hero h1{color: #f5c542;font-size:clamp(28px,4vw,40px);margin:0 0 6px 0}
+.menu-hero p{color:#f3e7d3cc;margin:0}
+.menu-count{color:#676767;margin-bottom:16px}
+.menu-search{width:100%;max-width:480px;padding:12px 18px;border:1px solid #C5C5C5;border-radius:50px;font-size:15px;outline:none;margin-bottom:14px;box-sizing:border-box}
+.menu-search:focus{border-color:#9a3412}
+.menu-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+.menu-pills button{border:1px solid #d4a017;background:#fff;color:#9a3412;border-radius:50px;padding:8px 18px;font-size:14px;font-weight:600;cursor:pointer}
+.menu-pills button.active{background:#9a3412;color:#fff}
+.menu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:28px}
+html[data-theme="dark"] .menu-count{color:#c9b896}
