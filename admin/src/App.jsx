@@ -319,6 +319,9 @@ function Chat({ token }) {
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [zipBusy, setZipBusy] = useState(false);
+  const [pending, setPending] = useState(null); // { bundleId, suggestions:[{file, options}] }
+  const [mapping, setMapping] = useState({});
+  const [dishes, setDishes] = useState([]);
   const bottom = useRef(null);
 
   useEffect(() => {
@@ -344,6 +347,8 @@ function Chat({ token }) {
     const file = e.target.files[0];
     if (!file) return;
     setZipBusy(true);
+    setPending(null);
+    setMapping({});
     setMsgs((m) => [...m, { from: "me", text: `📦 ${file.name} upload kar raha hun…` }]);
     try {
       const fd = new FormData();
@@ -354,13 +359,45 @@ function Chat({ token }) {
       });
       const d = res.data;
       let text = d.message || "Done";
-      if (d.unmatched?.length) text += `\n❌ Match nahi hui (${d.unmatched.length}): ` + d.unmatched.slice(0, 10).join(", ");
       setMsgs((m) => [...m, { from: "bot", text }]);
+      if (d.suggestions?.length) {
+        setPending({ bundleId: d.bundleId, suggestions: d.suggestions });
+        if (dishes.length === 0) {
+          const foods = await axios.get(API + "/api/food/list");
+          if (foods.data.success) setDishes(foods.data.data);
+        }
+      } else if (d.unmatched?.length) {
+        setMsgs((m) => [...m, { from: "bot", text: `❌ Match nahi hui: ` + d.unmatched.slice(0, 10).join(", ") }]);
+      }
     } catch {
       setMsgs((m) => [...m, { from: "bot", text: "Zip upload fail. 50MB se chhota .zip bhejo." }]);
     }
     setZipBusy(false);
     e.target.value = "";
+  };
+
+  const confirmMapping = async () => {
+    const map = {};
+    for (const s of pending.suggestions) {
+      if (mapping[s.file]) map[s.file] = mapping[s.file];
+    }
+    if (Object.keys(map).length === 0) {
+      setMsgs((m) => [...m, { from: "bot", text: "Koi dish select nahi ki. Dropdown se chuno." }]);
+      return;
+    }
+    setZipBusy(true);
+    try {
+      const res = await api(token).post("/api/food/bulk-confirm", {
+        bundleId: pending.bundleId,
+        mapping: map
+      });
+      setMsgs((m) => [...m, { from: "bot", text: res.data.message || "Done" }]);
+      setPending(null);
+      setMapping({});
+    } catch {
+      setMsgs((m) => [...m, { from: "bot", text: "Confirm fail. Zip dobara bhejo." }]);
+    }
+    setZipBusy(false);
   };
 
   return (
@@ -369,6 +406,33 @@ function Chat({ token }) {
         {msgs.map((m, i) => (
           <div key={i} className={m.from === "me" ? "msg me" : "msg bot"}>{m.text}</div>
         ))}
+        {pending && (
+          <div className="msg bot suggest-box">
+            <b>🤔 Spelling mismatch? Sahi dish chuno:</b>
+            {pending.suggestions.map((s) => (
+              <div key={s.file} className="suggest-row">
+                <span className="suggest-file">{s.file}</span>
+                <select
+                  value={mapping[s.file] || ""}
+                  onChange={(e) => setMapping((mp) => ({ ...mp, [s.file]: e.target.value }))}
+                >
+                  <option value="">— chhodo —</option>
+                  {s.options.map((o) => (
+                    <option key={o.id} value={o.id}>{o.name} ({Math.round(o.score * 100)}%)</option>
+                  ))}
+                  {dishes
+                    .filter((d) => !s.options.some((o) => o.id === String(d._id)))
+                    .map((d) => (
+                      <option key={d._id} value={d._id}>{d.name}</option>
+                    ))}
+                </select>
+              </div>
+            ))}
+            <button className="confirm-btn" onClick={confirmMapping} disabled={zipBusy}>
+              {zipBusy ? "Lag rahi hain…" : "✅ Accept & lagao"}
+            </button>
+          </div>
+        )}
         <div ref={bottom} />
       </div>
       <div className="chat-quick">

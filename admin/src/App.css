@@ -42,3 +42,8 @@ label input{width:auto}
 .chat-input{display:flex;gap:8px}
 .chat-input input{flex:1;border:1px solid #ccc;border-radius:20px;padding:10px 16px;font-size:14px}
 .chat-input button{background:#9a3412;color:#fff;border:none;border-radius:50%;width:44px;height:44px;font-size:18px;cursor:pointer;margin:0}
+.suggest-box{max-width:100% !important}
+.suggest-row{display:flex;gap:8px;align-items:center;margin:8px 0;flex-wrap:wrap}
+.suggest-file{font-weight:700;font-size:13px;flex:1;min-width:120px;word-break:break-all}
+.suggest-row select{flex:2;min-width:160px;border:1px solid #9a3412;border-radius:8px;padding:8px;font-size:13px;background:#fff}
+.confirm-btn{background:#0f8a0f !important;color:#fff !important;border:none;border-radius:8px;padding:10px 18px;font-weight:700;cursor:pointer;margin-top:8px}

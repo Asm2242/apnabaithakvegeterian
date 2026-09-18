@@ -32,6 +32,43 @@ const storeImage = async (file) => {
 
 const isRemoteImage = (img) => /^https?:\/\//.test(img || "");
 
+// Levenshtein similarity 0..1 for fuzzy dish matching ("Cholee Samosa" -> "Chole Samosa")
+const similarity = (a, b) => {
+    a = String(a || "");
+    b = String(b || "");
+    if (a === b) return 1;
+    if (!a.length || !b.length) return 0;
+    const dp = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]);
+    for (let j = 1; j <= b.length; j++) dp[0][j] = j;
+    for (let i = 1; i <= a.length; i++) {
+        for (let j = 1; j <= b.length; j++) {
+            dp[i][j] = Math.min(
+                dp[i - 1][j] + 1,
+                dp[i][j - 1] + 1,
+                dp[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)
+            );
+        }
+    }
+    return 1 - dp[a.length][b.length] / Math.max(a.length, b.length);
+};
+
+const norm = (s) => String(s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+
+// suggest closest dishes for a filename
+const suggestDishes = (fileKey, foods, topN = 3) => {
+    return foods
+        .map((f) => {
+            const nameKey = norm(f.name);
+            let score = similarity(fileKey, nameKey);
+            // bonus for substring overlap
+            if (nameKey.includes(fileKey) || fileKey.includes(nameKey)) score = Math.max(score, 0.6);
+            return { id: String(f._id), name: f.name, score: Math.round(score * 100) / 100 };
+        })
+        .filter((s) => s.score >= 0.35)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, topN);
+};
+
 // all food list
 const listFood = async (req, res) => {
     try {
@@ -121,7 +158,7 @@ const removeFood = async (req, res) => {
 
 }
 
-export { listFood, addFood, updateFood, removeFood, bulkPhotos }
+export { listFood, addFood, updateFood, removeFood, bulkPhotos, bulkConfirm }
 
 // POST /api/food/bulk-photos (admin) — photos.zip: match filenames to dishes.
 // "Paneer-Pizza.jpg" -> Paneer Pizza. Uploads to Cloudinary, updates DB.
@@ -166,14 +203,92 @@ const bulkPhotos = async (req, res) => {
             }
             fs.unlink(tmp, () => {});
         }
+        // unmatched files -> pending bundle + smart suggestions (spelling mistakes OK)
+        let bundleId = null;
+        const suggestions = [];
+        const pending = entries
+            .slice(0, 200)
+            .map((e) => path.basename(e.entryName))
+            .filter((n) => !updated.some((u) => u.file === n));
+        if (pending.length > 0) {
+            bundleId = `b${Date.now()}${Math.round(Math.random() * 1e6)}`;
+            const dir = path.join("uploads", `tmp-bulk-${bundleId}`);
+            fs.mkdirSync(dir, { recursive: true });
+            for (const entry of entries.slice(0, 200)) {
+                const base = path.basename(entry.entryName);
+                if (pending.includes(base)) {
+                    fs.writeFileSync(path.join(dir, base), entry.getData());
+                }
+            }
+            for (const file of pending) {
+                const key = norm(file.replace(/\.(jpe?g|png|webp)$/i, ""));
+                const options = suggestDishes(key, foods, 3);
+                suggestions.push({ file, options });
+            }
+        }
         res.json({
             success: true,
-            message: `${updated.length} photos lag gayi, ${unmatched.length} match nahi hui.`,
+            message: `${updated.length} photos lag gayi, ${pending.length} match nahi hui.`,
             updated,
-            unmatched
+            unmatched: pending,
+            bundleId,
+            suggestions
         });
     } catch (error) {
         console.log(error);
         res.json({ success: false, message: "Zip process fail" });
+    }
+}
+
+// POST /api/food/bulk-confirm (admin) — accept suggestions: { bundleId, mapping: { filename: dishId } }
+const bulkConfirm = async (req, res) => {
+    try {
+        const { bundleId, mapping } = req.body;
+        if (!bundleId || !mapping || typeof mapping !== "object") {
+            return res.json({ success: false, message: "bundleId + mapping bhejo" });
+        }
+        const dir = path.join("uploads", `tmp-bulk-${String(bundleId).replace(/[^a-z0-9]/gi, "")}`);
+        if (!fs.existsSync(dir)) {
+            return res.json({ success: false, message: "Bundle expire ho gaya. Zip dobara bhejo." });
+        }
+        const applied = [];
+        const failed = [];
+        for (const [file, dishId] of Object.entries(mapping)) {
+            if (!dishId) continue;
+            const safe = path.basename(String(file));
+            const full = path.join(dir, safe);
+            if (!fs.existsSync(full)) {
+                failed.push(file);
+                continue;
+            }
+            const dish = await foodModel.findById(dishId);
+            if (!dish) {
+                failed.push(file);
+                continue;
+            }
+            try {
+                const url = await storeImage({ path: full });
+                dish.image = url;
+                await dish.save();
+                applied.push({ dish: dish.name, file: safe });
+            } catch (e) {
+                failed.push(file);
+            }
+            fs.unlink(full, () => {});
+        }
+        // cleanup bundle dir
+        try {
+            const left = fs.readdirSync(dir);
+            if (left.length === 0) fs.rmdirSync(dir);
+        } catch (e) { /* ignore */ }
+        res.json({
+            success: true,
+            message: `${applied.length} photos accept karke laga di.`,
+            applied,
+            failed
+        });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: "Confirm fail" });
     }
 }

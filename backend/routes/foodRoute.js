@@ -1,5 +1,5 @@
 import express from 'express';
-import { addFood, listFood, removeFood, updateFood, bulkPhotos } from '../controllers/foodController.js';
+import { addFood, listFood, removeFood, updateFood, bulkPhotos, bulkConfirm } from '../controllers/foodController.js';
 import { adminAuth } from '../middleware/auth.js';
 import multer from 'multer';
 const foodRouter = express.Router();
@@ -37,5 +37,6 @@ foodRouter.post("/add",adminAuth,upload.single('image'),addFood);
 foodRouter.post("/update",adminAuth,upload.single('image'),updateFood);
 foodRouter.post("/remove",adminAuth,removeFood);
 foodRouter.post("/bulk-photos",adminAuth,uploadZip.single('zip'),bulkPhotos);
+foodRouter.post("/bulk-confirm",adminAuth,bulkConfirm);
 
 export default foodRouter;
