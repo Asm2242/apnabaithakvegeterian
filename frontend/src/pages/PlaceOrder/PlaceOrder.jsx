@@ -25,7 +25,7 @@ const PlaceOrder = () => {
 
   const {
     getTotalCartAmount, token, food_list, cartLines, url,
-    phoneVerified, phone, requestOtp, verifyOtp,
+    phoneVerified, phone, requestOtp, verifyOtp, setShowLogin,
   } = useContext(StoreContext);
 
   const [otpSent, setOtpSent] = useState(false);
@@ -182,8 +182,9 @@ const PlaceOrder = () => {
 
   useEffect(() => {
     if (!token) {
-      toast.error("Login first (OTP or sign in)");
-      navigate("/cart");
+      // checkout clicked while logged out -> open login popup right here
+      toast.info("Login to continue checkout");
+      setShowLogin(true);
     } else if (getTotalCartAmount() === 0) {
       navigate("/cart");
     }

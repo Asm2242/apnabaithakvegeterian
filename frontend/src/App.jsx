@@ -14,8 +14,7 @@ import Verify from "./pages/Verify/Verify";
 import { StoreContext } from "./Context/StoreContext";
 
 const App = () => {
-  const [showLogin, setShowLogin] = useState(false);
-  const { token } = useContext(StoreContext);
+  const { token, showLogin, setShowLogin } = useContext(StoreContext);
   // start gate: shown until logged in via OTP or skipped once
   const [gateOpen, setGateOpen] = useState(
     () => !localStorage.getItem("token") && !sessionStorage.getItem("ab_skipped")

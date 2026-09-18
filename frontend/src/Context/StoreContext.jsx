@@ -10,6 +10,8 @@ const StoreContextProvider = (props) => {
   // cart key: "<foodId>__<Size>" so Half/Full/Small/Regular stay separate
   const [cartItems, setCartItems] = useState({});
   const [token, setToken] = useState("");
+  // global login popup (navbar + auto-open at checkout)
+  const [showLogin, setShowLogin] = useState(false);
   const [phone, setPhone] = useState(localStorage.getItem("ab_phone") || "");
   const [phoneVerified, setPhoneVerified] = useState(
     localStorage.getItem("ab_phone_verified") === "1"
@@ -169,6 +171,8 @@ const StoreContextProvider = (props) => {
     sizesFor,
     token,
     setToken,
+    showLogin,
+    setShowLogin,
     loadCartData,
     setCartItems,
     phone,

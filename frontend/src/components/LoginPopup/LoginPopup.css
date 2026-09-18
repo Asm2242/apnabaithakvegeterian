@@ -45,9 +45,44 @@
     padding: 10px;
     border-radius: 4px;
     color: white;
-    background-color: #FF4C24;
+    background-color: #9a3412;
     font-size: 15px;
     cursor: pointer;
+}
+.login-popup-container button:disabled{
+    opacity: 0.6;
+    cursor: wait;
+}
+.login-mode-toggle{
+    display: flex;
+    gap: 8px;
+}
+.login-mode-toggle button{
+    flex: 1;
+    background: #fff;
+    color: #9a3412;
+    border: 1px solid #9a3412;
+}
+.login-mode-toggle button.active{
+    background: #9a3412;
+    color: #fff;
+}
+.phone-row{
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+}
+.phone-row span{
+    background: #f5f5f5;
+    border: 1px solid #C9C9C9;
+    border-right: none;
+    border-radius: 4px 0 0 4px;
+    padding: 10px;
+    font-weight: 700;
+    color: #9a3412;
+}
+.phone-row input{
+    border-radius: 0 4px 4px 0 !important;
 }
 .login-popup-condition{
     display: flex;
@@ -62,7 +97,7 @@
 
 
 .login-popup p span{
-    color: #FF4C24;
+    color: #9a3412;
     font-weight: 500;
     cursor: pointer;
 }
