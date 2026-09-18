@@ -1,13 +1,28 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { assets } from "../../assets/assets";
 import { StoreContext } from "../../Context/StoreContext";
 import "./FoodItem.css";
 import PropTypes from "prop-types";
 
-const FoodItem = ({ image, name, price, desc, id }) => {
-  //const [itemCount, setItemCount] = useState(0);
-  const { cartItems, addToCart, removeFromCart, url } =
-    useContext(StoreContext);
+const FoodItem = ({ image, name, price, desc, id, food }) => {
+  const {
+    cartItems,
+    addToCart,
+    removeFromCart,
+    url,
+    priceFor,
+    isPizza,
+    hasHalfFull,
+    defaultSize,
+    sizesFor,
+  } = useContext(StoreContext);
+
+  const item = food || { _id: id, price };
+  const dual = isPizza(item) || hasHalfFull(item);
+  const options = isPizza(item) ? ["Small", "Regular"] : ["Half", "Full"];
+  const [size, setSize] = useState(defaultSize(item));
+  const key = `${item._id || id}__${size}`;
+  const qty = cartItems[key] || 0;
 
   return (
     <div className="food-item">
@@ -15,37 +30,54 @@ const FoodItem = ({ image, name, price, desc, id }) => {
         <img
           className="food-item-image"
           src={url + "/images/" + image}
-          alt=""
+          alt={name}
         />
-        {!cartItems[id] ? (
+        {qty === 0 ? (
           <img
             className="add"
-            onClick={() => addToCart(id)}
+            onClick={() => addToCart(item._id || id, size)}
             src={assets.add_icon_white}
-            alt=""
+            alt="add"
           />
         ) : (
           <div className="food-item-counter">
             <img
               src={assets.remove_icon_red}
-              onClick={() => removeFromCart(id)}
-              alt=""
+              onClick={() => removeFromCart(item._id || id, size)}
+              alt="remove"
             />
-            <p>{cartItems[id]}</p>
+            <p>{qty}</p>
             <img
               src={assets.add_icon_green}
-              onClick={() => addToCart(id)}
-              alt=""
+              onClick={() => addToCart(item._id || id, size)}
+              alt="add"
             />
           </div>
         )}
       </div>
       <div className="food-item-info">
         <div className="food-item-name-rating">
-          <p>{name}</p> <img src={assets.rating_starts} alt="" />
+          <p>
+            <span className="veg-dot" title="Pure vegetarian" /> {name}
+          </p>
+          <img src={assets.rating_starts} alt="" />
         </div>
         <p className="food-item-desc">{desc}</p>
-        <p className="food-item-price">₹{price}</p>
+        {dual && (
+          <div className="food-item-sizes">
+            {options.map((s) => (
+              <button
+                key={s}
+                type="button"
+                className={size === s ? "size-btn active" : "size-btn"}
+                onClick={() => setSize(s)}
+              >
+                {s} ₹{priceFor(item, s)}
+              </button>
+            ))}
+          </div>
+        )}
+        <p className="food-item-price">₹{priceFor(item, size)}</p>
       </div>
     </div>
   );
@@ -57,6 +89,7 @@ FoodItem.propTypes = {
   price: PropTypes.number.isRequired,
   desc: PropTypes.string.isRequired,
   id: PropTypes.string.isRequired,
+  food: PropTypes.object,
 };
 
 export default FoodItem;

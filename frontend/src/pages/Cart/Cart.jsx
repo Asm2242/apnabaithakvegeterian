@@ -4,9 +4,11 @@ import { StoreContext } from "../../Context/StoreContext";
 import { useNavigate } from "react-router-dom";
 
 const Cart = () => {
-  const { cartItems, food_list, removeFromCart, getTotalCartAmount, url } =
+  const { cartItems, food_list, removeFromCart, getTotalCartAmount, url, parseKey, priceFor } =
     useContext(StoreContext);
   const navigate = useNavigate();
+
+  const lines = Object.entries(cartItems);
 
   return (
     <div className="cart">
@@ -17,27 +19,31 @@ const Cart = () => {
         </div>
         <br />
         <hr />
-        {food_list.map((item, index) => {
-          if (cartItems[item._id] > 0) {
-            return (
-              <div key={index}>
-                <div className="cart-items-title cart-items-item">
-                  <img src={url + "/images/" + item.image} alt="" />
-                  <p>{item.name}</p>
-                  <p>₹{item.price}</p>
-                  <div>{cartItems[item._id]}</div>
-                  <p>₹{item.price * cartItems[item._id]}</p>
-                  <p
-                    className="cart-items-remove-icon"
-                    onClick={() => removeFromCart(item._id)}
-                  >
-                    x
-                  </p>
-                </div>
-                <hr />
+        {lines.map(([key, qty], index) => {
+          const { id, size } = parseKey(key);
+          const item = food_list.find((f) => String(f._id) === id);
+          if (!item || qty <= 0) return null;
+          const price = priceFor(item, size);
+          return (
+            <div key={index}>
+              <div className="cart-items-title cart-items-item">
+                <img src={url + "/images/" + item.image} alt="" />
+                <p>
+                  {item.name} <span>({size})</span>
+                </p>
+                <p>₹{price}</p>
+                <div>{qty}</div>
+                <p>₹{price * qty}</p>
+                <p
+                  className="cart-items-remove-icon"
+                  onClick={() => removeFromCart(id, size)}
+                >
+                  x
+                </p>
               </div>
-            );
-          }
+              <hr />
+            </div>
+          );
         })}
       </div>
       <div className="cart-bottom">
@@ -51,13 +57,13 @@ const Cart = () => {
             <hr />
             <div className="cart-total-details">
               <p>Delivery Fee</p>
-              <p>₹{getTotalCartAmount() === 0 ? 0 : 0}</p>
+              <p>₹{getTotalCartAmount() === 0 || getTotalCartAmount() >= 399 ? 0 : 39}</p>
             </div>
             <hr />
             <div className="cart-total-details">
               <b>Total</b>
               <b>
-                ₹{getTotalCartAmount() === 0 ? 0 : getTotalCartAmount() + 0}
+                ₹{getTotalCartAmount() === 0 ? 0 : getTotalCartAmount() + (getTotalCartAmount() >= 399 ? 0 : 39)}
               </b>
             </div>
           </div>
@@ -67,11 +73,7 @@ const Cart = () => {
         </div>
         <div className="cart-promocode">
           <div>
-            <p>If you have a promo code, Enter it here</p>
-            <div className="cart-promocode-input">
-              <input type="text" placeholder="promo code" />
-              <button>Submit</button>
-            </div>
+            <p>Free delivery above ₹399</p>
           </div>
         </div>
       </div>

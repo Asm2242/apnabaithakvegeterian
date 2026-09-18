@@ -14,6 +14,7 @@ const LoginPopup = ({ setShowLogin }) => {
     name: "",
     email: "",
     password: "",
+    phone: "",
   });
 
   const onChangeHandler = (event) => {
@@ -72,6 +73,13 @@ const LoginPopup = ({ setShowLogin }) => {
             value={data.email}
             type="email"
             placeholder="Your email"
+          />
+          <input
+            name="phone"
+            onChange={onChangeHandler}
+            value={data.phone}
+            type="tel"
+            placeholder="+91 mobile number (for OTP + delivery)"
           />
           <input
             name="password"

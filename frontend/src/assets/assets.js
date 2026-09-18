@@ -2,6 +2,7 @@ import basket_icon from "./basket_icon.png";
 import header_img from "./header_img.png";
 import logo from "./logo.png";
 import logo2 from "./logo2.png";
+import baithakLogo from "./baithak-logo.svg";
 import search_icon from "./search_icon.png";
 
 //my image start
@@ -64,6 +65,7 @@ import twitter_icon from "./twitter_icon.png";
 export const assets = {
   logo2,
   logo,
+  baithakLogo,
   basket_icon,
   header_img,
   search_icon,
@@ -85,30 +87,20 @@ export const assets = {
 };
 
 export const menu_list = [
-  {
-    menu_name: "Cake",
-    menu_image: cakelogo,
-  },
-  {
-    menu_name: "Fish",
-    menu_image: fishlogo,
-  },
-  {
-    menu_name: "Chicken",
-    menu_image: chickenlogo,
-  },
-  {
-    menu_name: "Mutton",
-    menu_image: muttonlogo,
-  },
-  {
-    menu_name: "Pure Veg",
-    menu_image: pureveglogo,
-  },
-  {
-    menu_name: "Rolls",
-    menu_image: rollslogo,
-  },
+  { menu_name: "Chai & Coffee", menu_image: vanilacake },
+  { menu_name: "Breakfast", menu_image: panerroll },
+  { menu_name: "Maggi", menu_image: masalapaner },
+  { menu_name: "Sandwich", menu_image: pureveglogo },
+  { menu_name: "Burger", menu_image: rollslogo },
+  { menu_name: "Pizza", menu_image: cakelogo },
+  { menu_name: "Chinese", menu_image: chilipaner },
+  { menu_name: "Snacks", menu_image: butterpaner },
+  { menu_name: "Paratha & Roti", menu_image: pureveglogo },
+  { menu_name: "Dal & Sabzi", menu_image: masalapaner },
+  { menu_name: "Raita", menu_image: vanilacake },
+  { menu_name: "Dessert", menu_image: chocolatecake },
+  { menu_name: "Thali", menu_image: butterpaner },
+  { menu_name: "Combo", menu_image: chilipaner },
 ];
 
 export const food_list = [

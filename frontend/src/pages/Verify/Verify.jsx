@@ -1,42 +1,33 @@
-import axios from "axios";
 import { useContext, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { StoreContext } from "../../Context/StoreContext";
 import "./Verify.css";
 
 const Verify = () => {
-  const { url } = useContext(StoreContext);
+  const { setCartItems } = useContext(StoreContext);
   const [searchParams] = useSearchParams();
   const success = searchParams.get("success");
   const orderId = searchParams.get("orderId");
+  const cod = searchParams.get("cod");
 
   const navigate = useNavigate();
 
-  const verifyPayment = async () => {
-    try {
-      const response = await axios.post(url + "/api/order/verify", {
-        success,
-        orderId,
-      });
-      if (response.data.success) {
-        navigate("/myorders");
-      } else {
-        navigate("/");
-      }
-    } catch (error) {
-      // Handling network or API errors
-      console.error("Payment verification failed:", error);
-      navigate("/"); // Navigate to home or show an error page
-    }
-  };
-
   useEffect(() => {
-    if (success && orderId) {
-      verifyPayment();
-    } else {
-      navigate("/"); // Redirect if params are invalid
+    // COD orders skip payment verification entirely
+    if (cod === "1" && orderId) {
+      setCartItems({});
+      navigate("/myorders");
+      return;
     }
-  }, [success, orderId, navigate]);
+    if (success === "false" || !orderId) {
+      navigate("/");
+      return;
+    }
+    // online payments are verified in checkout handler; just show orders
+    setCartItems({});
+    navigate("/myorders");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [success, orderId, cod]);
 
   return (
     <div className="verify">

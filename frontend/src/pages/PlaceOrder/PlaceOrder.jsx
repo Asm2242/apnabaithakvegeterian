@@ -11,15 +11,25 @@ const PlaceOrder = () => {
     lastName: "",
     email: "",
     street: "",
-    city: "",
-    state: "",
-    zipcode: "",
-    country: "",
+    city: "Lucknow",
+    state: "Uttar Pradesh",
+    zipcode: "226013",
+    country: "India",
     phone: "",
+    landmark: "",
+    notes: "",
   });
+  const [mode, setMode] = useState("delivery");
+  const [payment, setPayment] = useState("online");
+  const [placing, setPlacing] = useState(false);
 
-  const { getTotalCartAmount, token, food_list, cartItems, url } =
-    useContext(StoreContext);
+  const {
+    getTotalCartAmount, token, food_list, cartLines, url,
+    phoneVerified, phone, requestOtp, verifyOtp,
+  } = useContext(StoreContext);
+
+  const [otpSent, setOtpSent] = useState(false);
+  const [otp, setOtp] = useState("");
 
   const navigate = useNavigate();
 
@@ -31,6 +41,7 @@ const PlaceOrder = () => {
 
   const loadRazorpayScript = () => {
     return new Promise((resolve) => {
+      if (window.Razorpay) return resolve(true);
       const script = document.createElement("script");
       script.src = "https://checkout.razorpay.com/v1/checkout.js";
       script.onload = () => resolve(true);
@@ -39,62 +50,104 @@ const PlaceOrder = () => {
     });
   };
 
+  const sendOtp = async () => {
+    const mobile = (data.phone || phone).replace(/\D/g, "").replace(/^91(?=\d{10}$)/, "");
+    if (!/^[6-9]\d{9}$/.test(mobile)) {
+      toast.error("Enter a valid 10-digit Indian mobile number");
+      return;
+    }
+    const res = await requestOtp(mobile);
+    if (res.success) {
+      setOtpSent(true);
+      toast.success("OTP sent to +91 " + mobile);
+    } else {
+      toast.error(res.message);
+    }
+  };
+
+  const doVerify = async () => {
+    const mobile = (data.phone || phone).replace(/\D/g, "").replace(/^91(?=\d{10}$)/, "");
+    const res = await verifyOtp(mobile, otp);
+    if (res.success) toast.success("Mobile verified");
+    else toast.error(res.message);
+  };
+
   const placeOrder = async (e) => {
     e.preventDefault();
+    if (placing) return;
 
-    const res = await loadRazorpayScript();
-    if (!res) {
-      toast.error("Razorpay SDK failed to load. Are you online?");
+    if (!/^[6-9]\d{9}$/.test((data.phone || phone).replace(/\D/g, "").replace(/^91(?=\d{10}$)/, ""))) {
+      toast.error("Enter a valid 10-digit Indian mobile number");
+      return;
+    }
+    if (!phoneVerified) {
+      toast.error("Verify OTP before placing the order");
       return;
     }
 
-    let orderItems = [];
-    food_list.forEach((item) => {
-      if (cartItems[item._id] > 0) {
-        orderItems.push({
-          ...item,
-          quantity: cartItems[item._id],
-        });
-      }
-    });
+    const lines = cartLines();
+    if (lines.length === 0) {
+      toast.error("Cart is empty");
+      return;
+    }
 
     const orderData = {
       address: data,
-      items: orderItems,
-      amount: getTotalCartAmount(), // Delivery fee handled in backend
+      items: lines,
+      amount: getTotalCartAmount(),
+      landmark: data.landmark,
+      notes: data.notes,
+      mode,
+      paymentMethod: payment,
+      otpVerified: true,
     };
 
+    setPlacing(true);
     try {
       const response = await axios.post(url + "/api/order/place", orderData, {
         headers: { token },
       });
 
       if (!response.data.success) {
-        toast.error("Something went wrong while placing the order.");
+        toast.error(response.data.message || "Something went wrong");
+        setPlacing(false);
+        return;
+      }
+
+      // COD: no Razorpay, straight to confirmation
+      if (response.data.cod) {
+        toast.success("Order placed! Pay cash on delivery");
+        navigate("/verify?success=true&orderId=" + response.data.orderId + "&cod=1");
+        return;
+      }
+
+      const ok = await loadRazorpayScript();
+      if (!ok) {
+        toast.error("Razorpay failed to load. Are you online?");
+        await axios.post(url + "/api/order/failed", { orderId: response.data.orderId }, { headers: { token } });
+        setPlacing(false);
         return;
       }
 
       const { razorpayOrderId, orderId, amount, currency } = response.data;
-
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount,
         currency,
-        name: "Food Delivery App",
-        description: "Order Payment",
+        name: "Apna Baithak",
+        description: "Pure Veg Order Payment",
         order_id: razorpayOrderId,
-        handler: async function (response) {
+        handler: async function (resp) {
           const verifyRes = await axios.post(
             url + "/api/order/verify",
             {
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
+              razorpay_order_id: resp.razorpay_order_id,
+              razorpay_payment_id: resp.razorpay_payment_id,
+              razorpay_signature: resp.razorpay_signature,
               orderId,
             },
             { headers: { token } }
           );
-
           if (verifyRes.data.success) {
             toast.success("Payment successful");
             navigate("/verify?success=true&orderId=" + orderId);
@@ -103,14 +156,19 @@ const PlaceOrder = () => {
             navigate("/verify?success=false&orderId=" + orderId);
           }
         },
+        modal: {
+          ondismiss: async function () {
+            await axios.post(url + "/api/order/failed", { orderId }, { headers: { token } });
+            toast.error("Payment cancelled");
+            setPlacing(false);
+          },
+        },
         prefill: {
           name: data.firstName + " " + data.lastName,
           email: data.email,
-          contact: data.phone,
+          contact: data.phone || phone,
         },
-        theme: {
-          color: "#3399cc",
-        },
+        theme: { color: "#9a3412" },
       };
 
       const rzp = new window.Razorpay(options);
@@ -118,100 +176,99 @@ const PlaceOrder = () => {
     } catch (error) {
       console.error(error);
       toast.error("Error placing order");
+      setPlacing(false);
     }
   };
 
   useEffect(() => {
     if (!token) {
-      toast.error("To place an order, sign in first");
+      toast.error("Login first (OTP or sign in)");
       navigate("/cart");
     } else if (getTotalCartAmount() === 0) {
       navigate("/cart");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
+
+  const subtotal = getTotalCartAmount();
+  const delivery = subtotal === 0 || mode === "takeaway" || subtotal >= 399 ? 0 : 39;
 
   return (
     <form onSubmit={placeOrder} className="place-order">
       <div className="place-order-left">
         <p className="title">Delivery Information</p>
-        <div className="multi-field">
-          <input
-            type="text"
-            name="firstName"
-            onChange={onChangeHandler}
-            value={data.firstName}
-            placeholder="First name"
-            required
-          />
-          <input
-            type="text"
-            name="lastName"
-            onChange={onChangeHandler}
-            value={data.lastName}
-            placeholder="Last name"
-            required
-          />
-        </div>
-        <input
-          type="email"
-          name="email"
-          onChange={onChangeHandler}
-          value={data.email}
-          placeholder="Email address"
-          required
-        />
-        <input
-          type="text"
-          name="street"
-          onChange={onChangeHandler}
-          value={data.street}
-          placeholder="Street"
-          required
-        />
-        <div className="multi-field">
-          <input
-            type="text"
-            name="city"
-            onChange={onChangeHandler}
-            value={data.city}
-            placeholder="City"
-            required
-          />
-          <input
-            type="text"
-            name="state"
-            onChange={onChangeHandler}
-            value={data.state}
-            placeholder="State"
-            required
-          />
+        <div className="mode-toggle">
+          {["delivery", "takeaway"].map((m) => (
+            <button
+              key={m}
+              type="button"
+              className={mode === m ? "active" : ""}
+              onClick={() => setMode(m)}
+            >
+              {m === "delivery" ? "Delivery" : "Takeaway"}
+            </button>
+          ))}
         </div>
         <div className="multi-field">
-          <input
-            type="text"
-            name="zipcode"
-            onChange={onChangeHandler}
-            value={data.zipcode}
-            placeholder="Zip code"
-            required
-          />
-          <input
-            type="text"
-            name="country"
-            onChange={onChangeHandler}
-            value={data.country}
-            placeholder="Country"
-            required
-          />
+          <input type="text" name="firstName" onChange={onChangeHandler} value={data.firstName} placeholder="First name" required />
+          <input type="text" name="lastName" onChange={onChangeHandler} value={data.lastName} placeholder="Last name" required />
         </div>
-        <input
-          type="text"
-          name="phone"
-          onChange={onChangeHandler}
-          value={data.phone}
-          placeholder="Phone"
-          required
-        />
+        <input type="email" name="email" onChange={onChangeHandler} value={data.email} placeholder="Email address" required />
+        {mode === "delivery" && (
+          <>
+            <input type="text" name="street" onChange={onChangeHandler} value={data.street} placeholder="House / flat, street" required />
+            <div className="multi-field">
+              <input type="text" name="city" onChange={onChangeHandler} value={data.city} placeholder="City" required />
+              <input type="text" name="zipcode" onChange={onChangeHandler} value={data.zipcode} placeholder="Pincode" required />
+            </div>
+            <input type="text" name="landmark" onChange={onChangeHandler} value={data.landmark} placeholder="Landmark (optional)" />
+          </>
+        )}
+        <input type="text" name="notes" onChange={onChangeHandler} value={data.notes} placeholder="Cooking instructions (optional)" />
+
+        <p className="title">Mobile verification</p>
+        {!phoneVerified ? (
+          <div className="otp-box">
+            <div className="multi-field">
+              <input
+                type="tel"
+                name="phone"
+                onChange={onChangeHandler}
+                value={data.phone}
+                placeholder="10-digit mobile number"
+                required
+              />
+              <button type="button" onClick={sendOtp}>
+                {otpSent ? "Resend OTP" : "Send OTP"}
+              </button>
+            </div>
+            {otpSent && (
+              <div className="multi-field">
+                <input
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  placeholder="6-digit OTP"
+                  inputMode="numeric"
+                />
+                <button type="button" onClick={doVerify}>Verify</button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <p className="verified">✓ {(data.phone || phone) && `+91 ${data.phone || phone}`} verified</p>
+        )}
+
+        <p className="title">Payment</p>
+        <div className="pay-methods">
+          <label className={payment === "online" ? "active" : ""}>
+            <input type="radio" name="payment" checked={payment === "online"} onChange={() => setPayment("online")} />
+            <span><b>Online Payment</b><small>UPI, card, netbanking — pay now</small></span>
+          </label>
+          <label className={payment === "cod" ? "active" : ""}>
+            <input type="radio" name="payment" checked={payment === "cod"} onChange={() => setPayment("cod")} />
+            <span><b>Cash on Delivery</b><small>Pay cash when order arrives</small></span>
+          </label>
+        </div>
       </div>
       <div className="place-order-right">
         <div className="cart-total">
@@ -219,25 +276,26 @@ const PlaceOrder = () => {
           <div>
             <div className="cart-total-details">
               <p>Subtotal</p>
-              <p>₹{getTotalCartAmount()}</p>
+              <p>₹{subtotal}</p>
             </div>
             <hr />
             <div className="cart-total-details">
               <p>Delivery Fee</p>
-              <p>₹{getTotalCartAmount() === 0 ? 0 : 0}</p>
+              <p>₹{delivery}</p>
             </div>
             <hr />
             <div className="cart-total-details">
               <b>Total</b>
-              <b>
-                ₹{getTotalCartAmount() === 0 ? 0 : getTotalCartAmount() + 0}
-              </b>
+              <b>₹{subtotal + delivery}</b>
             </div>
           </div>
         </div>
-        <button className="place-order-submit" type="submit">
-          Proceed To Payment
+        <button className="place-order-submit" type="submit" disabled={placing}>
+          {placing ? "Processing…" : payment === "online" ? `Pay ₹${subtotal + delivery} securely` : `Place order • ₹${subtotal + delivery}`}
         </button>
+        {payment === "online" && (
+          <p className="secure-note">Secure payment by Razorpay. Free delivery above ₹399.</p>
+        )}
       </div>
     </form>
   );

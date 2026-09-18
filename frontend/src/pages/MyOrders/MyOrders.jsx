@@ -33,10 +33,12 @@ const MyOrders = () => {
               <img src={assets.parcel_icon} alt="" />
               <p>
                 {order.items.map((item, index) => {
+                  const q = item.qty ?? item.quantity ?? 1;
+                  const label = `${item.name}${item.size ? ` (${item.size})` : ""} x ${q}`;
                   if (index === order.items.length - 1) {
-                    return item.name + " x " + item.quantity;
+                    return label;
                   } else {
-                    return item.name + " x " + item.quantity + ", ";
+                    return label + ", ";
                   }
                 })}
               </p>
@@ -44,6 +46,7 @@ const MyOrders = () => {
               <p>Items: {order.items.length}</p>
               <p>
                 <span>&#x25cf;</span> <b>{order.status}</b>
+                {order.paymentMethod === "cod" ? " • Pay cash on delivery" : order.paymentStatus === "PAID" ? " • Paid" : ""}
               </p>
               <button>Track Order</button>
             </div>

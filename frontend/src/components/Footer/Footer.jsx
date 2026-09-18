@@ -7,13 +7,18 @@ const Footer = () => {
     <div className="footer" id="footer">
       <div className="footer-content">
         <div className="footer-content-left">
-          {/* <img src={assets.logo} alt="" /> */}
-          <img className="logo" src={assets.logo2} alt="" />
+          <div className="brand brand-footer">
+            <img className="brand-logo" src={assets.baithakLogo} alt="Apna Baithak logo" />
+            <span className="text-logo">
+              Apna Baithak
+              <span>Pure Veg • Lucknow</span>
+            </span>
+          </div>
           <p>
-            Lorem Ipsum is simply dummy text of the printing and typesetting
-            industry. Lorem Ipsum has been the standard dummy text ever since
-            the 1500s, when an unknown printer took a galley of type and
-            scrambled it to make a type specimen book.
+            Apna Baithak Vegetarian Restaurant — 100% pure veg kitchen in
+            Eldeco City, Lucknow. Fresh thalis, maggi, pizza, momos, Chinese
+            and combos, served hot every day. Taste the Tradition • Feel
+            the Comfort.
           </p>
           <div className="footer-social-icons">
             <a href="">
@@ -37,16 +42,19 @@ const Footer = () => {
           </ul>
         </div>
         <div className="footer-content-right">
-          <h2>GET IN TOUCH</h2>
+          <h2>VISIT US</h2>
           <ul>
-            <li>+91-8005006537</li>
-            <li>contact@khanakhazana.com</li>
+            <li>Shop No. LGF 11, Arcade 1, Eldeco City, IIM Road, Lucknow – 226013</li>
+            <li>7:30 AM – 10:00 PM, All Days</li>
+            <li>+91 94549 99442</li>
+            <li>+91 82997 51213</li>
+            <li>Owner: Abhay Singh</li>
           </ul>
         </div>
       </div>
       <hr />
       <p className="footer-copyright">
-        Copyright 2024 © Khana Khazan.com - All Right Reserved.
+        Copyright {new Date().getFullYear()} © Apna Baithak Vegetarian Restaurant, Eldeco City, Lucknow - All Rights Reserved.
       </p>
     </div>
   );

@@ -19,8 +19,12 @@ const Navbar = ({ setShowLogin }) => {
   return (
     <div className="navbar">
       {/* <Link to='/'><img className='logo' src={assets.logo} alt="" /></Link> */}
-      <Link to="/">
-        <img className="logo" src={assets.logo2} alt="" />
+      <Link to="/" className="brand">
+        <img className="brand-logo" src={assets.baithakLogo} alt="Apna Baithak logo" />
+        <span className="text-logo">
+          Apna Baithak
+          <span>Pure Veg • Lucknow</span>
+        </span>
       </Link>
       <ul className="navbar-menu">
         <Link

@@ -25,7 +25,7 @@ const loginUser = async (req,res) => {
         }
 
         const token = createToken(user._id)
-        res.json({success:true,token})
+        res.json({success:true,token,role:user.role,name:user.name})
     } catch (error) {
         console.log(error);
         res.json({success:false,message:"Error"})
@@ -34,7 +34,7 @@ const loginUser = async (req,res) => {
 
 //register user
 const registerUser = async (req,res) => {
-    const {name, email, password} = req.body;
+    const {name, email, password, phone} = req.body;
     try{
         //check if user already exists
         const exists = await userModel.findOne({email})
@@ -49,12 +49,24 @@ const registerUser = async (req,res) => {
         if(password.length<8){
             return res.json({success:false,message: "Please enter a strong password"})
         }
+        // optional Indian mobile
+        let cleanPhone;
+        if (phone) {
+            cleanPhone = String(phone).replace(/\D/g, "").replace(/^91(?=\d{10}$)/, "");
+            if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+                return res.json({success:false,message: "Please enter a valid 10-digit Indian mobile number"})
+            }
+            const phoneTaken = await userModel.findOne({ phone: cleanPhone });
+            if (phoneTaken) {
+                return res.json({success:false,message: "Mobile number already registered"})
+            }
+        }
 
         // hashing user password
         const salt = await bcrypt.genSalt(10); // the more no. round the more time it will take
         const hashedPassword = await bcrypt.hash(password, salt)
 
-        const newUser = new userModel({name, email, password: hashedPassword})
+        const newUser = new userModel({name, email, password: hashedPassword, ...(cleanPhone ? { phone: cleanPhone } : {})})
         const user = await newUser.save()
         const token = createToken(user._id)
         res.json({success:true,token})

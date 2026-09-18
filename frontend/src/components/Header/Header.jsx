@@ -5,12 +5,11 @@ const Header = () => {
   return (
     <div className="header">
       <div className="header-contents">
-        <h2>Order your favourite food here</h2>
+        <h2>Apna Baithak — Taste the Tradition, Feel the Comfort</h2>
         <p>
-          Choose from a diverse menu featuring a delectable array of dishes
-          crafted with the finest ingredients and culinary expertise. Our
-          mission is to satisfy your cravings and elevate your dining
-          experience, one delicious meal at a time.
+          100% pure vegetarian kitchen in Eldeco City, Lucknow. Fresh thalis,
+          maggi, pizza, momos, Chinese and combos — 81 dishes starting at just
+          ₹10. Open 7:30 AM to 10:00 PM, all days.
         </p>
         <button>View Menu</button>
       </div>

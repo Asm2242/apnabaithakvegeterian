@@ -20,7 +20,7 @@
     padding: 10px;
     border: 1px solid #C5C5C5;
     border-radius: 4px;
-    outline-color: tomato;
+    outline-color: #9a3412;
 }
 .place-order-left .multi-field{
     display: flex;
@@ -33,11 +33,87 @@
 .place-order-submit{
     margin-top: 50px;
     border: none;
-    background-color: tomato;
+    background-color: #9a3412;
     color: white;
     padding: 12px 30px;
     border-radius: 4px;
     cursor: pointer;
+}
+.place-order-submit:disabled{
+    opacity: 0.6;
+    cursor: wait;
+}
+.mode-toggle{
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+.mode-toggle button{
+    flex: 1;
+    border: 1px solid #C5C5C5;
+    background: #fff;
+    border-radius: 20px;
+    padding: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    color: #676767;
+}
+.mode-toggle button.active{
+    background: #9a3412;
+    color: #fff;
+    border-color: #9a3412;
+}
+.otp-box button{
+    border: none;
+    background: #9a3412;
+    color: #fff;
+    border-radius: 4px;
+    padding: 10px 16px;
+    cursor: pointer;
+    white-space: nowrap;
+    margin-bottom: 15px;
+}
+.verified{
+    background: #e6f4e6;
+    color: #0f8a0f;
+    font-weight: 600;
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 15px;
+}
+.pay-methods{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+.pay-methods label{
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    border: 1px solid #C5C5C5;
+    border-radius: 8px;
+    padding: 12px;
+    cursor: pointer;
+}
+.pay-methods label.active{
+    border-color: #9a3412;
+    background: #fdf6ec;
+}
+.pay-methods input{
+    width: auto;
+    margin: 4px 0 0 0;
+}
+.pay-methods span small{
+    display: block;
+    color: #676767;
+    font-size: 12px;
+}
+.secure-note{
+    text-align: center;
+    font-size: 12px;
+    color: #676767;
+    margin-top: 10px;
 }
 
 @media (max-width:700px) {
