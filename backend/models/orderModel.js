@@ -7,6 +7,8 @@ const orderSchema = new mongoose.Schema({
     items: { type: Array, required: true },
     amount: { type: Number, required: true },
     subtotal: { type: Number, default: 0 },
+    discount: { type: Number, default: 0 },
+    couponCode: { type: String, default: "" },
     deliveryCharge: { type: Number, default: 0 },
     address: { type: Object, required: true },
     landmark: { type: String, default: "" },

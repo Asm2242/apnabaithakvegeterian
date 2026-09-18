@@ -12,6 +12,66 @@ body {
   min-height: 100vh;
 }
 
+/* ---- dark theme (toggle in navbar) ---- */
+html[data-theme="dark"] body{
+  background: #17100a;
+  color: #f3e7d3;
+}
+html[data-theme="dark"] .food-item,
+html[data-theme="dark"] .cart-total,
+html[data-theme="dark"] .login-popup-container,
+html[data-theme="dark"] .otp-gate-card,
+html[data-theme="dark"] .place-order-right .cart-total{
+  background: #241811;
+  color: #f3e7d3;
+}
+html[data-theme="dark"] .food-item-desc,
+html[data-theme="dark"] .explore-menu-text,
+html[data-theme="dark"] .otp-gate-sub,
+html[data-theme="dark"] .footer-content p{
+  color: #c9b896;
+}
+html[data-theme="dark"] .navbar-menu,
+html[data-theme="dark"] .navbar-right button{
+  color: #f3e7d3;
+}
+html[data-theme="dark"] .explore-menu-list-item p,
+html[data-theme="dark"] .cart-items-title p,
+html[data-theme="dark"] .cart-total-details p,
+html[data-theme="dark"] .my-orders-order p{
+  color: #f3e7d3;
+}
+html[data-theme="dark"] input,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] select{
+  background: #2e2015;
+  color: #f3e7d3;
+  border-color: #5a4028;
+}
+html[data-theme="dark"] .login-popup-inputs input,
+html[data-theme="dark"] .otp-gate-phone input,
+html[data-theme="dark"] .otp-gate-input,
+html[data-theme="dark"] .otp-boxes input{
+  background: #2e2015;
+  color: #f3e7d3;
+  border-color: #5a4028;
+}
+html[data-theme="dark"] .food-item-counter{
+  background: #2e2015;
+}
+html[data-theme="dark"] .size-btn{
+  background: #2e2015;
+  color: #f5c542;
+  border-color: #5a4028;
+}
+html[data-theme="dark"] .size-btn.active{
+  background: #9a3412;
+  color: #fff;
+}
+html[data-theme="dark"] hr{
+  border-color: #3a2a1a;
+}
+
 a {
   text-decoration: none;
   color: inherit;

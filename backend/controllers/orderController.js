@@ -3,6 +3,9 @@ import crypto from "crypto";
 import orderModel from "../models/orderModel.js";
 import userModel from "../models/userModel.js";
 import foodModel from "../models/foodModel.js";
+import riderModel from "../models/riderModel.js";
+import { couponDiscount } from "./couponController.js";
+import { notifyOwnerNewOrder, notifyCustomer } from "../utils/notify.js";
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -30,7 +33,7 @@ const priceFor = (food, size) => {
 // POST /api/order/place (auth) — supports online (Razorpay) + COD
 const placeOrder = async (req, res) => {
   try {
-    const { userId, items, address, landmark, notes, mode, paymentMethod, otpVerified } = req.body;
+    const { userId, items, address, landmark, notes, mode, paymentMethod, otpVerified, couponCode } = req.body;
 
     if (!Array.isArray(items) || items.length === 0 || items.length > 50) {
       return res.json({ success: false, message: "Cart is empty" });
@@ -64,7 +67,12 @@ const placeOrder = async (req, res) => {
       lines.push({ foodId: String(food._id), name: food.name, size: line.size || "Regular", qty, price });
     }
     const deliveryCharge = mode === "takeaway" || subtotal >= FREE_DELIVERY_AT ? 0 : DELIVERY_FEE;
-    const amount = subtotal + deliveryCharge;
+    // coupon / first-order offer (server-side, never trust frontend)
+    const { discount, error: couponError } = await couponDiscount(couponCode, subtotal, userId);
+    if (couponCode && couponError) {
+      return res.json({ success: false, message: couponError });
+    }
+    const amount = Math.max(0, subtotal - discount) + deliveryCharge;
 
     if (paymentMethod === "cod") {
       const order = await new orderModel({
@@ -74,6 +82,8 @@ const placeOrder = async (req, res) => {
         items: lines,
         amount,
         subtotal,
+        discount,
+        couponCode: couponCode ? String(couponCode).toUpperCase().trim() : "",
         deliveryCharge,
         address: addr,
         landmark: landmark || "",
@@ -85,6 +95,8 @@ const placeOrder = async (req, res) => {
         otpVerified: true
       }).save();
       await userModel.findByIdAndUpdate(userId, { cartData: {} });
+      notifyOwnerNewOrder(order);
+      notifyCustomer(user.phone, `Apna Baithak: order placed Rs.${amount}. Pay cash on delivery. Track: my orders page.`);
       return res.json({ success: true, cod: true, orderId: order._id, amount, message: "Pay cash on delivery" });
     }
 
@@ -96,6 +108,8 @@ const placeOrder = async (req, res) => {
       items: lines,
       amount,
       subtotal,
+      discount,
+      couponCode: couponCode ? String(couponCode).toUpperCase().trim() : "",
       deliveryCharge,
       address: addr,
       landmark: landmark || "",
@@ -139,11 +153,16 @@ const verifyOrder = async (req, res) => {
       .digest("hex");
 
     if (generatedSignature === razorpay_signature) {
-      await orderModel.findByIdAndUpdate(orderId, {
+      const order = await orderModel.findByIdAndUpdate(orderId, {
         payment: true,
         paymentStatus: "PAID",
         razorpayPaymentId: razorpay_payment_id
-      });
+      }, { new: true });
+      if (order) {
+        notifyOwnerNewOrder(order);
+        const u = await userModel.findById(order.userId).select("phone");
+        notifyCustomer(u?.phone, `Apna Baithak: payment Rs.${order.amount} received. Cooking started!`);
+      }
       res.json({ success: true, message: "Payment verified" });
     } else {
       await orderModel.findByIdAndUpdate(orderId, { paymentStatus: "FAILED" });
@@ -199,11 +218,49 @@ const updateStatus = async (req, res) => {
     }
     const patch = { status: req.body.status };
     if (req.body.riderId) patch.riderId = req.body.riderId;
-    await orderModel.findByIdAndUpdate(req.body.orderId, patch);
+    const order = await orderModel.findByIdAndUpdate(req.body.orderId, patch, { new: true });
+    if (order) {
+      const u = await userModel.findById(order.userId).select("phone");
+      const stepMsg = {
+        CONFIRMED: "confirmed! Cooking will start soon.",
+        PREPARING: "is being cooked fresh.",
+        READY: "is ready! Rider arriving soon.",
+        OUT_FOR_DELIVERY: "is on the way! Rider coming to you.",
+        DELIVERED: "delivered. Enjoy! Rate us ⭐",
+        CANCELLED: "was cancelled. Call +91 94549 99442 for help."
+      }[order.status];
+      if (stepMsg) notifyCustomer(u?.phone, `Apna Baithak: your order ${stepMsg}`);
+    }
     res.json({ success: true, message: "Status Updated" });
   } catch (error) {
     res.json({ success: false, message: "Error" });
   }
 };
 
-export { listOrders, placeOrder, updateStatus, userOrders, verifyOrder, markFailed };
+// GET /api/order/track/:id (auth, own order) — order + rider live GPS
+const trackOrder = async (req, res) => {
+  try {
+    const order = await orderModel.findOne({ _id: req.params.id, userId: req.body.userId });
+    if (!order) return res.json({ success: false, message: "Order not found" });
+    let rider = null;
+    if (order.riderId) {
+      const [ru, rp] = await Promise.all([
+        userModel.findById(order.riderId).select("name phone"),
+        riderModel.findOne({ userId: order.riderId })
+      ]);
+      if (ru) {
+        rider = {
+          name: ru.name, phone: ru.phone,
+          lat: rp?.lat ?? null, lng: rp?.lng ?? null,
+          updatedAt: rp?.locationUpdatedAt || null
+        };
+      }
+    }
+    res.json({ success: true, data: { order, rider } });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: "Error" });
+  }
+};
+
+export { listOrders, placeOrder, updateStatus, userOrders, verifyOrder, markFailed, trackOrder };

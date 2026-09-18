@@ -12,6 +12,24 @@ const StoreContextProvider = (props) => {
   const [token, setToken] = useState("");
   // global login popup (navbar + auto-open at checkout)
   const [showLogin, setShowLogin] = useState(false);
+  // dark/light theme (default light)
+  const [theme, setTheme] = useState(localStorage.getItem("ab_theme") || "light");
+  // wishlist (food _ids, local)
+  const [wishlist, setWishlist] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("ab_wishlist") || "[]");
+    } catch {
+      return [];
+    }
+  });
+  // applied coupon { code, discount }
+  const [coupon, setCoupon] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("ab_coupon") || "null");
+    } catch {
+      return null;
+    }
+  });
   const [phone, setPhone] = useState(localStorage.getItem("ab_phone") || "");
   const [phoneVerified, setPhoneVerified] = useState(
     localStorage.getItem("ab_phone_verified") === "1"
@@ -143,6 +161,27 @@ const StoreContextProvider = (props) => {
   };
 
   useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem("ab_theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => setTheme((t) => (t === "light" ? "dark" : "light"));
+
+  const toggleWish = (id) => {
+    setWishlist((prev) => {
+      const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
+      localStorage.setItem("ab_wishlist", JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const applyCoupon = (c) => {
+    setCoupon(c);
+    if (c) localStorage.setItem("ab_coupon", JSON.stringify(c));
+    else localStorage.removeItem("ab_coupon");
+  };
+
+  useEffect(() => {
     async function loadData() {
       await fetchFoodList();
       if (localStorage.getItem("token")) {
@@ -173,6 +212,12 @@ const StoreContextProvider = (props) => {
     setToken,
     showLogin,
     setShowLogin,
+    theme,
+    toggleTheme,
+    wishlist,
+    toggleWish,
+    coupon,
+    applyCoupon,
     loadCartData,
     setCartItems,
     phone,

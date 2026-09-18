@@ -1,6 +1,20 @@
 .cart {
     margin: 100px 0px;
 }
+.offer-banner{
+    background: linear-gradient(90deg, #3b1d0c, #9a3412);
+    color: #f5c542;
+    border-radius: 12px;
+    padding: 14px 18px;
+    font-size: 15px;
+    margin-bottom: 16px;
+    border: 1px solid #d4a017;
+}
+.rm-coupon{
+    cursor: pointer;
+    color: #b3261e;
+    font-weight: 700;
+}
 
 .cart hr {
     height: 1px;

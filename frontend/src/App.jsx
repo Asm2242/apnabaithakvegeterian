@@ -8,6 +8,8 @@ import LoginPopup from "./components/LoginPopup/LoginPopup";
 import OtpGate from "./components/OtpGate/OtpGate";
 import PlaceOrder from "./pages/PlaceOrder/PlaceOrder";
 import MyOrders from "./pages/MyOrders/MyOrders";
+import Profile from "./pages/Profile/Profile";
+import Track from "./pages/Track/Track";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Verify from "./pages/Verify/Verify";
@@ -46,6 +48,8 @@ const App = () => {
           <Route path="/order" element={<PlaceOrder />} />
           <Route path="/myorders" element={<MyOrders />} />
           <Route path="/verify" element={<Verify />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/track/:id" element={<Track />} />
         </Routes>
       </div>
       <Footer />

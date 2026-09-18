@@ -26,6 +26,7 @@ const PlaceOrder = () => {
   const {
     getTotalCartAmount, token, food_list, cartLines, url,
     phoneVerified, phone, requestOtp, verifyOtp, setShowLogin,
+    coupon, applyCoupon,
   } = useContext(StoreContext);
 
   const [otpSent, setOtpSent] = useState(false);
@@ -118,6 +119,7 @@ const PlaceOrder = () => {
       mode,
       paymentMethod: payment,
       otpVerified: true,
+      couponCode: coupon?.code || "",
     };
 
     setPlacing(true);
@@ -135,6 +137,7 @@ const PlaceOrder = () => {
       // COD: no Razorpay, straight to confirmation
       if (response.data.cod) {
         saveAddr();
+        applyCoupon(null);
         toast.success("Order placed! Pay cash on delivery");
         navigate("/verify?success=true&orderId=" + response.data.orderId + "&cod=1");
         return;
@@ -169,6 +172,7 @@ const PlaceOrder = () => {
           );
           if (verifyRes.data.success) {
             saveAddr();
+            applyCoupon(null);
             toast.success("Payment successful");
             navigate("/verify?success=true&orderId=" + orderId);
           } else {
@@ -222,7 +226,9 @@ const PlaceOrder = () => {
   }, [token]);
 
   const subtotal = getTotalCartAmount();
-  const delivery = subtotal === 0 || mode === "takeaway" || subtotal >= 399 ? 0 : 39;
+  const discount = coupon?.discount || 0;
+  const delivery = subtotal === 0 || mode === "takeaway" || subtotal - discount >= 399 ? 0 : 39;
+  const grand = Math.max(0, subtotal - discount) + delivery;
 
   return (
     <form onSubmit={placeOrder} className="place-order">
@@ -304,25 +310,34 @@ const PlaceOrder = () => {
       <div className="place-order-right">
         <div className="cart-total">
           <h2>Cart Totals</h2>
-          <div>
-            <div className="cart-total-details">
-              <p>Subtotal</p>
-              <p>₹{subtotal}</p>
-            </div>
-            <hr />
-            <div className="cart-total-details">
-              <p>Delivery Fee</p>
-              <p>₹{delivery}</p>
-            </div>
-            <hr />
-            <div className="cart-total-details">
-              <b>Total</b>
-              <b>₹{subtotal + delivery}</b>
+            <div>
+              <div className="cart-total-details">
+                <p>Subtotal</p>
+                <p>₹{subtotal}</p>
+              </div>
+              <hr />
+              {discount > 0 && (
+                <>
+                  <div className="cart-total-details">
+                    <p>Coupon ({coupon.code})</p>
+                    <p>− ₹{discount}</p>
+                  </div>
+                  <hr />
+                </>
+              )}
+              <div className="cart-total-details">
+                <p>Delivery Fee</p>
+                <p>₹{delivery}</p>
+              </div>
+              <hr />
+              <div className="cart-total-details">
+                <b>Total</b>
+                <b>₹{grand}</b>
+              </div>
             </div>
           </div>
-        </div>
-        <button className="place-order-submit" type="submit" disabled={placing}>
-          {placing ? "Processing…" : payment === "online" ? `Pay ₹${subtotal + delivery} securely` : `Place order • ₹${subtotal + delivery}`}
+          <button className="place-order-submit" type="submit" disabled={placing}>
+            {placing ? "Processing…" : payment === "online" ? `Pay ₹${grand} securely` : `Place order • ₹${grand}`}
         </button>
         {payment === "online" && (
           <p className="secure-note">Secure payment by Razorpay. Free delivery above ₹399.</p>

@@ -14,18 +14,29 @@ const FoodItem = ({ image, name, price, desc, id, food }) => {
     isPizza,
     hasHalfFull,
     defaultSize,
-    sizesFor,
+    wishlist,
+    toggleWish,
   } = useContext(StoreContext);
 
   const item = food || { _id: id, price };
+  const itemId = item._id || id;
+  const wished = wishlist.includes(itemId);
   const dual = isPizza(item) || hasHalfFull(item);
   const options = isPizza(item) ? ["Small", "Regular"] : ["Half", "Full"];
   const [size, setSize] = useState(defaultSize(item));
-  const key = `${item._id || id}__${size}`;
+  const key = `${itemId}__${size}`;
   const qty = cartItems[key] || 0;
 
   return (
     <div className="food-item">
+      <button
+        type="button"
+        aria-label="wishlist"
+        className={wished ? "wish-btn active" : "wish-btn"}
+        onClick={() => toggleWish(itemId)}
+      >
+        {wished ? "❤️" : "🤍"}
+      </button>
       <div className="food-item-img-container">
         <img
           className="food-item-image"
@@ -35,7 +46,7 @@ const FoodItem = ({ image, name, price, desc, id, food }) => {
         {qty === 0 ? (
           <img
             className="add"
-            onClick={() => addToCart(item._id || id, size)}
+            onClick={() => addToCart(itemId, size)}
             src={assets.add_icon_white}
             alt="add"
           />
@@ -43,13 +54,13 @@ const FoodItem = ({ image, name, price, desc, id, food }) => {
           <div className="food-item-counter">
             <img
               src={assets.remove_icon_red}
-              onClick={() => removeFromCart(item._id || id, size)}
+              onClick={() => removeFromCart(itemId, size)}
               alt="remove"
             />
             <p>{qty}</p>
             <img
               src={assets.add_icon_green}
-              onClick={() => addToCart(item._id || id, size)}
+              onClick={() => addToCart(itemId, size)}
               alt="add"
             />
           </div>

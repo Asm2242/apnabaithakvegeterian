@@ -35,6 +35,18 @@
     cursor: pointer;
     color: #454545;
 }
+.order-actions{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.order-actions button{
+    padding: 10px 14px !important;
+}
+.order-actions button.reorder{
+    background-color: #9a3412 !important;
+    color: #fff !important;
+}
 @media (max-width:900px) {
     .my-orders-order{
         grid-template-columns: 1fr 2fr 1fr;

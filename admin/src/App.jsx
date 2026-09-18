@@ -254,6 +254,59 @@ function Customers({ token }) {
   );
 }
 
+function Coupons({ token }) {
+  const [list, setList] = useState([]);
+  const [form, setForm] = useState({ code: "", description: "", type: "flat", value: "", minOrder: 0, maxDiscount: "", firstOrderOnly: false });
+  const load = async () => {
+    const res = await api(token).get("/api/coupon/admin/all");
+    if (res.data.success) setList(res.data.data);
+  };
+  useEffect(() => { load(); }, []);
+  const save = async (e) => {
+    e.preventDefault();
+    const res = await api(token).post("/api/coupon/admin/save", form);
+    if (res.data.success) {
+      setForm({ code: "", description: "", type: "flat", value: "", minOrder: 0, maxDiscount: "", firstOrderOnly: false });
+      load();
+    } else alert(res.data.message);
+  };
+  const toggle = async (id, active) => {
+    await api(token).post("/api/coupon/admin/toggle", { id, active: !active });
+    load();
+  };
+  const set = (k) => (e) => {
+    const v = e.target.type === "checkbox" ? e.target.checked : e.target.value;
+    setForm((f) => ({ ...f, [k]: v }));
+  };
+  return (
+    <div>
+      <form onSubmit={save} className="card">
+        <h3>New coupon</h3>
+        <div className="grid">
+          <input value={form.code} onChange={set("code")} placeholder="CODE (e.g. DIWALI100)" required />
+          <input value={form.value} onChange={set("value")} placeholder="Value (Rs or %)" type="number" required />
+          <input value={form.minOrder} onChange={set("minOrder")} placeholder="Min order Rs" type="number" />
+          <input value={form.maxDiscount} onChange={set("maxDiscount")} placeholder="Max discount Rs (for %)" type="number" />
+        </div>
+        <input value={form.description} onChange={set("description")} placeholder="Description" />
+        <label><input type="checkbox" checked={form.type === "percent"} onChange={(e) => setForm((f) => ({ ...f, type: e.target.checked ? "percent" : "flat" }))} /> Percent (else flat Rs)</label>
+        <label><input type="checkbox" checked={form.firstOrderOnly} onChange={set("firstOrderOnly")} /> First order only</label>
+        <div className="row"><button type="submit">Save coupon</button></div>
+      </form>
+      {list.map((c) => (
+        <div key={c._id} className="card food-row">
+          <div>
+            <b>{c.code}</b> • {c.type === "flat" ? `Rs.${c.value} off` : `${c.value}% off`} • min Rs.{c.minOrder}
+            {c.firstOrderOnly ? " • first order" : ""} {c.active ? "" : "• OFF"}
+            <br /><small>{c.description}</small>
+          </div>
+          <button onClick={() => toggle(c._id, c.active)}>{c.active ? "Disable" : "Enable"}</button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function App() {
   const [token, setToken] = useState(localStorage.getItem("ab_admin_token") || "");
   const [tab, setTab] = useState("orders");
@@ -271,7 +324,7 @@ function App() {
       <header>
         <b>Apna Baithak Admin</b>
         <nav>
-          {["orders", "foods", "riders", "customers"].map((t) => (
+          {["orders", "foods", "riders", "customers", "coupons"].map((t) => (
             <button key={t} className={tab === t ? "active" : ""} onClick={() => setTab(t)}>{t}</button>
           ))}
           <button onClick={logout}>Logout</button>
@@ -282,6 +335,7 @@ function App() {
         {tab === "foods" && <Foods token={token} imgBase={API} />}
         {tab === "riders" && <Riders token={token} />}
         {tab === "customers" && <Customers token={token} />}
+        {tab === "coupons" && <Coupons token={token} />}
       </main>
     </div>
   );
