@@ -106,7 +106,12 @@ const StoreContextProvider = (props) => {
     return totalAmount;
   };
 
-  // flattened lines for checkout: [{ foodId, size, qty }]
+  // dish photo: Cloudinary full URL as-is, else backend /images/ file
+  const imgUrl = (image) => {
+    if (!image) return "";
+    if (/^https?:\/\//.test(image)) return image;
+    return url + "/images/" + image;
+  };
   const cartLines = () => {
     return Object.entries(cartItems).map(([key, qty]) => {
       const { id, size } = parseKey(key);
@@ -195,6 +200,7 @@ const StoreContextProvider = (props) => {
 
   const contextValue = {
     url,
+    imgUrl,
     food_list,
     menu_list,
     cartItems,

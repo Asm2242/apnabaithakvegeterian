@@ -9,7 +9,7 @@ const FoodItem = ({ image, name, price, desc, id, food }) => {
     cartItems,
     addToCart,
     removeFromCart,
-    url,
+    imgUrl,
     priceFor,
     isPizza,
     hasHalfFull,
@@ -40,7 +40,7 @@ const FoodItem = ({ image, name, price, desc, id, food }) => {
       <div className="food-item-img-container">
         <img
           className="food-item-image"
-          src={url + "/images/" + image}
+          src={imgUrl(image)}
           alt={name}
         />
         {qty === 0 ? (

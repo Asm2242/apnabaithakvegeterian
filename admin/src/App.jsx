@@ -100,6 +100,11 @@ function Orders({ token }) {
 }
 
 function Foods({ token, imgBase }) {
+  const foodImg = (image) => {
+    if (!image) return "";
+    if (/^https?:\/\//.test(image)) return image;
+    return imgBase + "/images/" + image;
+  };
   const [foods, setFoods] = useState([]);
   const [form, setForm] = useState({ name: "", description: "", price: "", halfPrice: "", fullPrice: "", category: "Snacks", isPizza: false, bestSeller: false });
   const [file, setFile] = useState(null);
@@ -170,7 +175,7 @@ function Foods({ token, imgBase }) {
       </form>
       {foods.map((f) => (
         <div key={f._id} className="card food-row">
-          <img src={imgBase + "/images/" + f.image} alt="" />
+          <img src={foodImg(f.image)} alt="" />
           <div>
             <b>{f.name}</b> <span>({f.category})</span>
             <p>₹{f.price}{f.halfPrice != null ? ` • Half ₹${f.halfPrice} / Full ₹${f.fullPrice}` : ""} {f.available ? "" : "• SOLD OUT"}</p>

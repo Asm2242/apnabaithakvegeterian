@@ -6,7 +6,7 @@ import { StoreContext } from "../../Context/StoreContext";
 import { useNavigate } from "react-router-dom";
 
 const Cart = () => {
-  const { cartItems, food_list, removeFromCart, getTotalCartAmount, url, parseKey, priceFor, token, coupon, applyCoupon } =
+  const { cartItems, food_list, removeFromCart, getTotalCartAmount, imgUrl, parseKey, priceFor, token, coupon, applyCoupon } =
     useContext(StoreContext);
   const navigate = useNavigate();
   const [code, setCode] = useState(coupon?.code || "");
@@ -73,7 +73,7 @@ const Cart = () => {
           return (
             <div key={index}>
               <div className="cart-items-title cart-items-item">
-                <img src={url + "/images/" + item.image} alt="" />
+                <img src={imgUrl(item.image)} alt="" />
                 <p>
                   {item.name} <span>({size})</span>
                 </p>
