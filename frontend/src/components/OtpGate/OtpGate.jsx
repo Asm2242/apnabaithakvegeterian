@@ -1,55 +1,67 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { StoreContext } from "../../Context/StoreContext";
 import "./OtpGate.css";
 import PropTypes from "prop-types";
 
-// First screen of the customer app: +91 number -> OTP -> open.
+// Start page: Step 1 number only -> Step 2a name shown / 2b name asked + OTP.
 // Skip allowed for browsing; checkout will ask again.
 const OtpGate = ({ onDone }) => {
   const { url, setToken, loadCartData } = useContext(StoreContext);
+  const [step, setStep] = useState(1);
   const [phone, setPhone] = useState("");
-  const [sent, setSent] = useState(false);
-  const [code, setCode] = useState("");
   const [name, setName] = useState("");
+  const [knownName, setKnownName] = useState("");
+  const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [cooldown, setCooldown] = useState(0);
 
   const phoneValid = /^[6-9]\d{9}$/.test(phone);
 
-  useEffect(() => {
-    if (cooldown <= 0) return;
-    const t = setTimeout(() => setCooldown((c) => c - 1), 1000);
-    return () => clearTimeout(t);
-  }, [cooldown]);
+  const startCooldown = (s) => {
+    setCooldown(s);
+    const t = setInterval(() => {
+      setCooldown((c) => {
+        if (c <= 1) {
+          clearInterval(t);
+          return 0;
+        }
+        return c - 1;
+      });
+    }, 1000);
+  };
 
-  const send = async () => {
-    if (!phoneValid || busy || cooldown > 0) return;
+  const goStep2 = async () => {
+    if (!phoneValid || busy) return;
     setBusy(true);
     try {
+      const check = await axios.post(url + "/api/otp/check", { phone });
+      setKnownName(check.data.success && check.data.exists ? check.data.name || "" : "");
       const res = await axios.post(url + "/api/otp/start", { phone });
       if (res.data.success) {
-        setSent(true);
-        setCooldown(res.data.resendAfter || 30);
+        setStep(2);
+        startCooldown(res.data.resendAfter || 30);
         toast.success("OTP sent to +91 " + phone);
-      } else {
-        toast.error(res.data.message);
-      }
+      } else toast.error(res.data.message);
     } catch {
-      toast.error("Could not send OTP");
+      toast.error("Could not continue");
     }
     setBusy(false);
   };
 
   const verify = async () => {
     if (code.length !== 6 || busy) return;
+    if (!knownName && !name.trim()) {
+      toast.error("Please enter your name");
+      return;
+    }
     setBusy(true);
     try {
       const res = await axios.post(url + "/api/otp/login", {
         phone,
         otp: code,
-        name,
+        name: knownName || name,
       });
       if (res.data.success) {
         setToken(res.data.token);
@@ -57,11 +69,9 @@ const OtpGate = ({ onDone }) => {
         localStorage.setItem("ab_phone", phone);
         localStorage.setItem("ab_phone_verified", "1");
         await loadCartData(res.data.token);
-        toast.success("Welcome to Apna Baithak!");
+        toast.success(`Welcome${knownName ? " back" : ""}, ${res.data.name}!`);
         onDone(true);
-      } else {
-        toast.error(res.data.message);
-      }
+      } else toast.error(res.data.message);
     } catch {
       toast.error("Verification failed");
     }
@@ -73,28 +83,39 @@ const OtpGate = ({ onDone }) => {
       <div className="otp-gate-card">
         <p className="otp-gate-logo">Apna Baithak</p>
         <p className="otp-gate-sub">Pure Veg • Eldeco City, Lucknow</p>
-        <h2>Login with mobile number</h2>
-        <div className="otp-gate-phone">
-          <span>+91</span>
-          <input
-            value={phone}
-            onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
-            placeholder="10-digit mobile number"
-            inputMode="numeric"
-          />
-        </div>
-        {!sent ? (
-          <button disabled={!phoneValid || busy} onClick={send} className="otp-gate-btn">
-            {busy ? "Sending…" : "Send OTP"}
-          </button>
+
+        {step === 1 ? (
+          <>
+            <h2>Enter your number</h2>
+            <div className="otp-gate-phone">
+              <span>+91</span>
+              <input
+                value={phone}
+                onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                placeholder="10-digit mobile number"
+                inputMode="numeric"
+              />
+            </div>
+            <button disabled={!phoneValid || busy} onClick={goStep2} className="otp-gate-btn">
+              {busy ? "Please wait…" : "Continue"}
+            </button>
+          </>
         ) : (
           <>
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Your name (optional)"
-              className="otp-gate-input"
-            />
+            {knownName ? (
+              <h2>Welcome back, {knownName}! 👋</h2>
+            ) : (
+              <>
+                <h2>New customer?</h2>
+                <p className="otp-gate-new">ENTER YOUR NAME</p>
+                <input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="YOUR NAME"
+                  className="otp-gate-input"
+                />
+              </>
+            )}
             <div className="otp-gate-boxes">
               {[0, 1, 2, 3, 4, 5].map((i) => (
                 <input
@@ -107,16 +128,16 @@ const OtpGate = ({ onDone }) => {
                     const next = (code + "      ").split("");
                     next[i] = d;
                     setCode(next.join("").trim());
-                    const nextBox = document.getElementById(`otp-box-${i + 1}`);
+                    const nextBox = document.getElementById(`gate-otp-${i + 1}`);
                     if (d && nextBox) nextBox.focus();
                   }}
                   onKeyDown={(e) => {
                     if (e.key === "Backspace" && !code[i]) {
-                      const prev = document.getElementById(`otp-box-${i - 1}`);
+                      const prev = document.getElementById(`gate-otp-${i - 1}`);
                       if (prev) prev.focus();
                     }
                   }}
-                  id={`otp-box-${i}`}
+                  id={`gate-otp-${i}`}
                 />
               ))}
             </div>
@@ -126,13 +147,6 @@ const OtpGate = ({ onDone }) => {
               className="otp-gate-btn"
             >
               {busy ? "Verifying…" : "Verify & Continue"}
-            </button>
-            <button
-              disabled={cooldown > 0 || busy}
-              onClick={send}
-              className="otp-gate-link"
-            >
-              {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend OTP"}
             </button>
           </>
         )}

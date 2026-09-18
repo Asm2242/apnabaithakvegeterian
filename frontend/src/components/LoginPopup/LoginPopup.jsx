@@ -6,12 +6,16 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import PropTypes from "prop-types";
 
+// Step 1: enter number only.
+// Step 2a returning customer: "Welcome back, NAME!" + OTP.
+// Step 2b new customer: "ENTER YOUR NAME" + OTP.
 const LoginPopup = ({ setShowLogin }) => {
   const { setToken, url, loadCartData } = useContext(StoreContext);
-  const [name, setName] = useState("");
+  const [step, setStep] = useState(1);
   const [phone, setPhone] = useState("");
+  const [name, setName] = useState("");
+  const [knownName, setKnownName] = useState("");
   const [code, setCode] = useState("");
-  const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [cooldown, setCooldown] = useState(0);
 
@@ -30,18 +34,41 @@ const LoginPopup = ({ setShowLogin }) => {
     }, 1000);
   };
 
-  const sendOtp = async () => {
-    if (!phoneValid || busy || cooldown > 0) return;
+  const goStep2 = async () => {
+    if (!phoneValid || busy) return;
     setBusy(true);
     try {
+      // who is this number? (returning name or new customer)
+      const check = await axios.post(url + "/api/otp/check", { phone });
+      if (check.data.success && check.data.exists) {
+        setKnownName(check.data.name || "");
+      } else {
+        setKnownName("");
+      }
+      // send OTP in the same step
       const res = await axios.post(url + "/api/otp/start", { phone });
       if (res.data.success) {
-        setSent(true);
+        setStep(2);
         startCooldown(res.data.resendAfter || 30);
         toast.success("OTP sent to +91 " + phone);
       } else toast.error(res.data.message);
     } catch {
-      toast.error("Could not send OTP");
+      toast.error("Could not continue");
+    }
+    setBusy(false);
+  };
+
+  const resend = async () => {
+    if (cooldown > 0 || busy) return;
+    setBusy(true);
+    try {
+      const res = await axios.post(url + "/api/otp/start", { phone });
+      if (res.data.success) {
+        startCooldown(res.data.resendAfter || 30);
+        toast.success("OTP resent");
+      } else toast.error(res.data.message);
+    } catch {
+      toast.error("Could not resend OTP");
     }
     setBusy(false);
   };
@@ -49,12 +76,16 @@ const LoginPopup = ({ setShowLogin }) => {
   const verify = async (e) => {
     e.preventDefault();
     if (code.length !== 6 || busy) return;
+    if (!knownName && !name.trim()) {
+      toast.error("Please enter your name");
+      return;
+    }
     setBusy(true);
     try {
       const res = await axios.post(url + "/api/otp/login", {
         phone,
         otp: code,
-        name,
+        name: knownName || name,
       });
       if (res.data.success) {
         setToken(res.data.token);
@@ -62,7 +93,7 @@ const LoginPopup = ({ setShowLogin }) => {
         localStorage.setItem("ab_phone", phone);
         localStorage.setItem("ab_phone_verified", "1");
         await loadCartData(res.data.token);
-        toast.success("Welcome to Apna Baithak!");
+        toast.success(`Welcome${knownName ? " back" : ""}, ${res.data.name}!`);
         setShowLogin(false);
       } else toast.error(res.data.message);
     } catch {
@@ -78,11 +109,11 @@ const LoginPopup = ({ setShowLogin }) => {
 
   return (
     <div className="login-popup">
-      <form onSubmit={verify} className="login-popup-container otp-only">
+      <form onSubmit={step === 1 ? (e) => { e.preventDefault(); goStep2(); } : verify} className="login-popup-container otp-only">
         <div className="login-popup-title">
           <div className="otp-brand">
             <img src={assets.baithakLogo} alt="Apna Baithak" />
-            <h2>Welcome to Apna Baithak</h2>
+            <h2>Apna Baithak</h2>
           </div>
           <img
             className="close"
@@ -91,36 +122,42 @@ const LoginPopup = ({ setShowLogin }) => {
             alt="close"
           />
         </div>
-        <p className="otp-tagline">Login with your mobile number</p>
 
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          type="text"
-          placeholder="Your name (optional)"
-          className="otp-input"
-        />
-        <div className="phone-row">
-          <span>+91</span>
-          <input
-            value={phone}
-            onChange={(e) => {
-              setPhone(e.target.value.replace(/\D/g, "").slice(0, 10));
-              setSent(false);
-              setCode("");
-            }}
-            type="tel"
-            placeholder="10-digit mobile number"
-            inputMode="numeric"
-          />
-        </div>
-
-        {!sent ? (
-          <button type="button" disabled={!phoneValid || busy} onClick={sendOtp}>
-            {busy ? "Sending…" : "Send OTP"}
-          </button>
+        {step === 1 ? (
+          <>
+            <p className="otp-tagline">Enter your number to continue</p>
+            <div className="phone-row">
+              <span>+91</span>
+              <input
+                value={phone}
+                onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                type="tel"
+                placeholder="10-digit mobile number"
+                inputMode="numeric"
+                autoFocus
+              />
+            </div>
+            <button disabled={!phoneValid || busy}>
+              {busy ? "Please wait…" : "Continue"}
+            </button>
+          </>
         ) : (
           <>
+            {knownName ? (
+              <p className="welcome-back">Welcome back, <b>{knownName}</b>! 👋</p>
+            ) : (
+              <>
+                <p className="welcome-new">New customer? <b>ENTER YOUR NAME</b></p>
+                <input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  type="text"
+                  placeholder="YOUR NAME"
+                  className="otp-input"
+                />
+              </>
+            )}
+            <p className="otp-sent">OTP sent to +91 {phone} <span onClick={() => setStep(1)}>Change</span></p>
             <div className="otp-boxes">
               {[0, 1, 2, 3, 4, 5].map((i) => (
                 <input
@@ -149,7 +186,7 @@ const LoginPopup = ({ setShowLogin }) => {
               {cooldown > 0 ? (
                 `Resend OTP in ${cooldown}s`
               ) : (
-                <>Didn&apos;t get it? <span onClick={sendOtp}>Resend</span></>
+                <>Didn&apos;t get it? <span onClick={resend}>Resend</span></>
               )}
             </p>
           </>

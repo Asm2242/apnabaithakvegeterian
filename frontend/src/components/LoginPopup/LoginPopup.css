@@ -106,6 +106,24 @@
 .resend{
     text-align: center;
 }
+.welcome-back{
+    background: #fdf6ec;
+    border: 1px solid #d4a017;
+    border-radius: 8px;
+    padding: 12px;
+    color: #9a3412;
+    font-size: 16px;
+}
+.welcome-back b{
+    font-size: 17px;
+}
+.welcome-new{
+    color: #9a3412;
+    font-size: 15px;
+}
+.otp-sent{
+    font-size: 13px;
+}
 .login-mode-toggle{
     display: flex;
     gap: 8px;

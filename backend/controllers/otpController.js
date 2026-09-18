@@ -201,3 +201,25 @@ const loginWithOtp = async (req, res) => {
 }
 
 export { startOtp, loginWithOtp };
+
+// POST /api/otp/check  { phone } — public.
+// Step 1 of login: is this a returning customer? If yes, return name.
+// (User asked to show name for returning customers, like all food apps.)
+const checkCustomer = async (req, res) => {
+    try {
+        const { phone } = req.body;
+        if (!isIndianMobile(phone)) {
+            return res.json({ success: false, message: "Enter a valid 10-digit Indian mobile number" });
+        }
+        const user = await userModel.findOne({ phone, active: true }).select("name");
+        if (user) {
+            return res.json({ success: true, exists: true, name: user.name });
+        }
+        return res.json({ success: true, exists: false });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: "Error" });
+    }
+}
+
+export { checkCustomer };
