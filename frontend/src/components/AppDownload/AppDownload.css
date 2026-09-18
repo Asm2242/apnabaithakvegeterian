@@ -1,8 +1,40 @@
 .app-download {
-    margin: 100px auto;
+    margin: 80px auto;
     font-size: max(3vw, 20px);
     text-align: center;
     font-weight: 500;
+}
+.bulk-strip{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    background: linear-gradient(120deg, #3b1d0c, #6b3410);
+    border: 1px solid #d4a017;
+    border-radius: 20px;
+    padding: 26px 30px;
+    margin-top: 60px;
+    color: #f3e7d3;
+}
+.bulk-strip h3{
+    margin: 0 0 6px 0;
+    color: #f5c542;
+    font-size: 22px;
+}
+.bulk-strip p{
+    margin: 0;
+    font-size: 14px;
+    color: #f3e7d3cc;
+}
+.bulk-strip a{
+    background: linear-gradient(180deg, #f5c542, #d4a017);
+    color: #3b1d0c;
+    font-weight: 800;
+    border-radius: 50px;
+    padding: 14px 26px;
+    text-decoration: none;
+    white-space: nowrap;
 }
 .app-download-platforms{
     display: flex;

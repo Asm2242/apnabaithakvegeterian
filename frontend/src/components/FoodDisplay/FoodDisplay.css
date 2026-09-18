@@ -3,7 +3,18 @@
 }
 .food-display h2{
     font-size: max(2vw,24px);
-    font-weight: 600;
+    font-weight: 700;
+    color: #3b1d0c;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.food-display h2::after{
+    content: "";
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(90deg, #d4a017, transparent);
+    border-radius: 2px;
 }
 .food-display-list{
     display: grid;
