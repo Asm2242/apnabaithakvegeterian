@@ -19,6 +19,9 @@
 }
 .my-orders-order img{
     width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 8px;
 }
 .my-orders-order p span{
     color: tomato;
