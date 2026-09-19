@@ -85,14 +85,18 @@ const updateDeliveryStatus = async (req, res) => {
     }
 }
 
-// Rider toggles duty + posts live location
+// Rider toggles duty + posts live location (continuous GPS pings land here)
 const updateLocation = async (req, res) => {
     try {
-        const { lat, lng, onDuty } = req.body;
+        const { lat, lng, accuracy, onDuty } = req.body;
         await riderModel.findOneAndUpdate(
             { userId: req.body.userId },
             {
-                ...(lat != null && lng != null ? { lat, lng, locationUpdatedAt: new Date() } : {}),
+                ...(lat != null && lng != null ? {
+                    lat, lng,
+                    accuracy: accuracy != null ? Math.round(Number(accuracy)) : null,
+                    locationUpdatedAt: new Date()
+                } : {}),
                 ...(onDuty != null ? { onDuty } : {})
             }
         );

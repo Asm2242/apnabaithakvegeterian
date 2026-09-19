@@ -92,6 +92,11 @@ const Track = () => {
   const info = STATUS_INFO[order.status] || STATUS_INFO.PLACED;
   const closed = order.status === "CANCELLED" || order.status === "DELIVERED";
   const searchingRider = order.status === "READY" && !rider;
+  // freshness of rider GPS
+  const gpsAgeSec = rider?.updatedAt
+    ? Math.max(0, Math.round((Date.now() - new Date(rider.updatedAt).getTime()) / 1000))
+    : null;
+  const gpsStale = gpsAgeSec == null || gpsAgeSec > 120;
 
   // rider starts AT shop; moves after pickup
   const riderView = rider
@@ -133,6 +138,13 @@ const Track = () => {
                 {riderView.atShop
                   ? "At restaurant, picking up your food…"
                   : "On the way with your food 🛵"}
+              </p>
+              <p className={gpsStale ? "gps-stale" : "gps-fresh"}>
+                {gpsAgeSec == null
+                  ? "📡 Waiting for rider GPS…"
+                  : gpsStale
+                    ? `⚠️ Location ${gpsAgeSec >= 60 ? Math.round(gpsAgeSec / 60) + " min" : gpsAgeSec + "s"} old — rider offline?`
+                    : `🟢 Live • ${gpsAgeSec < 5 ? "just now" : gpsAgeSec + "s ago"}${rider.accuracy != null ? ` • ±${rider.accuracy}m` : ""}`}
               </p>
             </div>
             {rider.phone && (

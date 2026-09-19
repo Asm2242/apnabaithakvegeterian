@@ -2,6 +2,7 @@ import { useState } from "react";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { toast } from "react-toastify";
 import PropTypes from "prop-types";
 
 const pinIcon = L.divIcon({
@@ -41,11 +42,14 @@ const LocationPicker = ({ value, onChange }) => {
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
       (p) => {
+        if (p.coords.accuracy && p.coords.accuracy > 500) {
+          toast.info("GPS weak hai — bahar khule me try karo");
+        }
         pick([p.coords.latitude, p.coords.longitude]);
         setLocating(false);
       },
       () => setLocating(false),
-      { timeout: 10000 }
+      { enableHighAccuracy: true, timeout: 12000 }
     );
   };
 

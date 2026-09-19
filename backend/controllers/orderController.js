@@ -271,6 +271,7 @@ const trackOrder = async (req, res) => {
         rider = {
           name: ru.name, phone: ru.phone,
           lat: rp?.lat ?? null, lng: rp?.lng ?? null,
+          accuracy: rp?.accuracy ?? null,
           updatedAt: rp?.locationUpdatedAt || null
         };
       }

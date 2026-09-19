@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
@@ -69,9 +69,56 @@ const App = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [orders, setOrders] = useState([]);
-  const [onDuty, setOnDuty] = useState(false);
+  const [onDuty, setOnDuty] = useState(localStorage.getItem("ab_duty") === "1");
+  const [gps, setGps] = useState(null); // { accuracy, at }
+  const watchId = useRef(null);
+  const lastSent = useRef(0);
 
   const auth = { headers: { token } };
+
+  // continuous high-accuracy GPS while on duty — posts every ~10s
+  const postGps = async (lat, lng, accuracy, tok) => {
+    try {
+      await axios.post(
+        API + "/api/rider/location",
+        { lat, lng, accuracy: Math.round(accuracy) },
+        { headers: { token: tok || token } }
+      );
+      lastSent.current = Date.now();
+      setGps({ accuracy: Math.round(accuracy), at: Date.now() });
+    } catch { /* retry next tick */ }
+  };
+
+  const startWatch = (tok) => {
+    if (!navigator.geolocation || watchId.current != null) return;
+    watchId.current = navigator.geolocation.watchPosition(
+      (p) => {
+        // skip wild fixes (>500m), send at most every 10s
+        if (p.coords.accuracy && p.coords.accuracy > 500) return;
+        if (Date.now() - lastSent.current < 10000) return;
+        postGps(p.coords.latitude, p.coords.longitude, p.coords.accuracy || 0, tok);
+      },
+      () => setGps((g) => g || { accuracy: null, at: null, denied: true }),
+      { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 }
+    );
+  };
+
+  const stopWatch = () => {
+    if (watchId.current != null && navigator.geolocation) {
+      navigator.geolocation.clearWatch(watchId.current);
+    }
+    watchId.current = null;
+  };
+
+  // resume GPS if duty was on
+  useEffect(() => {
+    if (token && localStorage.getItem("ab_duty") === "1") {
+      setOnDuty(true);
+      startWatch(token);
+    }
+    return () => stopWatch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
   const load = async (tok) => {
     try {
@@ -104,8 +151,10 @@ const App = () => {
   };
 
   const logout = () => {
+    stopWatch();
     setToken("");
     localStorage.removeItem("ab_rider_token");
+    localStorage.removeItem("ab_duty");
     setOrders([]);
   };
 
@@ -143,16 +192,24 @@ const App = () => {
       pos = await new Promise((resolve) => {
         if (!navigator.geolocation) return resolve({});
         navigator.geolocation.getCurrentPosition(
-          (p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
+          (p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude, accuracy: Math.round(p.coords.accuracy || 0) }),
           () => resolve({}),
-          { timeout: 8000 }
+          { enableHighAccuracy: true, timeout: 10000 }
         );
       });
     } catch { /* location optional */ }
     try {
       await axios.post(API + "/api/rider/location", { onDuty: next, ...pos }, auth);
       setOnDuty(next);
-      toast.success(next ? "On duty — location shared" : "Off duty");
+      if (next) {
+        localStorage.setItem("ab_duty", "1");
+        startWatch();
+        toast.success("On duty — live GPS ON 🛰️");
+      } else {
+        localStorage.removeItem("ab_duty");
+        stopWatch();
+        toast.success("Off duty");
+      }
     } catch {
       toast.error("Could not update duty");
     }
@@ -181,7 +238,16 @@ const App = () => {
     <div className="rider-app">
       <ToastContainer />
       <header>
-        <b>Apna Baithak Rider</b>
+        <div className="rider-title">
+          <b>Apna Baithak Rider</b>
+          <p className="gps-line">
+            {onDuty
+              ? gps?.accuracy != null
+                ? `🛰️ GPS ±${gps.accuracy}m ${gps.accuracy > 100 ? "(weak — bahar jao)" : "(accurate ✓)"}`
+                : "🛰️ GPS dhoond raha hai… (location ON karo, bahar jao)"
+              : "Duty OFF hai — GPS band"}
+          </p>
+        </div>
         <div>
           <button className={onDuty ? "duty on" : "duty"} onClick={toggleDuty}>
             {onDuty ? "On Duty ✓" : "Off Duty"}
@@ -209,10 +275,11 @@ const App = () => {
             >
               🗺️ Choose Route & Navigate
             </a>
-            <button onClick={() => markPickedUp(o._id)} className="deliver-btn pickup">
-              {o.status === "READY" ? "🛵 Picked Up — Start Delivery" : "Mark Delivered (GPS tagged)"}
-            </button>
-            {o.status === "OUT_FOR_DELIVERY" && (
+            {o.status === "READY" ? (
+              <button onClick={() => markPickedUp(o._id)} className="deliver-btn pickup">
+                🛵 Picked Up — Start Delivery
+              </button>
+            ) : (
               <button onClick={() => markDelivered(o._id)} className="deliver-btn">
                 ✅ Mark Delivered
               </button>

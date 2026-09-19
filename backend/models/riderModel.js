@@ -10,6 +10,7 @@ const riderSchema = new mongoose.Schema({
     // live location, updated by rider app
     lat: { type: Number, default: null },
     lng: { type: Number, default: null },
+    accuracy: { type: Number, default: null }, // GPS meters (lower = better)
     locationUpdatedAt: { type: Date, default: null },
     totalDeliveries: { type: Number, default: 0 }
 }, { timestamps: true })
