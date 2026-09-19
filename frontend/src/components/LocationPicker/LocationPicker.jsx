@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import { useEffect, useState } from "react";
+import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { toast } from "react-toastify";
@@ -24,6 +24,17 @@ const TapToSet = ({ onPick }) => {
 
 TapToSet.propTypes = {
   onPick: PropTypes.func.isRequired,
+};
+
+// GPS/pin badalte hi map khud focus kare
+const Recenter = ({ pos }) => {
+  const map = useMap();
+  const [first, setFirst] = useState(true);
+  useEffect(() => {
+    if (pos && !first) map.flyTo(pos, 16, { duration: 1 });
+    if (first) setFirst(false);
+  }, [pos, map]);
+  return null;
 };
 
 // Checkout location picker: tap map / drag pin / GPS button
@@ -62,6 +73,7 @@ const LocationPicker = ({ value, onChange }) => {
         </button>
       </div>
       <MapContainer center={pos || fallback} zoom={15} scrollWheelZoom={false} className="loc-map">
+        <Recenter pos={pos} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

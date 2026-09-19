@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useContext, useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { toast } from "react-toastify";
@@ -25,6 +25,15 @@ const TapToSet = ({ onPick }) => {
 
 TapToSet.propTypes = {
   onPick: PropTypes.func.isRequired,
+};
+
+// GPS/pin badalte hi map khud focus kare
+const Recenter = ({ pos }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (pos) map.flyTo(pos, 16, { duration: 1 });
+  }, [pos, map]);
+  return null;
 };
 
 // Checkout address popup: last pin confirm / edit / add new / switch / GPS
@@ -182,6 +191,7 @@ const AddressPopup = ({ onConfirm, onClose }) => {
           </button>
         </div>
         <MapContainer center={pin || fallback} zoom={15} scrollWheelZoom={false} className="addr-map">
+          <Recenter pos={pin} />
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
