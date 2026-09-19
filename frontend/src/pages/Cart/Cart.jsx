@@ -6,7 +6,7 @@ import { StoreContext } from "../../Context/StoreContext";
 import { useNavigate } from "react-router-dom";
 
 const Cart = () => {
-  const { cartItems, food_list, removeFromCart, getTotalCartAmount, imgUrl, parseKey, priceFor, token, coupon, applyCoupon } =
+  const { cartItems, food_list, removeFromCart, getTotalCartAmount, url, imgUrl, parseKey, priceFor, token, coupon, applyCoupon } =
     useContext(StoreContext);
   const navigate = useNavigate();
   const [code, setCode] = useState(coupon?.code || "");
