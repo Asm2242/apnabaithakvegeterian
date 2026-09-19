@@ -45,7 +45,7 @@ const Cart = () => {
     }
   };
 
-  const lines = Object.entries(cartItems);
+  const lines = Object.entries(cartItems || {});
 
   const subtotal = getTotalCartAmount();
   const discount = coupon?.discount || 0;
