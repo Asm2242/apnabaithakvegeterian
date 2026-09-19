@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema({
     phone: { type: String, unique: true, sparse: true },
     phoneVerified: { type: Boolean, default: false },
     active: { type: Boolean, default: true },
-    // saved delivery address (autofill next time)
+    // saved delivery addresses: address1, address2... (last used first)
     savedAddress: {
         street: { type: String, default: "" },
         city: { type: String, default: "Lucknow" },
@@ -19,6 +19,18 @@ const userSchema = new mongoose.Schema({
         country: { type: String, default: "India" },
         landmark: { type: String, default: "" }
     },
+    addresses: [{
+        label: { type: String, default: "" },
+        street: { type: String, default: "" },
+        city: { type: String, default: "Lucknow" },
+        state: { type: String, default: "Uttar Pradesh" },
+        zipcode: { type: String, default: "" },
+        country: { type: String, default: "India" },
+        landmark: { type: String, default: "" },
+        lat: { type: Number, default: null },
+        lng: { type: Number, default: null },
+        lastUsedAt: { type: Date, default: Date.now }
+    }],
     cartData: { type: Object, default: {} }
 }, { minimize: false })
 

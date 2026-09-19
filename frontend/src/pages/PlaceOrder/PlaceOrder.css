@@ -115,6 +115,17 @@
     color: #676767;
     margin-top: 10px;
 }
+.change-addr-btn{
+    width: 100%;
+    margin-top: 12px;
+    background: #fff;
+    color: #9a3412;
+    border: 1px solid #9a3412;
+    border-radius: 8px;
+    padding: 11px;
+    font-weight: 700;
+    cursor: pointer;
+}
 
 @media (max-width:700px) {
     .place-order{

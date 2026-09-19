@@ -6,6 +6,7 @@ import { Route, Routes } from "react-router-dom";
 import Cart from "./pages/Cart/Cart";
 import LoginPopup from "./components/LoginPopup/LoginPopup";
 import OtpGate from "./components/OtpGate/OtpGate";
+import LocationGate from "./components/LocationGate/LocationGate";
 import PlaceOrder from "./pages/PlaceOrder/PlaceOrder";
 import MyOrders from "./pages/MyOrders/MyOrders";
 import Profile from "./pages/Profile/Profile";
@@ -27,13 +28,27 @@ const App = () => {
   const gateDone = (loggedIn) => {
     if (!loggedIn) sessionStorage.setItem("ab_skipped", "1");
     setGateOpen(false);
+    // first-open location gate (once ever)
+    if (!localStorage.getItem("ab_loc_asked")) {
+      setLocGate(true);
+    }
   };
+  const [locGate, setLocGate] = useState(false);
 
   if (gateOpen && !token) {
     return (
       <>
         <ToastContainer />
         <OtpGate onDone={gateDone} />
+      </>
+    );
+  }
+
+  if (locGate) {
+    return (
+      <>
+        <ToastContainer />
+        <LocationGate onDone={() => setLocGate(false)} />
       </>
     );
   }

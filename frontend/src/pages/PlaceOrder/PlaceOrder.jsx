@@ -5,6 +5,8 @@ import { toast } from "react-toastify";
 import { StoreContext } from "../../Context/StoreContext";
 import LocationPicker from "../../components/LocationPicker/LocationPicker";
 import "../../components/LocationPicker/LocationPicker.css";
+import AddressPopup from "../../components/AddressPopup/AddressPopup";
+import "../../components/AddressPopup/AddressPopup.css";
 import "./PlaceOrder.css";
 
 const PlaceOrder = () => {
@@ -25,6 +27,7 @@ const PlaceOrder = () => {
   const [payment, setPayment] = useState("online");
   const [placing, setPlacing] = useState(false);
   const [pin, setPin] = useState(null); // { lat, lng } customer dropped pin
+  const [addrPop, setAddrPop] = useState(false);
 
   const {
     getTotalCartAmount, token, food_list, cartLines, url,
@@ -225,6 +228,10 @@ const PlaceOrder = () => {
           }
         })
         .catch(() => {});
+      // cart ke baad direct address popup (once per visit)
+      if (!sessionStorage.getItem("ab_addr_done")) {
+        setAddrPop(true);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
@@ -235,6 +242,33 @@ const PlaceOrder = () => {
   const grand = Math.max(0, subtotal - discount) + delivery;
 
   return (
+    <>
+      {addrPop && (
+        <AddressPopup
+          onClose={() => {
+            sessionStorage.setItem("ab_addr_done", "1");
+            setAddrPop(false);
+          }}
+          onConfirm={({ addr, pin: p }) => {
+            sessionStorage.setItem("ab_addr_done", "1");
+            setAddrPop(false);
+            if (addr) {
+              setData((d) => ({
+                ...d,
+                street: addr.street || d.street,
+                city: addr.city || d.city,
+                state: addr.state || d.state,
+                zipcode: addr.zipcode || d.zipcode,
+                country: addr.country || d.country,
+                landmark: addr.landmark || d.landmark,
+              }));
+            }
+            if (p) setPin({ lat: p[0], lng: p[1] });
+            else if (addr?.lat != null) setPin({ lat: addr.lat, lng: addr.lng });
+            toast.success("Address set!");
+          }}
+        />
+      )}
     <form onSubmit={placeOrder} className="place-order">
       <div className="place-order-left">
         <p className="title">Delivery Information</p>
@@ -350,8 +384,16 @@ const PlaceOrder = () => {
         {payment === "online" && (
           <p className="secure-note">Secure payment by Razorpay. Free delivery above ₹399.</p>
         )}
+        <button
+          type="button"
+          className="change-addr-btn"
+          onClick={() => setAddrPop(true)}
+        >
+          📍 Change delivery address / pin
+        </button>
       </div>
     </form>
+    </>
   );
 };
 
