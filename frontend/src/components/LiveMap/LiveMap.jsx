@@ -36,7 +36,7 @@ FollowRider.propTypes = {
 };
 
 // Live map: shop pin + moving rider pin + route line (free OpenStreetMap)
-const LiveMap = ({ rider }) => {
+const LiveMap = ({ rider, riderLabel }) => {
   const riderPos =
     rider && rider.lat != null ? [rider.lat, rider.lng] : null;
   const shopPos = [SHOP.lat, SHOP.lng];
@@ -73,12 +73,14 @@ const LiveMap = ({ rider }) => {
           </>
         )}
       </MapContainer>
+      {riderLabel && <p className="live-caption">{riderLabel}</p>}
     </div>
   );
 };
 
 LiveMap.propTypes = {
   rider: PropTypes.object,
+  riderLabel: PropTypes.string,
 };
 
 export default LiveMap;

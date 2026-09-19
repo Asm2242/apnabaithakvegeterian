@@ -210,6 +210,10 @@ const userOrders = async (req, res) => {
 
 const ORDER_FLOW = ["PLACED", "CONFIRMED", "PREPARING", "READY", "OUT_FOR_DELIVERY", "DELIVERED", "CANCELLED"];
 
+// Apna Baithak shop coords — rider journey starts here on pickup
+const SHOP_LAT = 26.9381402;
+const SHOP_LNG = 80.9129123;
+
 // POST /api/order/status (admin) — status + optional rider assign
 const updateStatus = async (req, res) => {
   try {
@@ -219,6 +223,13 @@ const updateStatus = async (req, res) => {
     const patch = { status: req.body.status };
     if (req.body.riderId) patch.riderId = req.body.riderId;
     const order = await orderModel.findByIdAndUpdate(req.body.orderId, patch, { new: true });
+    // rider journey starts AT the shop on pickup
+    if (order && req.body.status === "OUT_FOR_DELIVERY" && order.riderId) {
+      await riderModel.findOneAndUpdate(
+        { userId: order.riderId, $or: [{ lat: null }, { lng: null }] },
+        { lat: SHOP_LAT, lng: SHOP_LNG, locationUpdatedAt: new Date() }
+      );
+    }
     if (order) {
       const u = await userModel.findById(order.userId).select("phone");
       const stepMsg = {

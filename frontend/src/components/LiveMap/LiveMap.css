@@ -17,6 +17,15 @@
 .lm-rider .pulse{
     animation: riderPulse 1.6s ease-in-out infinite;
 }
+.live-caption{
+    text-align: center;
+    font-size: 13px;
+    color: #9a3412;
+    font-weight: 600;
+    padding: 8px;
+    margin: 0;
+    background: #fdf6ec;
+}
 @keyframes riderPulse{
     0%,100%{transform:scale(1)}
     50%{transform:scale(1.2)}

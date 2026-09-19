@@ -66,10 +66,15 @@ const updateDeliveryStatus = async (req, res) => {
         }
         order.status = status;
         await order.save();
+        // pickup = journey starts AT shop; live GPS overwrites after
+        const locPatch =
+          status === "OUT_FOR_DELIVERY"
+            ? { lat: 26.9381402, lng: 80.9129123, locationUpdatedAt: new Date() }
+            : (lat != null && lng != null ? { lat, lng, locationUpdatedAt: new Date() } : {});
         await riderModel.findOneAndUpdate(
             { userId: req.body.userId },
             {
-                ...(lat != null && lng != null ? { lat, lng, locationUpdatedAt: new Date() } : {}),
+                ...locPatch,
                 ...(status === "DELIVERED" ? { $inc: { totalDeliveries: 1 } } : {})
             }
         );

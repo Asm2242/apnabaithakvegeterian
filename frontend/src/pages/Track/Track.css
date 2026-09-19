@@ -1,5 +1,55 @@
 .track{max-width:640px;margin:40px auto;padding:0 20px}
 .track h2{color:#9a3412}
+.status-hero{
+    text-align: center;
+    background: linear-gradient(160deg, #3b1d0c, #6b3410);
+    border: 1px solid #d4a017;
+    border-radius: 20px;
+    padding: 28px 20px;
+    margin-bottom: 16px;
+}
+.status-hero h2{
+    color: #fff;
+    margin: 10px 0 6px 0;
+    font-size: 24px;
+}
+.status-emoji{
+    font-size: 54px;
+    animation: heroBounce 1.8s ease-in-out infinite;
+}
+@keyframes heroBounce{
+    0%,100%{transform:translateY(0) scale(1)}
+    50%{transform:translateY(-10px) scale(1.08)}
+}
+.status-sub{
+    color: #f3e7d3cc;
+    margin: 0;
+}
+.typing::after{
+    content: "…";
+    animation: dots 1.2s steps(4) infinite;
+}
+@keyframes dots{
+    0%{content: ""}
+    25%{content: "."}
+    50%{content: ".."}
+    75%{content: "…"}
+}
+.status-eta{
+    display: inline-block;
+    margin: 12px 0 0 0;
+    background: #f5c542;
+    color: #3b1d0c;
+    font-weight: 800;
+    border-radius: 50px;
+    padding: 8px 22px;
+    animation: etaGlow 2s ease-in-out infinite;
+}
+@keyframes etaGlow{
+    0%,100%{box-shadow:0 0 0 0 #f5c54266}
+    50%{box-shadow:0 0 0 10px #f5c54200}
+}
+.track-total{color:#f3e7d3aa !important;margin:10px 0 0 0 !important;font-size:14px}
 .track-total{color:#676767;margin-bottom:16px}
 .cancelled{background:#fdecea;color:#b3261e;font-weight:700;border-radius:8px;padding:12px}
 .steps{list-style:none;padding:0;margin:20px 0}

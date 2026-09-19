@@ -52,7 +52,7 @@ const App = () => {
     setOrders([]);
   };
 
-  const markDelivered = async (orderId) => {
+  const setStatus = async (orderId, status) => {
     try {
       const pos = await new Promise((resolve) => {
         if (!navigator.geolocation) return resolve(null);
@@ -64,17 +64,20 @@ const App = () => {
       });
       const res = await axios.post(
         API + "/api/rider/status",
-        { orderId, status: "DELIVERED", ...(pos || {}) },
+        { orderId, status, ...(pos || {}) },
         auth
       );
       if (res.data.success) {
-        toast.success("Delivered!");
+        toast.success(status === "DELIVERED" ? "Delivered!" : "Picked up! Customer sees you moving 🛵");
         load();
       } else toast.error(res.data.message);
     } catch {
       toast.error("Update failed");
     }
   };
+
+  const markDelivered = (orderId) => setStatus(orderId, "DELIVERED");
+  const markPickedUp = (orderId) => setStatus(orderId, "OUT_FOR_DELIVERY");
 
   const toggleDuty = async () => {
     const next = !onDuty;
@@ -150,9 +153,14 @@ const App = () => {
             >
               Navigate
             </a>
-            <button onClick={() => markDelivered(o._id)} className="deliver-btn">
-              Mark Delivered (GPS tagged)
+            <button onClick={() => markPickedUp(o._id)} className="deliver-btn pickup">
+              {o.status === "READY" ? "🛵 Picked Up — Start Delivery" : "Mark Delivered (GPS tagged)"}
             </button>
+            {o.status === "OUT_FOR_DELIVERY" && (
+              <button onClick={() => markDelivered(o._id)} className="deliver-btn">
+                ✅ Mark Delivered
+              </button>
+            )}
           </div>
         ))}
         {active.length === 0 && <p>No deliveries assigned. Stay on duty!</p>}
