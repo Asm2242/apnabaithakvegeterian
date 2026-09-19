@@ -2,9 +2,66 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import "./App.css";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:4000";
+
+// Apna Baithak shop — every delivery route starts here
+const SHOP_LAT = 26.9381402;
+const SHOP_LNG = 80.9129123;
+
+const shopIcon = L.divIcon({
+  className: "rm-shop",
+  html: "<div>🍽️</div>",
+  iconSize: [34, 34],
+  iconAnchor: [17, 17],
+});
+
+const homeIcon = L.divIcon({
+  className: "rm-home",
+  html: "<div>🏠</div>",
+  iconSize: [34, 34],
+  iconAnchor: [17, 30],
+});
+
+// mini map per order: shop -> customer pin
+const OrderMap = ({ order }) => {
+  const shop = [SHOP_LAT, SHOP_LNG];
+  const cust =
+    order.lat != null && order.lng != null ? [order.lat, order.lng] : null;
+  return (
+    <div className="rider-minimap">
+      <MapContainer center={cust || shop} zoom={14} scrollWheelZoom={false}>
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        <Marker position={shop} icon={shopIcon}>
+          <Popup>Apna Baithak (pickup)</Popup>
+        </Marker>
+        {cust && (
+          <>
+            <Marker position={cust} icon={homeIcon}>
+              <Popup>Customer drop 📍</Popup>
+            </Marker>
+            <Polyline positions={[shop, cust]} color="#0f8a0f" weight={4} dashArray="8 8" />
+          </>
+        )}
+      </MapContainer>
+      {!cust && <p className="no-pin">Customer ne pin nahi lagaya — address se jao.</p>}
+    </div>
+  );
+};
+
+const destOf = (o) => {
+  // customer dropped pin first (exact), else address text
+  if (o.lat != null && o.lng != null) return `${o.lat},${o.lng}`;
+  const a = typeof o.address === "string" ? o.address : o.address?.street || "";
+  return `${a} ${o.address?.city || "Lucknow"} ${o.address?.zipcode || ""}`.trim();
+};
 
 // Apna Baithak Rider — separate delivery partner app
 const App = () => {
@@ -140,18 +197,17 @@ const App = () => {
             <p>{o.customerName} • {o.phone}</p>
             <p>{typeof o.address === "string" ? o.address : o.address?.street}, {o.address?.city} {o.address?.zipcode}</p>
             {o.landmark && <p>Landmark: {o.landmark}</p>}
+            <OrderMap order={o} />
             <ul>{(o.items || []).map((it, i) => (
               <li key={i}>{it.name} ({it.size}) × {it.qty}</li>
             ))}</ul>
             <a
-              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                `${typeof o.address === "string" ? o.address : o.address?.street || ""} ${o.address?.city || "Lucknow"}`
-              )}`}
+              href={`https://www.google.com/maps/dir/?api=1&origin=${SHOP_LAT},${SHOP_LNG}&destination=${encodeURIComponent(destOf(o))}&travelmode=driving`}
               target="_blank"
               rel="noreferrer"
               className="nav-btn"
             >
-              Navigate
+              🗺️ Choose Route & Navigate
             </a>
             <button onClick={() => markPickedUp(o._id)} className="deliver-btn pickup">
               {o.status === "READY" ? "🛵 Picked Up — Start Delivery" : "Mark Delivered (GPS tagged)"}

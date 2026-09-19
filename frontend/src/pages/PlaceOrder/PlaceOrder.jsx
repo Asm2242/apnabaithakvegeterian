@@ -3,6 +3,8 @@ import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { StoreContext } from "../../Context/StoreContext";
+import LocationPicker from "../../components/LocationPicker/LocationPicker";
+import "../../components/LocationPicker/LocationPicker.css";
 import "./PlaceOrder.css";
 
 const PlaceOrder = () => {
@@ -22,6 +24,7 @@ const PlaceOrder = () => {
   const [mode, setMode] = useState("delivery");
   const [payment, setPayment] = useState("online");
   const [placing, setPlacing] = useState(false);
+  const [pin, setPin] = useState(null); // { lat, lng } customer dropped pin
 
   const {
     getTotalCartAmount, token, food_list, cartLines, url,
@@ -120,6 +123,7 @@ const PlaceOrder = () => {
       paymentMethod: payment,
       otpVerified: true,
       couponCode: coupon?.code || "",
+      ...(pin ? { lat: pin.lat, lng: pin.lng } : {}),
     };
 
     setPlacing(true);
@@ -259,6 +263,10 @@ const PlaceOrder = () => {
               <input type="text" name="zipcode" onChange={onChangeHandler} value={data.zipcode} placeholder="Pincode" required />
             </div>
             <input type="text" name="landmark" onChange={onChangeHandler} value={data.landmark} placeholder="Landmark (optional)" />
+            <LocationPicker
+              value={pin ? [pin.lat, pin.lng] : null}
+              onChange={setPin}
+            />
           </>
         )}
         <input type="text" name="notes" onChange={onChangeHandler} value={data.notes} placeholder="Cooking instructions (optional)" />

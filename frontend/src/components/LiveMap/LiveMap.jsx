@@ -22,6 +22,13 @@ const riderIcon = L.divIcon({
   iconAnchor: [20, 20],
 });
 
+const homeIcon = L.divIcon({
+  className: "lm-home",
+  html: "<div>🏠</div>",
+  iconSize: [36, 36],
+  iconAnchor: [18, 32],
+});
+
 // follow the rider as he moves
 const FollowRider = ({ pos }) => {
   const map = useMap();
@@ -35,12 +42,14 @@ FollowRider.propTypes = {
   pos: PropTypes.array,
 };
 
-// Live map: shop pin + moving rider pin + route line (free OpenStreetMap)
-const LiveMap = ({ rider, riderLabel }) => {
+// Live map: shop pin + moving rider pin + customer home pin + route (free OSM)
+const LiveMap = ({ rider, riderLabel, customer }) => {
   const riderPos =
     rider && rider.lat != null ? [rider.lat, rider.lng] : null;
   const shopPos = [SHOP.lat, SHOP.lng];
-  const center = riderPos || shopPos;
+  const custPos =
+    customer && customer.lat != null ? [customer.lat, customer.lng] : null;
+  const center = riderPos || custPos || shopPos;
 
   return (
     <div className="live-map">
@@ -57,6 +66,11 @@ const LiveMap = ({ rider, riderLabel }) => {
         <Marker position={shopPos} icon={shopIcon}>
           <Popup>{SHOP.name}<br />7:30 AM – 10 PM</Popup>
         </Marker>
+        {custPos && (
+          <Marker position={custPos} icon={homeIcon}>
+            <Popup>Your home 📍 (your dropped pin)</Popup>
+          </Marker>
+        )}
         {riderPos && (
           <>
             <Marker position={riderPos} icon={riderIcon}>
@@ -68,7 +82,7 @@ const LiveMap = ({ rider, riderLabel }) => {
                   : ""}
               </Popup>
             </Marker>
-            <Polyline positions={[shopPos, riderPos]} color="#9a3412" weight={4} dashArray="8 8" />
+            <Polyline positions={[riderPos, custPos || shopPos]} color="#9a3412" weight={4} dashArray="8 8" />
             <FollowRider pos={riderPos} />
           </>
         )}
@@ -81,6 +95,7 @@ const LiveMap = ({ rider, riderLabel }) => {
 LiveMap.propTypes = {
   rider: PropTypes.object,
   riderLabel: PropTypes.string,
+  customer: PropTypes.object,
 };
 
 export default LiveMap;

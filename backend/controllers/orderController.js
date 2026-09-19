@@ -33,7 +33,7 @@ const priceFor = (food, size) => {
 // POST /api/order/place (auth) — supports online (Razorpay) + COD
 const placeOrder = async (req, res) => {
   try {
-    const { userId, items, address, landmark, notes, mode, paymentMethod, otpVerified, couponCode } = req.body;
+    const { userId, items, address, landmark, notes, mode, paymentMethod, otpVerified, couponCode, lat, lng } = req.body;
 
     if (!Array.isArray(items) || items.length === 0 || items.length > 50) {
       return res.json({ success: false, message: "Cart is empty" });
@@ -67,6 +67,12 @@ const placeOrder = async (req, res) => {
       lines.push({ foodId: String(food._id), name: food.name, size: line.size || "Regular", qty, price });
     }
     const deliveryCharge = mode === "takeaway" || subtotal >= FREE_DELIVERY_AT ? 0 : DELIVERY_FEE;
+    // customer dropped pin (validated ranges) — rider navigates here
+    const pinLat = Number(lat);
+    const pinLng = Number(lng);
+    const hasPin =
+      Number.isFinite(pinLat) && Number.isFinite(pinLng) &&
+      pinLat >= -90 && pinLat <= 90 && pinLng >= -180 && pinLng <= 180;
     // coupon / first-order offer (server-side, never trust frontend)
     const { discount, error: couponError } = await couponDiscount(couponCode, subtotal, userId);
     if (couponCode && couponError) {
@@ -92,6 +98,7 @@ const placeOrder = async (req, res) => {
         status: "PLACED",
         paymentMethod: "cod",
         paymentStatus: "COD",
+        ...(hasPin ? { lat: pinLat, lng: pinLng } : {}),
         otpVerified: true
       }).save();
       await userModel.findByIdAndUpdate(userId, { cartData: {} });
@@ -118,6 +125,7 @@ const placeOrder = async (req, res) => {
       status: "PLACED",
       paymentMethod: "online",
       paymentStatus: "PENDING",
+      ...(hasPin ? { lat: pinLat, lng: pinLng } : {}),
       otpVerified: true
     }).save();
     await userModel.findByIdAndUpdate(userId, { cartData: {} });

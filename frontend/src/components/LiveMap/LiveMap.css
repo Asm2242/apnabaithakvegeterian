@@ -9,7 +9,7 @@
     width: 100%;
     z-index: 1;
 }
-.lm-shop div, .lm-rider div{
+.lm-shop div, .lm-rider div, .lm-home div{
     font-size: 30px;
     text-align: center;
     filter: drop-shadow(0 3px 5px #0006);

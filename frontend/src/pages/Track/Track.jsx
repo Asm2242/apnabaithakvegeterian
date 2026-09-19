@@ -115,9 +115,13 @@ const Track = () => {
         <p className="track-total">₹{order.amount} • {order.paymentMethod === "cod" ? "Pay cash on delivery" : order.paymentStatus}</p>
       </div>
 
-      <LiveMap rider={riderView} riderLabel={
-        !rider ? null : riderView.atShop ? "Rider at restaurant — picking up…" : null
-      } />
+      <LiveMap
+        rider={riderView}
+        riderLabel={
+          !rider ? null : riderView.atShop ? "Rider at restaurant — picking up…" : null
+        }
+        customer={order.lat != null ? { lat: order.lat, lng: order.lng } : null}
+      />
 
       {rider && (
         <div className="rider-box">
