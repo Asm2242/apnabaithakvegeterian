@@ -105,13 +105,10 @@ const App = () => {
   const [onDuty, setOnDuty] = useState(localStorage.getItem("ab_duty") === "1");
   const [gps, setGps] = useState(null); // { lat, lng, accuracy, at }
   const [qrOrder, setQrOrder] = useState(null); // order for QR modal
+  const [qrUrl, setQrUrl] = useState("");
+  const [qrBusy, setQrBusy] = useState(false);
   const watchId = useRef(null);
   const lastSent = useRef(0);
-
-  // owner UPI for doorstep QR (set VITE_OWNER_UPI in Vercel env)
-  const OWNER_UPI = import.meta.env.VITE_OWNER_UPI || "9454999442@upi";
-  const upiLink = (o) =>
-    `upi://pay?pa=${OWNER_UPI}&pn=ApnaBaithak&am=${o.amount}&cu=INR&tn=${o._id}`;
 
   const auth = { headers: { token } };
 
@@ -237,6 +234,43 @@ const App = () => {
     }
   };
 
+  // Razorpay payment link QR (doorstep online payment)
+  const openQr = async (o) => {
+    setQrOrder(o);
+    setQrUrl("");
+    setQrBusy(true);
+    try {
+      const res = await axios.post(API + "/api/rider/paylink", { orderId: o._id }, auth);
+      if (res.data.success && !res.data.paid) {
+        setQrUrl(res.data.short_url);
+      } else if (res.data.paid) {
+        toast.success("Already paid ✓");
+        setQrOrder(null);
+        load();
+      } else toast.error(res.data.message);
+    } catch {
+      toast.error("Link fail");
+    }
+    setQrBusy(false);
+  };
+
+  const checkPaid = async () => {
+    if (!qrOrder) return;
+    setQrBusy(true);
+    try {
+      const res = await axios.post(API + "/api/rider/paycheck", { orderId: qrOrder._id }, auth);
+      if (res.data.paid) {
+        toast.success("Payment received ✓");
+        setQrOrder(null);
+        setQrUrl("");
+        load();
+      } else toast.info(res.data.message || "Not paid yet");
+    } catch {
+      toast.error("Check fail");
+    }
+    setQrBusy(false);
+  };
+
   const toggleDuty = async () => {
     const next = !onDuty;
     let pos = {};
@@ -344,8 +378,8 @@ const App = () => {
               <p className="cash-done">💰 Cash collected ✓</p>
             ) : null}
             {(o.paymentMethod !== "cod" && o.paymentStatus !== "PAID") || (o.paymentMethod === "cod" && !o.cashCollected) ? (
-              <button onClick={() => setQrOrder(o)} className="deliver-btn qr">
-                📱 Show QR (UPI ₹{o.amount})
+              <button onClick={() => openQr(o)} className="deliver-btn qr">
+                📱 Razorpay QR (₹{o.amount})
               </button>
             ) : null}
           </div>
@@ -359,13 +393,23 @@ const App = () => {
         ))}
       </main>
       {qrOrder && (
-        <div className="qr-modal" onClick={() => setQrOrder(null)}>
+        <div className="qr-modal" onClick={() => { setQrOrder(null); setQrUrl(""); }}>
           <div className="qr-box" onClick={(e) => e.stopPropagation()}>
             <h3>Scan & Pay ₹{qrOrder.amount}</h3>
-            <QRCodeSVG value={upiLink(qrOrder)} size={230} />
-            <p>Apna Baithak • {OWNER_UPI}</p>
-            <p className="qr-note">Customer apne UPI app se scan kare</p>
-            <button onClick={() => setQrOrder(null)}>Close</button>
+            {qrBusy && !qrUrl ? (
+              <p>Razorpay link ban raha hai…</p>
+            ) : qrUrl ? (
+              <>
+                <QRCodeSVG value={qrUrl} size={230} />
+                <p>Apna Baithak • Razorpay secure</p>
+                <p className="qr-note">Customer scan kare → UPI/card se pay</p>
+                <button onClick={checkPaid} disabled={qrBusy} className="check-btn">
+                  {qrBusy ? "Checking…" : "✓ Check payment"}
+                </button>
+              </>
+            ) : null}
+            <br />
+            <button onClick={() => { setQrOrder(null); setQrUrl(""); }}>Close</button>
           </div>
         </div>
       )}

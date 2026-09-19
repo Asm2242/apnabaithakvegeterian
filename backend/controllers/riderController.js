@@ -1,8 +1,14 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import Razorpay from "razorpay";
 import userModel from "../models/userModel.js";
 import riderModel from "../models/riderModel.js";
 import orderModel from "../models/orderModel.js";
+
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_SECRET,
+});
 
 const createToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET);
 
@@ -85,7 +91,61 @@ const updateDeliveryStatus = async (req, res) => {
     }
 }
 
-// Rider confirms COD cash collected from customer
+// Rider: Razorpay payment link for doorstep QR (create once, reuse)
+const payLink = async (req, res) => {
+    try {
+        const order = await orderModel.findOne({ _id: req.body.orderId, riderId: req.body.userId });
+        if (!order) return res.json({ success: false, message: "Order not assigned to you" });
+        if (order.paymentStatus === "PAID") {
+            return res.json({ success: true, paid: true, message: "Already paid" });
+        }
+        if (order.razorpayLinkUrl) {
+            return res.json({ success: true, short_url: order.razorpayLinkUrl });
+        }
+        if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_SECRET) {
+            return res.json({ success: false, message: "Online payment not configured" });
+        }
+        const link = await razorpay.paymentLink.create({
+            amount: Math.round(order.amount * 100),
+            currency: "INR",
+            description: `Apna Baithak order Rs.${order.amount}`,
+            customer: {
+                name: (order.customerName || "Customer").slice(0, 50),
+                contact: order.phone || undefined
+            },
+            notify: { sms: false, email: false },
+            notes: { orderId: String(order._id) }
+        });
+        order.razorpayLinkId = link.id;
+        order.razorpayLinkUrl = link.short_url;
+        await order.save();
+        res.json({ success: true, short_url: link.short_url });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: "Link create fail" });
+    }
+};
+
+// Rider: check if Razorpay link got paid -> mark PAID
+const payCheck = async (req, res) => {
+    try {
+        const order = await orderModel.findOne({ _id: req.body.orderId, riderId: req.body.userId });
+        if (!order) return res.json({ success: false, message: "Order not assigned to you" });
+        if (order.paymentStatus === "PAID") return res.json({ success: true, paid: true });
+        if (!order.razorpayLinkId) return res.json({ success: true, paid: false });
+        const link = await razorpay.paymentLink.fetch(order.razorpayLinkId);
+        if (link.status === "paid") {
+            order.paymentStatus = "PAID";
+            order.payment = true;
+            await order.save();
+            return res.json({ success: true, paid: true, message: "Payment received ✓" });
+        }
+        res.json({ success: true, paid: false, message: "Not paid yet" });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: "Check fail" });
+    }
+};
 const collectCash = async (req, res) => {
     try {
         const order = await orderModel.findOne({ _id: req.body.orderId, riderId: req.body.userId });
@@ -138,4 +198,4 @@ const listRiders = async (req, res) => {
     }
 }
 
-export { createRider, loginRider, myOrders, updateDeliveryStatus, updateLocation, listRiders, collectCash };
+export { createRider, loginRider, myOrders, updateDeliveryStatus, updateLocation, listRiders, collectCash, payLink, payCheck };

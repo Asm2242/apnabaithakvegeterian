@@ -27,6 +27,9 @@ const orderSchema = new mongoose.Schema({
     cashCollected: { type: Boolean, default: false },
     razorpayOrderId: { type: String, default: "" },
     razorpayPaymentId: { type: String, default: "" },
+    // doorstep Razorpay payment link (rider QR)
+    razorpayLinkId: { type: String, default: "" },
+    razorpayLinkUrl: { type: String, default: "" },
     // assigned delivery partner (users._id with role=rider)
     riderId: { type: String, default: "" },
     otpVerified: { type: Boolean, default: false }

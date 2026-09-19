@@ -31,6 +31,7 @@ body{margin:0;font-family:Arial,sans-serif;background:#f6f1e7;color:#3b1d0c}
 .qr-box p{color:#555;margin:10px 0 0 0}
 .qr-note{font-size:12px;color:#999 !important}
 .qr-box button{background:#9a3412;color:#fff;border:none;border-radius:8px;padding:10px 24px;font-weight:700;margin-top:12px;cursor:pointer}
+.qr-box .check-btn{background:#0f8a0f !important;width:100%}
 .rider-minimap{margin:10px 0}
 .rider-minimap .leaflet-container{height:180px;width:100%;border-radius:10px;border:1px solid #d4a017;z-index:1}
 .rm-shop div,.rm-home div,.rm-you div{font-size:28px;text-align:center;filter:drop-shadow(0 3px 5px #0006)}
