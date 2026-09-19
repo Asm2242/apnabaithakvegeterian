@@ -1,33 +1,24 @@
-import { useContext, useEffect } from "react";
+import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { StoreContext } from "../../Context/StoreContext";
 import "./Verify.css";
 
+// Legacy route: forward everything to cinematic success page
 const Verify = () => {
-  const { setCartItems } = useContext(StoreContext);
   const [searchParams] = useSearchParams();
-  const success = searchParams.get("success");
+  const navigate = useNavigate();
   const orderId = searchParams.get("orderId");
+  const success = searchParams.get("success");
   const cod = searchParams.get("cod");
 
-  const navigate = useNavigate();
-
   useEffect(() => {
-    // COD orders skip payment verification entirely
-    if (cod === "1" && orderId) {
-      setCartItems({});
-      navigate("/myorders");
-      return;
+    if (orderId && success !== "false") {
+      navigate(`/success/${orderId}${cod ? "?cod=1" : ""}`, { replace: true });
+    } else if (orderId) {
+      navigate(`/success/${orderId}?failed=1`, { replace: true });
+    } else {
+      navigate("/", { replace: true });
     }
-    if (success === "false" || !orderId) {
-      navigate("/");
-      return;
-    }
-    // online payments are verified in checkout handler; just show orders
-    setCartItems({});
-    navigate("/myorders");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [success, orderId, cod]);
+  }, [orderId, success, cod, navigate]);
 
   return (
     <div className="verify">

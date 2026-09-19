@@ -11,6 +11,7 @@ import MyOrders from "./pages/MyOrders/MyOrders";
 import Profile from "./pages/Profile/Profile";
 import Track from "./pages/Track/Track";
 import Menu from "./pages/Menu/Menu";
+import OrderSuccess from "./pages/OrderSuccess/OrderSuccess";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Verify from "./pages/Verify/Verify";
@@ -52,6 +53,7 @@ const App = () => {
           <Route path="/profile" element={<Profile />} />
           <Route path="/track/:id" element={<Track />} />
           <Route path="/menu" element={<Menu />} />
+          <Route path="/success/:id" element={<OrderSuccess />} />
         </Routes>
       </div>
       <Footer />

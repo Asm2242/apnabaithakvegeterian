@@ -312,6 +312,58 @@ function Coupons({ token }) {
   );
 }
 
+function Requests({ token }) {
+  const [list, setList] = useState([]);
+  const [note, setNote] = useState({});
+  const load = async () => {
+    const res = await api(token).get("/api/order/requests");
+    if (res.data.success) setList(res.data.data);
+  };
+  useEffect(() => {
+    load();
+    const t = setInterval(load, 20000);
+    return () => clearInterval(t);
+  }, []);
+  const resolve = async (id, action) => {
+    await api(token).post("/api/order/request/resolve", {
+      id,
+      action,
+      adminNote: note[id] || ""
+    });
+    load();
+  };
+  const pending = list.filter((r) => r.status === "pending");
+  const done = list.filter((r) => r.status !== "pending");
+  return (
+    <div>
+      <h3>Pending ({pending.length})</h3>
+      {pending.map((r) => (
+        <div key={r._id} className="card">
+          <b>{r.type.replace(/_/g, " ").toUpperCase()}</b> • order ₹{r.order?.[0]?.amount} • {r.order?.[0]?.customerName} {r.order?.[0]?.phone}
+          <p>{r.details || "(no details)"}</p>
+          <input
+            placeholder="Reply note (optional)"
+            value={note[r._id] || ""}
+            onChange={(e) => setNote((n) => ({ ...n, [r._id]: e.target.value }))}
+          />
+          <div className="row">
+            <button onClick={() => resolve(r._id, "resolved")}>✓ Accept</button>
+            <button onClick={() => resolve(r._id, "rejected")} className="danger">✕ Reject</button>
+          </div>
+        </div>
+      ))}
+      {pending.length === 0 && <p>No pending requests. 👍</p>}
+      <h3>Done ({done.length})</h3>
+      {done.slice(0, 30).map((r) => (
+        <div key={r._id} className="card">
+          <b>{r.type.replace(/_/g, " ")}</b> • {r.status} • {r.order?.[0]?.customerName}
+          {r.adminNote ? <p>Reply: {r.adminNote}</p> : null}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function Chat({ token }) {
   const [msgs, setMsgs] = useState([
     { from: "bot", text: "Namaste! 🙏 Main Apna Baithak helper hun. Neeche button dabao ya likho — jaise 'advance all', 'report', 'chai hide karo'." }
@@ -479,7 +531,7 @@ function App() {
       <header>
         <b>Apna Baithak Admin</b>
         <nav>
-          {["orders", "foods", "riders", "customers", "coupons", "chat"].map((t) => (
+          {["orders", "requests", "foods", "riders", "customers", "coupons", "chat"].map((t) => (
             <button key={t} className={tab === t ? "active" : ""} onClick={() => setTab(t)}>{t === "chat" ? "🤖 chat" : t}</button>
           ))}
           <button onClick={logout}>Logout</button>
@@ -487,6 +539,7 @@ function App() {
       </header>
       <main>
         {tab === "orders" && <Orders token={token} />}
+        {tab === "requests" && <Requests token={token} />}
         {tab === "foods" && <Foods token={token} imgBase={API} />}
         {tab === "riders" && <Riders token={token} />}
         {tab === "customers" && <Customers token={token} />}

@@ -1,0 +1,27 @@
+.success-wrap{min-height:70vh;display:flex;align-items:center;justify-content:center;padding:40px 20px}
+.plate-stage{text-align:center;max-width:420px;animation:fadeIn 0.5s}
+.plate-stage h2{color:#3b1d0c;font-size:28px;margin:18px 0 8px 0}
+.plate-stage p{color:#676767}
+.plate{font-size:90px;animation:plateFloat 2s ease-in-out infinite}
+@keyframes plateFloat{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-12px) rotate(4deg)}}
+.steam{display:flex;justify-content:center;gap:14px;margin-bottom:-10px}
+.steam span{width:8px;height:34px;border-radius:8px;background:linear-gradient(#d4a01755,transparent);animation:steamUp 1.6s ease-in-out infinite}
+.steam span:nth-child(2){animation-delay:0.25s}
+.steam span:nth-child(3){animation-delay:0.5s}
+@keyframes steamUp{0%{transform:translateY(8px) scaleY(0.6);opacity:0}40%{opacity:1}100%{transform:translateY(-10px) scaleY(1.2);opacity:0}}
+.cloche{width:150px;height:14px;margin:6px auto 0 auto;border-radius:50%;background:radial-gradient(ellipse,#3b1d0c22,#0000)}
+.loadbar{width:220px;height:8px;background:#eee;border-radius:8px;margin:20px auto 0 auto;overflow:hidden}
+.loadbar div{height:100%;width:40%;border-radius:8px;background:linear-gradient(90deg,#9a3412,#d4a017);animation:loadSlide 1.2s ease-in-out infinite}
+@keyframes loadSlide{0%{margin-left:-40%}100%{margin-left:100%}}
+.tick-circle svg,.cross-circle svg{width:110px;height:110px}
+.tick-circle circle{fill:none;stroke:#0f8a0f;stroke-width:3;stroke-dasharray:157;stroke-dashoffset:157;animation:draw 0.7s ease forwards}
+.tick-circle path{fill:none;stroke:#0f8a0f;stroke-width:4;stroke-linecap:round;stroke-dasharray:40;stroke-dashoffset:40;animation:draw 0.5s 0.6s ease forwards}
+.cross-circle circle{fill:none;stroke:#b3261e;stroke-width:3;stroke-dasharray:157;stroke-dashoffset:157;animation:draw 0.7s ease forwards}
+.cross-circle path{fill:none;stroke:#b3261e;stroke-width:4;stroke-linecap:round;stroke-dasharray:52;stroke-dashoffset:52;animation:draw 0.5s 0.6s ease forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.redirect-note{font-size:13px;color:#9a3412 !important;font-weight:600}
+.track-link{display:inline-block;margin-top:16px;background:#9a3412;color:#fff !important;font-weight:700;border-radius:50px;padding:12px 30px;text-decoration:none}
+.ghost-link{display:inline-block;margin-top:16px;margin-left:10px;color:#9a3412;font-weight:700}
+.fail-btns{display:flex;gap:6px;justify-content:center;align-items:center}
+html[data-theme="dark"] .plate-stage h2{color:#f3e7d3}
+html[data-theme="dark"] .plate-stage p{color:#c9b896}

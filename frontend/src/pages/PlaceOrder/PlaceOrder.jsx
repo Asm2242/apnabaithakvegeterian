@@ -134,12 +134,12 @@ const PlaceOrder = () => {
         return;
       }
 
-      // COD: no Razorpay, straight to confirmation
+      // COD: no Razorpay, straight to cinematic confirmation
       if (response.data.cod) {
         saveAddr();
         applyCoupon(null);
         toast.success("Order placed! Pay cash on delivery");
-        navigate("/verify?success=true&orderId=" + response.data.orderId + "&cod=1");
+        navigate("/success/" + response.data.orderId + "?cod=1");
         return;
       }
 
@@ -174,10 +174,10 @@ const PlaceOrder = () => {
             saveAddr();
             applyCoupon(null);
             toast.success("Payment successful");
-            navigate("/verify?success=true&orderId=" + orderId);
+            navigate("/success/" + orderId);
           } else {
             toast.error("Payment verification failed");
-            navigate("/verify?success=false&orderId=" + orderId);
+            navigate("/success/" + orderId + "?failed=1");
           }
         },
         modal: {
