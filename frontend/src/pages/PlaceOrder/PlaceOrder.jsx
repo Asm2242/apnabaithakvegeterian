@@ -5,32 +5,33 @@ import { toast } from "react-toastify";
 import { StoreContext } from "../../Context/StoreContext";
 import LocationPicker from "../../components/LocationPicker/LocationPicker";
 import "../../components/LocationPicker/LocationPicker.css";
-import AddressPopup from "../../components/AddressPopup/AddressPopup";
-import "../../components/AddressPopup/AddressPopup.css";
 import "./PlaceOrder.css";
 
+// Checkout stepper: 1 Pin -> 2 Details popup -> 3 Payment -> animation -> track
 const PlaceOrder = () => {
   const [data, setData] = useState({
-    firstName: "",
-    lastName: "",
+    fullName: "",
     email: "",
+    flat: "",
     street: "",
     city: "Lucknow",
     state: "Uttar Pradesh",
     zipcode: "226013",
     country: "India",
     phone: "",
+    altPhone: "",
     landmark: "",
     notes: "",
   });
   const [mode, setMode] = useState("delivery");
+  const [step, setStep] = useState("pin"); // pin | details | payment
   const [payment, setPayment] = useState("online");
   const [placing, setPlacing] = useState(false);
-  const [pin, setPin] = useState(null); // { lat, lng } customer dropped pin
-  const [addrPop, setAddrPop] = useState(false);
+  const [pin, setPin] = useState(null);
+  const [saved, setSaved] = useState([]);
 
   const {
-    getTotalCartAmount, token, food_list, cartLines, url,
+    getTotalCartAmount, token, cartLines, url,
     phoneVerified, phone, requestOtp, verifyOtp, setShowLogin,
     coupon, applyCoupon,
   } = useContext(StoreContext);
@@ -46,6 +47,62 @@ const PlaceOrder = () => {
     setData((data) => ({ ...data, [name]: value }));
   };
 
+  const cleanMobile = (p) => String(p || "").replace(/\D/g, "").replace(/^91(?=\d{10}$)/, "");
+
+  // init: login gate + saved addresses + gate pin
+  useEffect(() => {
+    if (!token) {
+      toast.info("Login to continue checkout");
+      setShowLogin(true);
+      return;
+    }
+    if (getTotalCartAmount() === 0) {
+      navigate("/cart");
+      return;
+    }
+    axios
+      .get(url + "/api/user/addresses", { headers: { token } })
+      .then((res) => {
+        if (res.data.success) setSaved(res.data.data || []);
+      })
+      .catch(() => {});
+    try {
+      const gp = JSON.parse(localStorage.getItem("ab_pin") || "null");
+      if (gp) setPin(gp);
+    } catch { /* ignore */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
+
+  // ---- step 1: pin ----
+  const savePin = () => {
+    if (mode === "delivery" && !pin) {
+      toast.error("Map par pin lagao ya Current location dabao");
+      return;
+    }
+    if (pin) localStorage.setItem("ab_pin", JSON.stringify(pin));
+    setStep("details");
+    window.scrollTo(0, 0);
+  };
+
+  const pickSaved = (a) => {
+    setData((d) => ({
+      ...d,
+      street: a.street || d.street,
+      city: a.city || d.city,
+      state: a.state || d.state,
+      zipcode: a.zipcode || d.zipcode,
+      country: a.country || d.country,
+      landmark: a.landmark || d.landmark,
+    }));
+    if (a.lat != null) {
+      setPin({ lat: a.lat, lng: a.lng });
+      localStorage.setItem("ab_pin", JSON.stringify({ lat: a.lat, lng: a.lng }));
+    }
+    axios.post(url + `/api/user/addresses/use/${a._id}`, {}, { headers: { token } }).catch(() => {});
+    toast.success(`Address set: ${a.label || a.street}`);
+  };
+
+  // ---- step 2: details ----
   const loadRazorpayScript = () => {
     return new Promise((resolve) => {
       if (window.Razorpay) return resolve(true);
@@ -58,7 +115,7 @@ const PlaceOrder = () => {
   };
 
   const sendOtp = async () => {
-    const mobile = (data.phone || phone).replace(/\D/g, "").replace(/^91(?=\d{10}$)/, "");
+    const mobile = cleanMobile(data.phone || phone);
     if (!/^[6-9]\d{9}$/.test(mobile)) {
       toast.error("Enter a valid 10-digit Indian mobile number");
       return;
@@ -73,19 +130,67 @@ const PlaceOrder = () => {
   };
 
   const doVerify = async () => {
-    const mobile = (data.phone || phone).replace(/\D/g, "").replace(/^91(?=\d{10}$)/, "");
+    const mobile = cleanMobile(data.phone || phone);
     const res = await verifyOtp(mobile, otp);
     if (res.success) toast.success("Mobile verified");
     else toast.error(res.message);
   };
 
-  const saveAddr = () => {
-    // remember address for next time (idea #1) — silent fail ok
+  const saveDetails = async (e) => {
+    e.preventDefault();
+    if (!data.fullName.trim()) {
+      toast.error("Apna naam likho");
+      return;
+    }
+    const mobile = cleanMobile(data.phone || phone);
+    if (!/^[6-9]\d{9}$/.test(mobile)) {
+      toast.error("Sahi 10-digit mobile number dalo");
+      return;
+    }
+    if (data.altPhone && !/^[6-9]\d{9}$/.test(cleanMobile(data.altPhone))) {
+      toast.error("Alt number galat hai (optional hai — khaali chhodo ya sahi dalo)");
+      return;
+    }
+    if (!phoneVerified) {
+      toast.error("Verify OTP before continuing");
+      return;
+    }
+    if (mode === "delivery") {
+      if (!data.street.trim()) {
+        toast.error("Street / house likho");
+        return;
+      }
+      // save to address book (silent)
+      axios
+        .post(
+          url + "/api/user/addresses",
+          {
+            label: "",
+            flat: data.flat,
+            street: [data.flat, data.street].filter(Boolean).join(", "),
+            city: data.city,
+            state: data.state,
+            zipcode: data.zipcode,
+            country: data.country,
+            landmark: data.landmark,
+            lat: pin?.lat ?? null,
+            lng: pin?.lng ?? null,
+          },
+          { headers: { token } }
+        )
+        .catch(() => {});
+    }
+    setStep("payment");
+    window.scrollTo(0, 0);
+  };
+
+  // ---- step 3: payment ----
+  const saveAddrLegacy = () => {
     axios
       .post(
         url + "/api/user/address",
         {
-          street: data.street,
+          street: [data.flat, data.street].filter(Boolean).join(", "),
           city: data.city,
           state: data.state,
           zipcode: data.zipcode,
@@ -100,37 +205,31 @@ const PlaceOrder = () => {
   const placeOrder = async (e) => {
     e.preventDefault();
     if (placing) return;
-
-    if (!/^[6-9]\d{9}$/.test((data.phone || phone).replace(/\D/g, "").replace(/^91(?=\d{10}$)/, ""))) {
-      toast.error("Enter a valid 10-digit Indian mobile number");
-      return;
-    }
-    if (!phoneVerified) {
-      toast.error("Verify OTP before placing the order");
-      return;
-    }
-
-    const lines = cartLines();
-    if (lines.length === 0) {
-      toast.error("Cart is empty");
-      return;
-    }
-
-    const orderData = {
-      address: data,
-      items: lines,
-      amount: getTotalCartAmount(),
-      landmark: data.landmark,
-      notes: data.notes,
-      mode,
-      paymentMethod: payment,
-      otpVerified: true,
-      couponCode: coupon?.code || "",
-      ...(pin ? { lat: pin.lat, lng: pin.lng } : {}),
-    };
-
     setPlacing(true);
     try {
+      const orderData = {
+        address: {
+          name: data.fullName,
+          email: data.email,
+          flat: data.flat,
+          street: [data.flat, data.street].filter(Boolean).join(", "),
+          city: data.city,
+          state: data.state,
+          zipcode: data.zipcode,
+          country: data.country,
+          altPhone: cleanMobile(data.altPhone),
+        },
+        items: cartLines(),
+        amount: getTotalCartAmount(),
+        landmark: data.landmark,
+        notes: data.notes,
+        mode,
+        paymentMethod: payment,
+        otpVerified: true,
+        couponCode: coupon?.code || "",
+        ...(pin ? { lat: pin.lat, lng: pin.lng } : {}),
+      };
+
       const response = await axios.post(url + "/api/order/place", orderData, {
         headers: { token },
       });
@@ -141,9 +240,8 @@ const PlaceOrder = () => {
         return;
       }
 
-      // COD: no Razorpay, straight to cinematic confirmation
       if (response.data.cod) {
-        saveAddr();
+        saveAddrLegacy();
         applyCoupon(null);
         toast.success("Order placed! Pay cash on delivery");
         navigate("/success/" + response.data.orderId + "?cod=1");
@@ -178,7 +276,7 @@ const PlaceOrder = () => {
             { headers: { token } }
           );
           if (verifyRes.data.success) {
-            saveAddr();
+            saveAddrLegacy();
             applyCoupon(null);
             toast.success("Payment successful");
             navigate("/success/" + orderId);
@@ -195,7 +293,7 @@ const PlaceOrder = () => {
           },
         },
         prefill: {
-          name: data.firstName + " " + data.lastName,
+          name: data.fullName,
           email: data.email,
           contact: data.phone || phone,
         },
@@ -211,189 +309,165 @@ const PlaceOrder = () => {
     }
   };
 
-  useEffect(() => {
-    if (!token) {
-      // checkout clicked while logged out -> open login popup right here
-      toast.info("Login to continue checkout");
-      setShowLogin(true);
-    } else if (getTotalCartAmount() === 0) {
-      navigate("/cart");
-    } else {
-      // saved address autofill (idea #1)
-      axios
-        .get(url + "/api/user/address", { headers: { token } })
-        .then((res) => {
-          if (res.data.success && res.data.address?.street) {
-            setData((d) => ({ ...d, ...res.data.address }));
-          }
-        })
-        .catch(() => {});
-      // cart ke baad direct address popup (once per visit)
-      if (!sessionStorage.getItem("ab_addr_done")) {
-        setAddrPop(true);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
-
   const subtotal = getTotalCartAmount();
   const discount = coupon?.discount || 0;
   const delivery = subtotal === 0 || mode === "takeaway" || subtotal - discount >= 399 ? 0 : 39;
   const grand = Math.max(0, subtotal - discount) + delivery;
 
   return (
-    <>
-      {addrPop && (
-        <AddressPopup
-          onClose={() => {
-            sessionStorage.setItem("ab_addr_done", "1");
-            setAddrPop(false);
-          }}
-          onConfirm={({ addr, pin: p }) => {
-            sessionStorage.setItem("ab_addr_done", "1");
-            setAddrPop(false);
-            if (addr) {
-              setData((d) => ({
-                ...d,
-                street: addr.street || d.street,
-                city: addr.city || d.city,
-                state: addr.state || d.state,
-                zipcode: addr.zipcode || d.zipcode,
-                country: addr.country || d.country,
-                landmark: addr.landmark || d.landmark,
-              }));
-            }
-            if (p) setPin({ lat: p[0], lng: p[1] });
-            else if (addr?.lat != null) setPin({ lat: addr.lat, lng: addr.lng });
-            toast.success("Address set!");
-          }}
-        />
-      )}
-    <form onSubmit={placeOrder} className="place-order">
-      <div className="place-order-left">
-        <p className="title">Delivery Information</p>
-        <div className="mode-toggle">
-          {["delivery", "takeaway"].map((m) => (
-            <button
-              key={m}
-              type="button"
-              className={mode === m ? "active" : ""}
-              onClick={() => setMode(m)}
-            >
-              {m === "delivery" ? "Delivery" : "Takeaway"}
-            </button>
-          ))}
-        </div>
-        <div className="multi-field">
-          <input type="text" name="firstName" onChange={onChangeHandler} value={data.firstName} placeholder="First name" required />
-          <input type="text" name="lastName" onChange={onChangeHandler} value={data.lastName} placeholder="Last name" required />
-        </div>
-        <input type="email" name="email" onChange={onChangeHandler} value={data.email} placeholder="Email address" required />
-        {mode === "delivery" && (
-          <>
-            <input type="text" name="street" onChange={onChangeHandler} value={data.street} placeholder="House / flat, street" required />
-            <div className="multi-field">
-              <input type="text" name="city" onChange={onChangeHandler} value={data.city} placeholder="City" required />
-              <input type="text" name="zipcode" onChange={onChangeHandler} value={data.zipcode} placeholder="Pincode" required />
-            </div>
-            <input type="text" name="landmark" onChange={onChangeHandler} value={data.landmark} placeholder="Landmark (optional)" />
-            <LocationPicker
-              value={pin ? [pin.lat, pin.lng] : null}
-              onChange={setPin}
-            />
-          </>
-        )}
-        <input type="text" name="notes" onChange={onChangeHandler} value={data.notes} placeholder="Cooking instructions (optional)" />
+    <div className="checkout-steps">
+      <div className="mode-toggle">
+        {["delivery", "takeaway"].map((m) => (
+          <button
+            key={m}
+            type="button"
+            className={mode === m ? "active" : ""}
+            onClick={() => {
+              setMode(m);
+              if (m === "takeaway") setStep("details");
+              else setStep("pin");
+            }}
+          >
+            {m === "delivery" ? "🛵 Delivery" : "🛍️ Takeaway"}
+          </button>
+        ))}
+      </div>
 
-        <p className="title">Mobile verification</p>
-        {!phoneVerified ? (
-          <div className="otp-box">
-            <div className="multi-field">
-              <input
-                type="tel"
-                name="phone"
-                onChange={onChangeHandler}
-                value={data.phone}
-                placeholder="10-digit mobile number"
-                required
-              />
-              <button type="button" onClick={sendOtp}>
-                {otpSent ? "Resend OTP" : "Send OTP"}
-              </button>
+      <div className="stepper">
+        {["Pin", "Details", "Payment"].map((s, i) => {
+          const idx = ["pin", "details", "payment"].indexOf(step);
+          return (
+            <div key={s} className={`step ${i < idx ? "done" : ""} ${i === idx ? "now" : ""}`}>
+              <span>{i + 1}</span> {s}
             </div>
-            {otpSent && (
-              <div className="multi-field">
-                <input
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                  placeholder="6-digit OTP"
-                  inputMode="numeric"
-                />
-                <button type="button" onClick={doVerify}>Verify</button>
+          );
+        })}
+      </div>
+
+      {step === "pin" && mode === "delivery" && (
+        <div className="step-card">
+          <h2>📍 Apni location pin karo</h2>
+          <p className="muted">Rider seedha isi pin par ayega. Tap karo ya GPS dabao.</p>
+          <LocationPicker
+            value={pin ? [pin.lat, pin.lng] : null}
+            onChange={setPin}
+          />
+          <button className="place-order-submit" onClick={savePin}>
+            Save pin & continue →
+          </button>
+        </div>
+      )}
+
+      {(step === "details" || (step === "pin" && mode === "takeaway")) && (
+        <div className="step-card popup-look">
+          <h2>👤 Personal details</h2>
+          {saved.length > 0 && mode === "delivery" && (
+            <div className="saved-chips">
+              {saved.slice(0, 3).map((a) => (
+                <button key={a._id} type="button" onClick={() => pickSaved(a)}>
+                  📍 {a.label || a.street?.slice(0, 22) || "Address"}
+                </button>
+              ))}
+            </div>
+          )}
+          <form onSubmit={saveDetails}>
+            <input name="fullName" value={data.fullName} onChange={onChangeHandler} placeholder="Full name" required />
+            <div className="multi-field">
+              <input name="phone" value={data.phone} onChange={onChangeHandler} placeholder="10-digit mobile" required />
+              <input name="altPhone" value={data.altPhone} onChange={onChangeHandler} placeholder="Alt number (optional)" />
+            </div>
+            {!phoneVerified ? (
+              <div className="otp-box">
+                <div className="multi-field">
+                  <button type="button" onClick={sendOtp}>{otpSent ? "Resend OTP" : "Send OTP"}</button>
+                </div>
+                {otpSent && (
+                  <div className="multi-field">
+                    <input value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))} placeholder="6-digit OTP" inputMode="numeric" />
+                    <button type="button" onClick={doVerify}>Verify</button>
+                  </div>
+                )}
               </div>
+            ) : (
+              <p className="verified">✓ +91 {data.phone || phone} verified</p>
+            )}
+            {mode === "delivery" && (
+              <>
+                <input name="flat" value={data.flat} onChange={onChangeHandler} placeholder="Block / Building / Apartment / Flat" />
+                <input name="street" value={data.street} onChange={onChangeHandler} placeholder="House / flat, street" required />
+                <div className="multi-field">
+                  <input name="city" value={data.city} onChange={onChangeHandler} placeholder="City" required />
+                  <input name="zipcode" value={data.zipcode} onChange={onChangeHandler} placeholder="Pincode" required />
+                </div>
+                <input name="landmark" value={data.landmark} onChange={onChangeHandler} placeholder="Landmark (optional)" />
+                <input name="notes" value={data.notes} onChange={onChangeHandler} placeholder="Cooking instructions (optional)" />
+              </>
+            )}
+            <div className="step-btns">
+              {mode === "delivery" && (
+                <button type="button" className="back-btn" onClick={() => setStep("pin")}>← Pin</button>
+              )}
+              <button type="submit" className="place-order-submit">Save & continue →</button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {step === "payment" && (
+        <form onSubmit={placeOrder} className="place-order">
+          <div className="place-order-left">
+            <h2 className="font24">💳 Payment</h2>
+            <div className="pay-methods">
+              <label className={payment === "online" ? "active" : ""}>
+                <input type="radio" name="payment" checked={payment === "online"} onChange={() => setPayment("online")} />
+                <span><b>Online Payment</b><small>UPI, card, netbanking — pay now</small></span>
+              </label>
+              <label className={payment === "cod" ? "active" : ""}>
+                <input type="radio" name="payment" checked={payment === "cod"} onChange={() => setPayment("cod")} />
+                <span><b>Cash on Delivery</b><small>Pay cash when order arrives</small></span>
+              </label>
+            </div>
+            <button type="button" className="back-btn" onClick={() => setStep("details")}>← Details</button>
+          </div>
+          <div className="place-order-right">
+            <div className="cart-total">
+              <h2>Order Summary</h2>
+              <div>
+                <div className="cart-total-details">
+                  <p>Subtotal</p>
+                  <p>₹{subtotal}</p>
+                </div>
+                <hr />
+                {discount > 0 && (
+                  <>
+                    <div className="cart-total-details">
+                      <p>Coupon ({coupon.code})</p>
+                      <p>− ₹{discount}</p>
+                    </div>
+                    <hr />
+                  </>
+                )}
+                <div className="cart-total-details">
+                  <p>Delivery Fee</p>
+                  <p>₹{delivery}</p>
+                </div>
+                <hr />
+                <div className="cart-total-details">
+                  <b>Total</b>
+                  <b>₹{grand}</b>
+                </div>
+              </div>
+            </div>
+            <button className="place-order-submit" type="submit" disabled={placing}>
+              {placing ? "Processing…" : payment === "online" ? `Pay ₹${grand} securely` : `Place order • ₹${grand}`}
+            </button>
+            {payment === "online" && (
+              <p className="secure-note">Secure payment by Razorpay. Free delivery above ₹399.</p>
             )}
           </div>
-        ) : (
-          <p className="verified">✓ {(data.phone || phone) && `+91 ${data.phone || phone}`} verified</p>
-        )}
-
-        <p className="title">Payment</p>
-        <div className="pay-methods">
-          <label className={payment === "online" ? "active" : ""}>
-            <input type="radio" name="payment" checked={payment === "online"} onChange={() => setPayment("online")} />
-            <span><b>Online Payment</b><small>UPI, card, netbanking — pay now</small></span>
-          </label>
-          <label className={payment === "cod" ? "active" : ""}>
-            <input type="radio" name="payment" checked={payment === "cod"} onChange={() => setPayment("cod")} />
-            <span><b>Cash on Delivery</b><small>Pay cash when order arrives</small></span>
-          </label>
-        </div>
-      </div>
-      <div className="place-order-right">
-        <div className="cart-total">
-          <h2>Cart Totals</h2>
-            <div>
-              <div className="cart-total-details">
-                <p>Subtotal</p>
-                <p>₹{subtotal}</p>
-              </div>
-              <hr />
-              {discount > 0 && (
-                <>
-                  <div className="cart-total-details">
-                    <p>Coupon ({coupon.code})</p>
-                    <p>− ₹{discount}</p>
-                  </div>
-                  <hr />
-                </>
-              )}
-              <div className="cart-total-details">
-                <p>Delivery Fee</p>
-                <p>₹{delivery}</p>
-              </div>
-              <hr />
-              <div className="cart-total-details">
-                <b>Total</b>
-                <b>₹{grand}</b>
-              </div>
-            </div>
-          </div>
-          <button className="place-order-submit" type="submit" disabled={placing}>
-            {placing ? "Processing…" : payment === "online" ? `Pay ₹${grand} securely` : `Place order • ₹${grand}`}
-        </button>
-        {payment === "online" && (
-          <p className="secure-note">Secure payment by Razorpay. Free delivery above ₹399.</p>
-        )}
-        <button
-          type="button"
-          className="change-addr-btn"
-          onClick={() => setAddrPop(true)}
-        >
-          📍 Change delivery address / pin
-        </button>
-      </div>
-    </form>
-    </>
+        </form>
+      )}
+    </div>
   );
 };
 

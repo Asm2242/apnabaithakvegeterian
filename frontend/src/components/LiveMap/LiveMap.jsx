@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -38,6 +38,28 @@ const FollowRider = ({ pos }) => {
   return null;
 };
 
+// first: zoom OUT to show shop+rider+customer together, then auto zoom IN to rider
+const FitAll = ({ points, focus }) => {
+  const map = useMap();
+  const done = useRef(false);
+  useEffect(() => {
+    if (done.current || points.length === 0) return;
+    done.current = true;
+    try {
+      map.fitBounds(L.latLngBounds(points), { padding: [30, 30] });
+    } catch { /* ignore */ }
+    if (focus) {
+      const t = setTimeout(() => {
+        try {
+          map.flyTo(focus, 16, { duration: 1.5 });
+        } catch { /* ignore */ }
+      }, 2800);
+      return () => clearTimeout(t);
+    }
+  }, [map]);
+  return null;
+};
+
 FollowRider.propTypes = {
   pos: PropTypes.array,
 };
@@ -50,6 +72,7 @@ const LiveMap = ({ rider, riderLabel, customer }) => {
   const custPos =
     customer && customer.lat != null ? [customer.lat, customer.lng] : null;
   const center = riderPos || custPos || shopPos;
+  const allPoints = [shopPos, ...(riderPos ? [riderPos] : []), ...(custPos ? [custPos] : [])];
 
   return (
     <div className="live-map">
@@ -59,6 +82,7 @@ const LiveMap = ({ rider, riderLabel, customer }) => {
         scrollWheelZoom={false}
         className="live-map-box"
       >
+        <FitAll points={allPoints} focus={riderPos} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
