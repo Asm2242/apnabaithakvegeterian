@@ -29,44 +29,33 @@ const homeIcon = L.divIcon({
   iconAnchor: [18, 32],
 });
 
-// follow the rider as he moves
-const FollowRider = ({ pos }) => {
-  const map = useMap();
-  useEffect(() => {
-    if (pos) map.panTo(pos, { animate: true });
-  }, [pos, map]);
-  return null;
-};
+// (removed: replaced by FitBoth)
 
-// first: zoom OUT to show shop+rider+customer together, then auto zoom IN to rider
-const FitAll = ({ points, focus }) => {
+// rider + customer hamesha ek saath: door ho to zoom OUT,
+// paas aaye to khud zoom IN (har location update par)
+const FitBoth = ({ riderPos, custPos }) => {
   const map = useMap();
-  const done = useRef(false);
+  const first = useRef(true);
   useEffect(() => {
-    if (done.current) return;
-    done.current = true;
     try {
-      if (points.length >= 2) {
-        map.fitBounds(L.latLngBounds(points), { padding: [40, 40] });
-      } else if (points.length === 1) {
-        map.setView(points[0], 14);
+      if (riderPos && custPos) {
+        const b = L.latLngBounds([riderPos, custPos]);
+        if (first.current) {
+          map.fitBounds(b, { padding: [50, 50] });
+          first.current = false;
+        } else {
+          map.flyToBounds(b, { padding: [50, 50], duration: 1.2 });
+        }
+      } else if (riderPos || custPos) {
+        map.setView(riderPos || custPos, 14);
       }
     } catch { /* ignore */ }
-    if (focus && points.length >= 2) {
-      const t = setTimeout(() => {
-        try {
-          map.flyTo(focus, 16, { duration: 1.5 });
-        } catch { /* ignore */ }
-      }, 2800);
-      return () => clearTimeout(t);
-    }
-  }, [map]);
+  }, [riderPos, custPos, map]);
   return null;
 };
 
-FollowRider.propTypes = {
-  pos: PropTypes.array,
-};
+// (removed: replaced by FitBoth)
+
 
 // Live map: shop pin + moving rider pin + customer home pin + route (free OSM)
 const LiveMap = ({ rider, riderLabel, customer }) => {
@@ -76,7 +65,6 @@ const LiveMap = ({ rider, riderLabel, customer }) => {
   const custPos =
     customer && customer.lat != null ? [customer.lat, customer.lng] : null;
   const center = riderPos || custPos || shopPos;
-  const allPoints = [shopPos, ...(riderPos ? [riderPos] : []), ...(custPos ? [custPos] : [])];
 
   return (
     <div className="live-map">
@@ -86,7 +74,7 @@ const LiveMap = ({ rider, riderLabel, customer }) => {
         scrollWheelZoom={false}
         className="live-map-box"
       >
-        <FitAll points={allPoints} focus={riderPos} />
+        <FitBoth riderPos={riderPos} custPos={custPos} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -111,7 +99,6 @@ const LiveMap = ({ rider, riderLabel, customer }) => {
               </Popup>
             </Marker>
             <Polyline positions={[riderPos, custPos || shopPos]} color="#9a3412" weight={4} dashArray="8 8" />
-            <FollowRider pos={riderPos} />
           </>
         )}
       </MapContainer>
