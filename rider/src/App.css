@@ -22,6 +22,15 @@ body{margin:0;font-family:Arial,sans-serif;background:#f6f1e7;color:#3b1d0c}
 .nav-btn{display:inline-block;background:#0f8a0f;color:#fff !important;border-radius:8px;padding:10px 18px;margin:6px 8px 6px 0;font-weight:600;text-decoration:none}
 .deliver-btn{background:#9a3412 !important;width:100%}
 .deliver-btn.pickup{background:#0f8a0f !important}
+.deliver-btn.cash{background:#b8860b !important}
+.deliver-btn.qr{background:#fff !important;color:#9a3412 !important;border:2px solid #9a3412 !important}
+.cash-done{color:#0f8a0f;font-weight:700}
+.qr-modal{position:fixed;inset:0;z-index:50;background:#000000aa;display:flex;align-items:center;justify-content:center;padding:20px}
+.qr-box{background:#fff;border-radius:16px;padding:24px;text-align:center;border-top:6px solid #d4a017}
+.qr-box h3{color:#9a3412;margin:0 0 12px 0}
+.qr-box p{color:#555;margin:10px 0 0 0}
+.qr-note{font-size:12px;color:#999 !important}
+.qr-box button{background:#9a3412;color:#fff;border:none;border-radius:8px;padding:10px 24px;font-weight:700;margin-top:12px;cursor:pointer}
 .rider-minimap{margin:10px 0}
 .rider-minimap .leaflet-container{height:180px;width:100%;border-radius:10px;border:1px solid #d4a017;z-index:1}
 .rm-shop div,.rm-home div,.rm-you div{font-size:28px;text-align:center;filter:drop-shadow(0 3px 5px #0006)}

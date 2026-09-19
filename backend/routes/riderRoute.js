@@ -1,7 +1,7 @@
 import express from 'express';
 import {
     createRider, loginRider, myOrders,
-    updateDeliveryStatus, updateLocation, listRiders
+    updateDeliveryStatus, updateLocation, listRiders, collectCash
 } from '../controllers/riderController.js';
 import { adminAuth, riderAuth } from '../middleware/auth.js';
 
@@ -15,6 +15,7 @@ riderRouter.post("/login", loginRider);
 riderRouter.get("/myorders", riderAuth, myOrders);
 riderRouter.post("/status", riderAuth, updateDeliveryStatus);
 riderRouter.post("/location", riderAuth, updateLocation);
+riderRouter.post("/collect", riderAuth, collectCash);
 // admin: all riders
 riderRouter.get("/list", adminAuth, listRiders);
 

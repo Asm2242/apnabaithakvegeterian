@@ -5,6 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { QRCodeSVG } from "qrcode.react";
 import "./App.css";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:4000";
@@ -102,9 +103,15 @@ const App = () => {
   const [password, setPassword] = useState("");
   const [orders, setOrders] = useState([]);
   const [onDuty, setOnDuty] = useState(localStorage.getItem("ab_duty") === "1");
-  const [gps, setGps] = useState(null); // { accuracy, at }
+  const [gps, setGps] = useState(null); // { lat, lng, accuracy, at }
+  const [qrOrder, setQrOrder] = useState(null); // order for QR modal
   const watchId = useRef(null);
   const lastSent = useRef(0);
+
+  // owner UPI for doorstep QR (set VITE_OWNER_UPI in Vercel env)
+  const OWNER_UPI = import.meta.env.VITE_OWNER_UPI || "9454999442@upi";
+  const upiLink = (o) =>
+    `upi://pay?pa=${OWNER_UPI}&pn=ApnaBaithak&am=${o.amount}&cu=INR&tn=${o._id}`;
 
   const auth = { headers: { token } };
 
@@ -217,6 +224,19 @@ const App = () => {
   const markDelivered = (orderId) => setStatus(orderId, "DELIVERED");
   const markPickedUp = (orderId) => setStatus(orderId, "OUT_FOR_DELIVERY");
 
+  const collectMoney = async (orderId) => {
+    if (!window.confirm("Cash mil gaya? Confirm karo.")) return;
+    try {
+      const res = await axios.post(API + "/api/rider/collect", { orderId }, auth);
+      if (res.data.success) {
+        toast.success("Cash collected ✓");
+        load();
+      } else toast.error(res.data.message);
+    } catch {
+      toast.error("Failed");
+    }
+  };
+
   const toggleDuty = async () => {
     const next = !onDuty;
     let pos = {};
@@ -316,6 +336,18 @@ const App = () => {
                 ✅ Mark Delivered
               </button>
             )}
+            {o.paymentMethod === "cod" && !o.cashCollected ? (
+              <button onClick={() => collectMoney(o._id)} className="deliver-btn cash">
+                💰 Money Collected (₹{o.amount} cash)
+              </button>
+            ) : o.paymentMethod === "cod" ? (
+              <p className="cash-done">💰 Cash collected ✓</p>
+            ) : null}
+            {(o.paymentMethod !== "cod" && o.paymentStatus !== "PAID") || (o.paymentMethod === "cod" && !o.cashCollected) ? (
+              <button onClick={() => setQrOrder(o)} className="deliver-btn qr">
+                📱 Show QR (UPI ₹{o.amount})
+              </button>
+            ) : null}
           </div>
         ))}
         {active.length === 0 && <p>No deliveries assigned. Stay on duty!</p>}
@@ -326,6 +358,17 @@ const App = () => {
           </div>
         ))}
       </main>
+      {qrOrder && (
+        <div className="qr-modal" onClick={() => setQrOrder(null)}>
+          <div className="qr-box" onClick={(e) => e.stopPropagation()}>
+            <h3>Scan & Pay ₹{qrOrder.amount}</h3>
+            <QRCodeSVG value={upiLink(qrOrder)} size={230} />
+            <p>Apna Baithak • {OWNER_UPI}</p>
+            <p className="qr-note">Customer apne UPI app se scan kare</p>
+            <button onClick={() => setQrOrder(null)}>Close</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

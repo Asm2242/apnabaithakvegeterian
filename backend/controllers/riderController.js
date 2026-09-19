@@ -85,7 +85,22 @@ const updateDeliveryStatus = async (req, res) => {
     }
 }
 
-// Rider toggles duty + posts live location (continuous GPS pings land here)
+// Rider confirms COD cash collected from customer
+const collectCash = async (req, res) => {
+    try {
+        const order = await orderModel.findOne({ _id: req.body.orderId, riderId: req.body.userId });
+        if (!order) return res.json({ success: false, message: "Order not assigned to you" });
+        if (order.paymentMethod !== "cod") {
+            return res.json({ success: false, message: "Only for COD orders" });
+        }
+        order.cashCollected = true;
+        await order.save();
+        res.json({ success: true, message: "Cash collected ✓" });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: "Error" });
+    }
+};
 const updateLocation = async (req, res) => {
     try {
         const { lat, lng, accuracy, onDuty } = req.body;
@@ -123,4 +138,4 @@ const listRiders = async (req, res) => {
     }
 }
 
-export { createRider, loginRider, myOrders, updateDeliveryStatus, updateLocation, listRiders };
+export { createRider, loginRider, myOrders, updateDeliveryStatus, updateLocation, listRiders, collectCash };

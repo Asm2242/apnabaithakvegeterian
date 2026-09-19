@@ -70,6 +70,7 @@ function Orders({ token }) {
             <span className="badge">{o.status}</span>
             <span className={`badge ${o.paymentStatus === "PAID" ? "green" : o.paymentStatus === "COD" ? "brown" : "red"}`}>
               {o.paymentMethod?.toUpperCase()} • {o.paymentStatus}
+              {o.cashCollected ? " • 💰 collected" : ""}
             </span>
             <span>{o.mode}</span>
           </div>

@@ -23,6 +23,8 @@ const orderSchema = new mongoose.Schema({
     // PENDING / PAID / COD / FAILED / REFUNDED
     paymentStatus: { type: String, default: "PENDING" },
     payment: { type: Boolean, default: false },
+    // rider confirms cash received on COD delivery
+    cashCollected: { type: Boolean, default: false },
     razorpayOrderId: { type: String, default: "" },
     razorpayPaymentId: { type: String, default: "" },
     // assigned delivery partner (users._id with role=rider)
