@@ -24,6 +24,7 @@ body{margin:0;font-family:Arial,sans-serif;background:#f6f1e7;color:#3b1d0c}
 .deliver-btn.pickup{background:#0f8a0f !important}
 .rider-minimap{margin:10px 0}
 .rider-minimap .leaflet-container{height:180px;width:100%;border-radius:10px;border:1px solid #d4a017;z-index:1}
-.rm-shop div,.rm-home div{font-size:28px;text-align:center;filter:drop-shadow(0 3px 5px #0006)}
+.rm-shop div,.rm-home div,.rm-you div{font-size:28px;text-align:center;filter:drop-shadow(0 3px 5px #0006)}
+.dist-line{font-size:13px;color:#0f8a0f;font-weight:700;margin:6px 0 0 0}
 .no-pin{font-size:12px;color:#676767;margin:6px 0 0 0}
 form.rider-card{width:100%;max-width:340px}

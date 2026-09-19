@@ -27,11 +27,32 @@ const homeIcon = L.divIcon({
   iconAnchor: [17, 30],
 });
 
-// mini map per order: shop -> customer pin
-const OrderMap = ({ order }) => {
+const youIcon = L.divIcon({
+  className: "rm-you",
+  html: "<div>🔵</div>",
+  iconSize: [30, 30],
+  iconAnchor: [15, 15],
+});
+
+// km between two pins (for "X km left")
+const kmBetween = (a, b) => {
+  const R = 6371;
+  const dLa = ((b[0] - a[0]) * Math.PI) / 180;
+  const dLo = ((b[1] - a[1]) * Math.PI) / 180;
+  const s =
+    Math.sin(dLa / 2) ** 2 +
+    Math.cos((a[0] * Math.PI) / 180) *
+      Math.cos((b[0] * Math.PI) / 180) *
+      Math.sin(dLo / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(s));
+};
+
+// mini map per order: shop -> customer pin + YOU live marker
+const OrderMap = ({ order, livePos }) => {
   const shop = [SHOP_LAT, SHOP_LNG];
   const cust =
     order.lat != null && order.lng != null ? [order.lat, order.lng] : null;
+  const from = livePos || shop;
   return (
     <div className="rider-minimap">
       <MapContainer center={cust || shop} zoom={14} scrollWheelZoom={false}>
@@ -45,13 +66,24 @@ const OrderMap = ({ order }) => {
         {cust && (
           <>
             <Marker position={cust} icon={homeIcon}>
-              <Popup>Customer drop 📍</Popup>
+              <Popup>Customer drop 📍 — EXACT pin</Popup>
             </Marker>
-            <Polyline positions={[shop, cust]} color="#0f8a0f" weight={4} dashArray="8 8" />
+            <Polyline positions={[from, cust]} color="#0f8a0f" weight={4} dashArray="8 8" />
           </>
         )}
+        {livePos && (
+          <Marker position={livePos} icon={youIcon}>
+            <Popup>You are here 🔵</Popup>
+          </Marker>
+        )}
       </MapContainer>
-      {!cust && <p className="no-pin">Customer ne pin nahi lagaya — address se jao.</p>}
+      {cust ? (
+        <p className="dist-line">
+          📍 Customer pin{cust && livePos ? ` — ${kmBetween(livePos, cust).toFixed(1)} km from you` : " locked"}
+        </p>
+      ) : (
+        <p className="no-pin">Customer ne pin nahi lagaya — address se jao.</p>
+      )}
     </div>
   );
 };
@@ -85,7 +117,7 @@ const App = () => {
         { headers: { token: tok || token } }
       );
       lastSent.current = Date.now();
-      setGps({ accuracy: Math.round(accuracy), at: Date.now() });
+      setGps({ lat, lng, accuracy: Math.round(accuracy), at: Date.now() });
     } catch { /* retry next tick */ }
   };
 
@@ -263,12 +295,12 @@ const App = () => {
             <p>{o.customerName} • {o.phone}</p>
             <p>{typeof o.address === "string" ? o.address : o.address?.street}, {o.address?.city} {o.address?.zipcode}</p>
             {o.landmark && <p>Landmark: {o.landmark}</p>}
-            <OrderMap order={o} />
+            <OrderMap order={o} livePos={onDuty && gps?.lat != null ? [gps.lat, gps.lng] : null} />
             <ul>{(o.items || []).map((it, i) => (
               <li key={i}>{it.name} ({it.size}) × {it.qty}</li>
             ))}</ul>
             <a
-              href={`https://www.google.com/maps/dir/?api=1&origin=${SHOP_LAT},${SHOP_LNG}&destination=${encodeURIComponent(destOf(o))}&travelmode=driving`}
+              href={`https://www.google.com/maps/dir/?api=1&origin=${onDuty && gps?.lat != null ? `${gps.lat},${gps.lng}` : `${SHOP_LAT},${SHOP_LNG}`}&destination=${encodeURIComponent(destOf(o))}&travelmode=driving`}
               target="_blank"
               rel="noreferrer"
               className="nav-btn"
