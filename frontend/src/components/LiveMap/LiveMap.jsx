@@ -43,12 +43,16 @@ const FitAll = ({ points, focus }) => {
   const map = useMap();
   const done = useRef(false);
   useEffect(() => {
-    if (done.current || points.length === 0) return;
+    if (done.current) return;
     done.current = true;
     try {
-      map.fitBounds(L.latLngBounds(points), { padding: [30, 30] });
+      if (points.length >= 2) {
+        map.fitBounds(L.latLngBounds(points), { padding: [40, 40] });
+      } else if (points.length === 1) {
+        map.setView(points[0], 14);
+      }
     } catch { /* ignore */ }
-    if (focus) {
+    if (focus && points.length >= 2) {
       const t = setTimeout(() => {
         try {
           map.flyTo(focus, 16, { duration: 1.5 });
