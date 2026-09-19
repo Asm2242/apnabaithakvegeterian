@@ -3,6 +3,7 @@ import { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { StoreContext } from "../../Context/StoreContext";
+import LiveMap from "../../components/LiveMap/LiveMap";
 import "./Track.css";
 
 const STEPS = ["PLACED", "CONFIRMED", "PREPARING", "READY", "OUT_FOR_DELIVERY", "DELIVERED"];
@@ -116,13 +117,8 @@ const Track = () => {
           </div>
           {rider.lat != null ? (
             <>
-              <p className="live">🟢 Live {rider.updatedAt ? `(${new Date(rider.updatedAt).toLocaleTimeString("en-IN")})` : ""}</p>
-              <iframe
-                title="rider location"
-                className="rider-map"
-                loading="lazy"
-                src={`https://maps.google.com/maps?q=${rider.lat},${rider.lng}&z=16&output=embed`}
-              />
+              <p className="live">🟢 Live {rider.updatedAt ? `(${new Date(rider.updatedAt).toLocaleTimeString("en-IN")})` : ""} — map har 15 sec fresh hota hai</p>
+              <LiveMap rider={rider} />
             </>
           ) : (
             <p>Rider on the way — live location coming soon.</p>

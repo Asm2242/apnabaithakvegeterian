@@ -1,0 +1,23 @@
+.live-map{
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid #d4a017;
+    margin-top: 10px;
+}
+.live-map-box{
+    height: 300px;
+    width: 100%;
+    z-index: 1;
+}
+.lm-shop div, .lm-rider div{
+    font-size: 30px;
+    text-align: center;
+    filter: drop-shadow(0 3px 5px #0006);
+}
+.lm-rider .pulse{
+    animation: riderPulse 1.6s ease-in-out infinite;
+}
+@keyframes riderPulse{
+    0%,100%{transform:scale(1)}
+    50%{transform:scale(1.2)}
+}
