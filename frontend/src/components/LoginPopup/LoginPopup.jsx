@@ -5,6 +5,7 @@ import { StoreContext } from "../../Context/StoreContext";
 import axios from "axios";
 import { toast } from "react-toastify";
 import PropTypes from "prop-types";
+import { fbSend, fbVerify, fbReset } from "../../lib/firebase";
 
 // Step 1: enter number only.
 // Step 2a returning customer: "Welcome back, NAME!" + OTP.
@@ -18,6 +19,7 @@ const LoginPopup = ({ setShowLogin }) => {
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [cooldown, setCooldown] = useState(0);
+  const [fbMode, setFbMode] = useState(false);
 
   const phoneValid = /^[6-9]\d{9}$/.test(phone);
 
@@ -45,15 +47,27 @@ const LoginPopup = ({ setShowLogin }) => {
       } else {
         setKnownName("");
       }
-      // send OTP in the same step
-      const res = await axios.post(url + "/api/otp/start", { phone });
-      if (res.data.success) {
-        setStep(2);
-        startCooldown(res.data.resendAfter || 30);
-        toast.success("OTP sent to +91 " + phone);
-      } else toast.error(res.data.message);
+    } catch { /* name optional */ }
+    // FREE Firebase OTP first, backend OTP fallback
+    try {
+      await fbSend(phone);
+      setFbMode(true);
+      setStep(2);
+      startCooldown(30);
+      toast.success("OTP sent to +91 " + phone);
     } catch {
-      toast.error("Could not continue");
+      fbReset();
+      setFbMode(false);
+      try {
+        const res = await axios.post(url + "/api/otp/start", { phone });
+        if (res.data.success) {
+          setStep(2);
+          startCooldown(res.data.resendAfter || 30);
+          toast.success("OTP sent to +91 " + phone);
+        } else toast.error(res.data.message);
+      } catch {
+        toast.error("Could not continue");
+      }
     }
     setBusy(false);
   };
@@ -61,6 +75,17 @@ const LoginPopup = ({ setShowLogin }) => {
   const resend = async () => {
     if (cooldown > 0 || busy) return;
     setBusy(true);
+    if (fbMode) {
+      try {
+        await fbSend(phone);
+        startCooldown(30);
+        toast.success("OTP resent");
+      } catch {
+        toast.error("Could not resend OTP");
+      }
+      setBusy(false);
+      return;
+    }
     try {
       const res = await axios.post(url + "/api/otp/start", { phone });
       if (res.data.success) {
@@ -81,6 +106,36 @@ const LoginPopup = ({ setShowLogin }) => {
       return;
     }
     setBusy(true);
+    const finish = async (tok, nm) => {
+      setToken(tok);
+      localStorage.setItem("token", tok);
+      localStorage.setItem("ab_phone", phone);
+      localStorage.setItem("ab_phone_verified", "1");
+      await loadCartData(tok);
+      toast.success(`Welcome${knownName ? " back" : ""}, ${nm}!`);
+      setShowLogin(false);
+    };
+    if (fbMode) {
+      try {
+        const idToken = await fbVerify(code);
+        const res = await axios.post(url + "/api/otp/firelogin", {
+          idToken,
+          name: knownName || name,
+        });
+        if (res.data.success) {
+          await finish(res.data.token, res.data.name);
+          setBusy(false);
+          return;
+        }
+        throw new Error(res.data.message || "firelogin");
+      } catch {
+        fbReset();
+        setFbMode(false);
+        setBusy(false);
+        toast.error("Firebase failed — resend OTP to retry");
+        return;
+      }
+    }
     try {
       const res = await axios.post(url + "/api/otp/login", {
         phone,
@@ -88,13 +143,7 @@ const LoginPopup = ({ setShowLogin }) => {
         name: knownName || name,
       });
       if (res.data.success) {
-        setToken(res.data.token);
-        localStorage.setItem("token", res.data.token);
-        localStorage.setItem("ab_phone", phone);
-        localStorage.setItem("ab_phone_verified", "1");
-        await loadCartData(res.data.token);
-        toast.success(`Welcome${knownName ? " back" : ""}, ${res.data.name}!`);
-        setShowLogin(false);
+        await finish(res.data.token, res.data.name);
       } else toast.error(res.data.message);
     } catch {
       toast.error("Verification failed");
@@ -109,6 +158,7 @@ const LoginPopup = ({ setShowLogin }) => {
 
   return (
     <div className="login-popup">
+      <div id="recaptcha-container" />
       <form onSubmit={step === 1 ? (e) => { e.preventDefault(); goStep2(); } : verify} className="login-popup-container otp-only">
         <div className="login-popup-title">
           <div className="otp-brand">

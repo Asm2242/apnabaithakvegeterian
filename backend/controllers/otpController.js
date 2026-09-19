@@ -2,7 +2,6 @@ import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import otpModel from "../models/otpModel.js";
 import userModel from "../models/userModel.js";
-
 const OTP_TTL_MS = 5 * 60 * 1000;      // 5 minutes
 const RESEND_COOLDOWN_MS = 30 * 1000;  // 30 seconds
 const MAX_ATTEMPTS = 5;
@@ -201,6 +200,70 @@ const loginWithOtp = async (req, res) => {
 }
 
 export { startOtp, loginWithOtp };
+
+// ---- Firebase Phone Auth (free 10k/month) ----
+// Frontend verifies OTP with Firebase, sends idToken here.
+// We verify via Admin SDK (service account JSON in FIREBASE_SERVICE_ACCOUNT env),
+// then find-or-create Mongo user and return our JWT.
+let fbAdmin = null;
+const getFbAdmin = async () => {
+    if (fbAdmin) return fbAdmin;
+    let raw = process.env.FIREBASE_SERVICE_ACCOUNT;
+    if (!raw && process.env.FIREBASE_KEY_FILE) {
+        const { default: fs } = await import("fs");
+        raw = fs.readFileSync(process.env.FIREBASE_KEY_FILE, "utf8");
+    }
+    if (!raw) return null;
+    const { default: admin } = await import("firebase-admin");
+    const creds = JSON.parse(raw);
+    fbAdmin = admin.apps.length
+        ? admin.app()
+        : admin.initializeApp({ credential: admin.credential.cert(creds) });
+    return fbAdmin;
+};
+
+// POST /api/otp/firelogin  { idToken, name? } — public
+const fireLogin = async (req, res) => {
+    try {
+        const { idToken, name } = req.body;
+        if (!idToken) return res.json({ success: false, message: "Missing token" });
+        const admin = await getFbAdmin();
+        if (!admin) {
+            return res.json({ success: false, message: "Firebase not configured, use OTP" });
+        }
+        const decoded = await admin.auth().verifyIdToken(idToken);
+        const e164 = decoded.phone_number || "";
+        const m = e164.replace(/^\+91/, "");
+        if (!/^[6-9]\d{9}$/.test(m)) {
+            return res.json({ success: false, message: "Non-Indian number" });
+        }
+        let user = await userModel.findOne({ phone: m });
+        if (!user) {
+            user = await new userModel({
+                name: (name || "").trim() || `Guest ${m.slice(-4)}`,
+                email: `91${m}@otp.apnabaithak.com`,
+                password: crypto.randomBytes(24).toString("hex"),
+                role: "customer",
+                phone: m,
+                phoneVerified: true
+            }).save();
+        } else {
+            user.phoneVerified = true;
+            if (name && user.name.startsWith("Guest")) user.name = name.trim();
+            if (!user.active) {
+                return res.json({ success: false, message: "Account disabled" });
+            }
+            await user.save();
+        }
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+        res.json({ success: true, token, name: user.name, phone: m });
+    } catch (error) {
+        console.log("[firelogin]", error.message);
+        res.json({ success: false, message: "Firebase verify fail" });
+    }
+};
+
+export { fireLogin };
 
 // POST /api/otp/check  { phone } — public.
 // Step 1 of login: is this a returning customer? If yes, return name.

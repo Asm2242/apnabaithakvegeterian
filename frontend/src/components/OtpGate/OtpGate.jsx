@@ -3,6 +3,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { StoreContext } from "../../Context/StoreContext";
 import "./OtpGate.css";
+import { fbSend, fbVerify, fbReset } from "../../lib/firebase";
 import PropTypes from "prop-types";
 
 // Start page: Step 1 number only -> Step 2a name shown / 2b name asked + OTP.
@@ -16,6 +17,7 @@ const OtpGate = ({ onDone }) => {
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [cooldown, setCooldown] = useState(0);
+  const [fbMode, setFbMode] = useState(false); // true = Firebase OTP, false = backend OTP
 
   const phoneValid = /^[6-9]\d{9}$/.test(phone);
 
@@ -38,16 +40,39 @@ const OtpGate = ({ onDone }) => {
     try {
       const check = await axios.post(url + "/api/otp/check", { phone });
       setKnownName(check.data.success && check.data.exists ? check.data.name || "" : "");
-      const res = await axios.post(url + "/api/otp/start", { phone });
-      if (res.data.success) {
-        setStep(2);
-        startCooldown(res.data.resendAfter || 30);
-        toast.success("OTP sent to +91 " + phone);
-      } else toast.error(res.data.message);
-    } catch {
-      toast.error("Could not continue");
+    } catch { /* name optional */ }
+    // try FREE Firebase OTP first, fall back to backend OTP
+    try {
+      await fbSend(phone);
+      setFbMode(true);
+      setStep(2);
+      startCooldown(30);
+      toast.success("OTP sent to +91 " + phone);
+    } catch (e) {
+      fbReset();
+      setFbMode(false);
+      try {
+        const res = await axios.post(url + "/api/otp/start", { phone });
+        if (res.data.success) {
+          setStep(2);
+          startCooldown(res.data.resendAfter || 30);
+          toast.success("OTP sent to +91 " + phone);
+        } else toast.error(res.data.message);
+      } catch {
+        toast.error("Could not send OTP");
+      }
     }
     setBusy(false);
+  };
+
+  const finishLogin = async (tok, nm) => {
+    setToken(tok);
+    localStorage.setItem("token", tok);
+    localStorage.setItem("ab_phone", phone);
+    localStorage.setItem("ab_phone_verified", "1");
+    await loadCartData(tok);
+    toast.success(`Welcome${knownName ? " back" : ""}, ${nm}!`);
+    onDone(true);
   };
 
   const verify = async () => {
@@ -57,6 +82,28 @@ const OtpGate = ({ onDone }) => {
       return;
     }
     setBusy(true);
+    // Firebase path first
+    if (fbMode) {
+      try {
+        const idToken = await fbVerify(code);
+        const res = await axios.post(url + "/api/otp/firelogin", {
+          idToken,
+          name: knownName || name,
+        });
+        if (res.data.success) {
+          await finishLogin(res.data.token, res.data.name);
+          setBusy(false);
+          return;
+        }
+        throw new Error(res.data.message || "firelogin");
+      } catch {
+        fbReset();
+        setFbMode(false);
+        setBusy(false);
+        toast.error("Firebase failed — resend OTP to retry");
+        return;
+      }
+    }
     try {
       const res = await axios.post(url + "/api/otp/login", {
         phone,
@@ -64,13 +111,7 @@ const OtpGate = ({ onDone }) => {
         name: knownName || name,
       });
       if (res.data.success) {
-        setToken(res.data.token);
-        localStorage.setItem("token", res.data.token);
-        localStorage.setItem("ab_phone", phone);
-        localStorage.setItem("ab_phone_verified", "1");
-        await loadCartData(res.data.token);
-        toast.success(`Welcome${knownName ? " back" : ""}, ${res.data.name}!`);
-        onDone(true);
+        await finishLogin(res.data.token, res.data.name);
       } else toast.error(res.data.message);
     } catch {
       toast.error("Verification failed");
@@ -81,6 +122,7 @@ const OtpGate = ({ onDone }) => {
   return (
     <div className="otp-gate">
       <div className="otp-gate-card">
+        <div id="recaptcha-container" />
         <p className="otp-gate-logo">Apna Baithak</p>
         <p className="otp-gate-sub">Pure Veg • Eldeco City, Lucknow</p>
 
