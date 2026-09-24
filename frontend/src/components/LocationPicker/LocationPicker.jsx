@@ -4,6 +4,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { toast } from "react-toastify";
 import PropTypes from "prop-types";
+import { getPos } from "../../lib/location";
 
 const pinIcon = L.divIcon({
   className: "lp-pin",
@@ -48,20 +49,18 @@ const LocationPicker = ({ value, onChange }) => {
     onChange({ lat: Math.round(p[0] * 100000) / 100000, lng: Math.round(p[1] * 100000) / 100000 });
   };
 
-  const useGps = () => {
-    if (!navigator.geolocation) return;
+  const useGps = async () => {
     setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      (p) => {
-        if (p.coords.accuracy && p.coords.accuracy > 500) {
-          toast.info("GPS weak hai — bahar khule me try karo");
-        }
-        pick([p.coords.latitude, p.coords.longitude]);
-        setLocating(false);
-      },
-      () => setLocating(false),
-      { enableHighAccuracy: true, timeout: 12000 }
-    );
+    try {
+      const p = await getPos();
+      if (p.accuracy && p.accuracy > 500) {
+        toast.info("GPS weak hai — bahar khule me try karo");
+      }
+      pick([p.lat, p.lng]);
+    } catch {
+      toast.error("Location nahi mili — map par tap karo");
+    }
+    setLocating(false);
   };
 
   return (

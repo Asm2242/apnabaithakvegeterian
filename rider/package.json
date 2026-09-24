@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@capacitor/geolocation": "^6.1.1",
     "axios": "^1.7.9",
     "leaflet": "^1.9.4",
     "qrcode.react": "^3.2.0",

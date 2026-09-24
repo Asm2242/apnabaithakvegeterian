@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@capacitor/geolocation": "^6.1.1",
     "@stripe/stripe-js": "^3.0.3",
     "axios": "^1.7.9",
     "dotenv": "^16.5.0",

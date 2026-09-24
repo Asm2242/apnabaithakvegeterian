@@ -6,6 +6,7 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet"
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { QRCodeSVG } from "qrcode.react";
+import { getPos, watchPos } from "./lib/location";
 import "./App.css";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:4000";
@@ -126,22 +127,25 @@ const App = () => {
   };
 
   const startWatch = (tok) => {
-    if (!navigator.geolocation || watchId.current != null) return;
-    watchId.current = navigator.geolocation.watchPosition(
+    if (watchId.current != null) return;
+    watchPos(
       (p) => {
         // skip wild fixes (>500m), send at most every 10s
-        if (p.coords.accuracy && p.coords.accuracy > 500) return;
+        if (p.accuracy && p.accuracy > 500) return;
         if (Date.now() - lastSent.current < 10000) return;
-        postGps(p.coords.latitude, p.coords.longitude, p.coords.accuracy || 0, tok);
+        postGps(p.lat, p.lng, p.accuracy || 0, tok);
       },
-      () => setGps((g) => g || { accuracy: null, at: null, denied: true }),
-      { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 }
-    );
+      () => setGps((g) => g || { accuracy: null, at: null, denied: true })
+    ).then((clear) => {
+      watchId.current = clear;
+    }).catch(() => {
+      setGps((g) => g || { accuracy: null, at: null, denied: true });
+    });
   };
 
   const stopWatch = () => {
-    if (watchId.current != null && navigator.geolocation) {
-      navigator.geolocation.clearWatch(watchId.current);
+    if (typeof watchId.current === "function") {
+      try { watchId.current(); } catch { /* ignore */ }
     }
     watchId.current = null;
   };
@@ -196,14 +200,11 @@ const App = () => {
 
   const setStatus = async (orderId, status) => {
     try {
-      const pos = await new Promise((resolve) => {
-        if (!navigator.geolocation) return resolve(null);
-        navigator.geolocation.getCurrentPosition(
-          (p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
-          () => resolve(null),
-          { timeout: 8000 }
-        );
-      });
+      let pos = null;
+      try {
+        const p = await getPos(8000);
+        pos = { lat: p.lat, lng: p.lng };
+      } catch { /* location optional */ }
       const res = await axios.post(
         API + "/api/rider/status",
         { orderId, status, ...(pos || {}) },
@@ -275,14 +276,8 @@ const App = () => {
     const next = !onDuty;
     let pos = {};
     try {
-      pos = await new Promise((resolve) => {
-        if (!navigator.geolocation) return resolve({});
-        navigator.geolocation.getCurrentPosition(
-          (p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude, accuracy: Math.round(p.coords.accuracy || 0) }),
-          () => resolve({}),
-          { enableHighAccuracy: true, timeout: 10000 }
-        );
-      });
+      const p = await getPos(10000);
+      pos = { lat: p.lat, lng: p.lng, accuracy: Math.round(p.accuracy || 0) };
     } catch { /* location optional */ }
     try {
       await axios.post(API + "/api/rider/location", { onDuty: next, ...pos }, auth);
