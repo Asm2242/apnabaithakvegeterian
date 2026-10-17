@@ -115,6 +115,26 @@
     color: #676767;
     margin-top: 10px;
 }
+.pay-methods label:has(input:disabled){
+    opacity: 0.45;
+    cursor: not-allowed;
+    filter: grayscale(0.6);
+}
+.pay-off-note{
+    margin: 10px 0 0;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #fdf3e7;
+    border: 1px solid #e6c9a8;
+    color: #8a4b16;
+    font-size: 13px;
+    line-height: 1.5;
+}
+html[data-theme="dark"] .pay-off-note{
+    background: #2e2015;
+    border-color: #5a4028;
+    color: #e5b787;
+}
 .change-addr-btn{
     width: 100%;
     margin-top: 12px;

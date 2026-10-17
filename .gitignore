@@ -18,6 +18,11 @@ backend/uploads/*
 mobile-customer/android/
 mobile-rider/android/
 
+# build output
+frontend/dist/
+admin/dist/
+rider/dist/
+
 # logs + local test files
 *.log
 backend/dbtest.cjs

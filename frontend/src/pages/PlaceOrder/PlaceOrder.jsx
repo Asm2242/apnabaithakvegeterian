@@ -29,6 +29,7 @@ const PlaceOrder = () => {
   const [placing, setPlacing] = useState(false);
   const [pin, setPin] = useState(null);
   const [saved, setSaved] = useState([]);
+  const [onlineOn, setOnlineOn] = useState(true);
 
   const {
     getTotalCartAmount, token, cartLines, url,
@@ -72,6 +73,20 @@ const PlaceOrder = () => {
     } catch { /* ignore */ }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
+
+  // admin ka online payment switch — off hai to COD hi milega
+  useEffect(() => {
+    axios
+      .get(url + "/api/order/config")
+      .then((res) => {
+        if (res.data.success) setOnlineOn(!!res.data.data.onlinePayment);
+      })
+      .catch(() => {});
+  }, [url]);
+
+  useEffect(() => {
+    if (!onlineOn) setPayment("cod");
+  }, [onlineOn]);
 
   // ---- step 1: pin ----
   const savePin = () => {
@@ -419,7 +434,13 @@ const PlaceOrder = () => {
             <h2 className="font24">💳 Payment</h2>
             <div className="pay-methods">
               <label className={payment === "online" ? "active" : ""}>
-                <input type="radio" name="payment" checked={payment === "online"} onChange={() => setPayment("online")} />
+                <input
+                  type="radio"
+                  name="payment"
+                  checked={payment === "online"}
+                  disabled={!onlineOn}
+                  onChange={() => setPayment("online")}
+                />
                 <span><b>Online Payment</b><small>UPI, card, netbanking — pay now</small></span>
               </label>
               <label className={payment === "cod" ? "active" : ""}>
@@ -427,6 +448,11 @@ const PlaceOrder = () => {
                 <span><b>Cash on Delivery</b><small>Pay cash when order arrives</small></span>
               </label>
             </div>
+            {!onlineOn && (
+              <p className="pay-off-note">
+                Online payment abhi temporarily band hai — Cash on Delivery chuna gaya hai.
+              </p>
+            )}
             <button type="button" className="back-btn" onClick={() => setStep("details")}>← Details</button>
           </div>
           <div className="place-order-right">

@@ -1,5 +1,6 @@
 import userModel from "../models/userModel.js";
 import orderModel from "../models/orderModel.js";
+import { getAllSettings, setSetting } from "../utils/settings.js";
 
 // GET /api/admin/customers — all customer accounts (admin only)
 const listCustomers = async (req, res) => {
@@ -42,4 +43,29 @@ const stats = async (req, res) => {
     }
 }
 
-export { listCustomers, setCustomerActive, stats };
+// GET /api/admin/settings — shop switches (online payment on/off)
+const getSettings = async (req, res) => {
+    try {
+        res.json({ success: true, data: await getAllSettings() });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: "Error" });
+    }
+}
+
+// POST /api/admin/settings { key, value } — flip one switch
+const updateSettings = async (req, res) => {
+    try {
+        const { key } = req.body;
+        if (key !== "onlinePayment") {
+            return res.json({ success: false, message: "Unknown setting" });
+        }
+        await setSetting(key, !!req.body.value);
+        res.json({ success: true, data: await getAllSettings() });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: "Error" });
+    }
+}
+
+export { listCustomers, setCustomerActive, stats, getSettings, updateSettings };

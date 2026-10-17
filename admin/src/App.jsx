@@ -7,6 +7,80 @@ const FLOW = ["PLACED", "CONFIRMED", "PREPARING", "READY", "OUT_FOR_DELIVERY", "
 
 const api = (token) => axios.create({ baseURL: API, headers: { token } });
 
+function Switch({ checked, onChange, disabled }) {
+  return (
+    <label className="switch">
+      <input
+        type="checkbox"
+        checked={!!checked}
+        disabled={disabled}
+        onChange={(e) => onChange(e.target.checked)}
+      />
+      <span className="track" />
+      <span className="thumb" />
+      <span className="state">OFF</span>
+      <span className="state on">ON</span>
+    </label>
+  );
+}
+
+function Settings({ token }) {
+  const [settings, setSettings] = useState({ onlinePayment: true });
+  const [busy, setBusy] = useState(false);
+
+  const load = async () => {
+    const res = await api(token).get("/api/admin/settings");
+    if (res.data.success) setSettings(res.data.data);
+  };
+  useEffect(() => { load(); }, []);
+
+  const flip = async (value) => {
+    setBusy(true);
+    const res = await api(token).post("/api/admin/settings", {
+      key: "onlinePayment",
+      value,
+    });
+    if (res.data.success) setSettings(res.data.data);
+    else alert(res.data.message || "Update fail");
+    setBusy(false);
+  };
+
+  return (
+    <div className="card">
+      <h3>⚙️ Shop Settings</h3>
+      <div className="setting-row">
+        <div className="info">
+          <b>
+            Online Payment (Razorpay){" "}
+            <span className={`pill ${settings.onlinePayment ? "live" : "off"}`}>
+              {settings.onlinePayment ? "● Live" : "● Off"}
+            </span>
+          </b>
+          <small>
+            OFF karte hi customers ko checkout par online payment option nahi dikhega —
+            sirf Cash on Delivery rahega. Naye orders par turant apply hota hai.
+          </small>
+        </div>
+        <Switch
+          checked={settings.onlinePayment}
+          disabled={busy}
+          onChange={flip}
+        />
+      </div>
+      <hr />
+      <div className="setting-row">
+        <div className="info">
+          <b>Razorpay Keys</b>
+          <small>
+            Live key ID <code>{import.meta.env.VITE_RAZORPAY_KEY_ID || "set in Render env"}</code>.
+            Secret sirf Render environment me hai — kabhi yaha ya browser me na aaye.
+          </small>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Login({ onLogin }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -42,13 +116,16 @@ function Orders({ token }) {
   const [orders, setOrders] = useState([]);
   const [riders, setRiders] = useState([]);
   const [filter, setFilter] = useState("all");
+  const [stats, setStats] = useState({});
   const load = async () => {
-    const [o, r] = await Promise.all([
+    const [o, r, s] = await Promise.all([
       api(token).get("/api/order/list"),
       api(token).get("/api/rider/list"),
+      api(token).get("/api/admin/stats"),
     ]);
     if (o.data.success) setOrders(o.data.data);
     if (r.data.success) setRiders(r.data.data);
+    if (s.data.success) setStats(s.data.data);
   };
   useEffect(() => { load(); const t = setInterval(load, 15000); return () => clearInterval(t); }, []);
   const setStatus = async (orderId, status, riderId) => {
@@ -58,6 +135,13 @@ function Orders({ token }) {
   const shown = orders.filter((o) => filter === "all" || o.status === filter);
   return (
     <div>
+      <div className="stats">
+        <div className="stat"><b>{stats.todayOrders ?? 0}</b><span>Today Orders</span></div>
+        <div className="stat"><b>{stats.pendingOrders ?? 0}</b><span>Live / Pending</span></div>
+        <div className="stat"><b>{stats.foods ?? 0}</b><span>Dishes</span></div>
+        <div className="stat"><b>{stats.customers ?? 0}</b><span>Customers</span></div>
+        <div className="stat"><b>{stats.riders ?? 0}</b><span>Riders</span></div>
+      </div>
       <div className="filters">
         {["all", ...FLOW].map((s) => (
           <button key={s} className={filter === s ? "active" : ""} onClick={() => setFilter(s)}>{s}</button>
@@ -95,7 +179,7 @@ function Orders({ token }) {
           </div>
         </div>
       ))}
-      {shown.length === 0 && <p>No orders.</p>}
+      {shown.length === 0 && <p className="empty">No orders in this filter.</p>}
     </div>
   );
 }
@@ -255,7 +339,7 @@ function Customers({ token }) {
           <button onClick={() => toggle(c._id, c.active)}>{c.active ? "Disable" : "Enable"}</button>
         </div>
       ))}
-      {list.length === 0 && <p>No customers yet.</p>}
+      {list.length === 0 && <p className="empty">No customers yet.</p>}
     </div>
   );
 }
@@ -353,7 +437,7 @@ function Requests({ token }) {
           </div>
         </div>
       ))}
-      {pending.length === 0 && <p>No pending requests. 👍</p>}
+      {pending.length === 0 && <p className="empty">No pending requests. 👍</p>}
       <h3>Done ({done.length})</h3>
       {done.slice(0, 30).map((r) => (
         <div key={r._id} className="card">
@@ -518,6 +602,13 @@ function Chat({ token }) {
 function App() {
   const [token, setToken] = useState(localStorage.getItem("ab_admin_token") || "");
   const [tab, setTab] = useState("orders");
+  const [theme, setTheme] = useState(localStorage.getItem("ab_admin_theme") || "dark");
+
+  useEffect(() => {
+    document.body.dataset.theme = theme;
+    localStorage.setItem("ab_admin_theme", theme);
+  }, [theme]);
+
   const login = (tok) => {
     setToken(tok);
     localStorage.setItem("ab_admin_token", tok);
@@ -532,10 +623,15 @@ function App() {
       <header>
         <b>Apna Baithak Admin</b>
         <nav>
-          {["orders", "requests", "foods", "riders", "customers", "coupons", "chat"].map((t) => (
-            <button key={t} className={tab === t ? "active" : ""} onClick={() => setTab(t)}>{t === "chat" ? "🤖 chat" : t}</button>
+          {["orders", "requests", "foods", "riders", "customers", "coupons", "settings", "chat"].map((t) => (
+            <button key={t} className={tab === t ? "active" : ""} onClick={() => setTab(t)}>
+              {t === "chat" ? "🤖 chat" : t === "settings" ? "⚙️ settings" : t}
+            </button>
           ))}
-          <button onClick={logout}>Logout</button>
+          <button className="theme-btn" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
+            {theme === "dark" ? "☀️" : "🌙"}
+          </button>
+          <button className="ghost" onClick={logout}>Logout</button>
         </nav>
       </header>
       <main>
@@ -545,6 +641,7 @@ function App() {
         {tab === "riders" && <Riders token={token} />}
         {tab === "customers" && <Customers token={token} />}
         {tab === "coupons" && <Coupons token={token} />}
+        {tab === "settings" && <Settings token={token} />}
         {tab === "chat" && <Chat token={token} />}
       </main>
     </div>

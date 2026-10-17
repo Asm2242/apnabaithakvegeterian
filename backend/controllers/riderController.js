@@ -4,6 +4,7 @@ import Razorpay from "razorpay";
 import userModel from "../models/userModel.js";
 import riderModel from "../models/riderModel.js";
 import orderModel from "../models/orderModel.js";
+import { isOnlinePaymentOn } from "../utils/settings.js";
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -104,6 +105,9 @@ const payLink = async (req, res) => {
         }
         if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_SECRET) {
             return res.json({ success: false, message: "Online payment not configured" });
+        }
+        if (!(await isOnlinePaymentOn())) {
+            return res.json({ success: false, message: "Online payment admin ne band kar diya hai" });
         }
         const link = await razorpay.paymentLink.create({
             amount: Math.round(order.amount * 100),

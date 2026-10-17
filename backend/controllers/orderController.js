@@ -6,6 +6,7 @@ import foodModel from "../models/foodModel.js";
 import riderModel from "../models/riderModel.js";
 import { couponDiscount } from "./couponController.js";
 import { notifyOwnerNewOrder, notifyCustomer } from "../utils/notify.js";
+import { isOnlinePaymentOn } from "../utils/settings.js";
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -30,6 +31,15 @@ const priceFor = (food, size) => {
   return food.price;
 };
 
+// GET /api/order/config — public shop config for checkout (no auth needed)
+const getConfig = async (req, res) => {
+  try {
+    res.json({ success: true, data: { onlinePayment: await isOnlinePaymentOn() } });
+  } catch (error) {
+    res.json({ success: true, data: { onlinePayment: false } });
+  }
+};
+
 // POST /api/order/place (auth) — supports online (Razorpay) + COD
 const placeOrder = async (req, res) => {
   try {
@@ -40,6 +50,10 @@ const placeOrder = async (req, res) => {
     }
     if (paymentMethod !== "cod" && paymentMethod !== "online") {
       return res.json({ success: false, message: "Choose Online or COD" });
+    }
+    // admin ne online payment band kiya hua hai — sirf COD allowed
+    if (paymentMethod === "online" && !(await isOnlinePaymentOn())) {
+      return res.json({ success: false, message: "Online payment abhi available nahi hai. Cash on Delivery chuno." });
     }
     if (!otpVerified) {
       return res.json({ success: false, message: "Verify OTP before ordering" });
@@ -283,4 +297,4 @@ const trackOrder = async (req, res) => {
   }
 };
 
-export { listOrders, placeOrder, updateStatus, userOrders, verifyOrder, markFailed, trackOrder };
+export { listOrders, placeOrder, updateStatus, userOrders, verifyOrder, markFailed, trackOrder, getConfig };
