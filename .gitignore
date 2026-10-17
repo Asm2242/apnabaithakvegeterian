@@ -14,6 +14,10 @@ rider/node_modules/
 # uploads (dish photos live on server disk)
 backend/uploads/*
 
+# generated Capacitor android projects (built fresh in CI)
+mobile-customer/android/
+mobile-rider/android/
+
 # logs + local test files
 *.log
 backend/dbtest.cjs
