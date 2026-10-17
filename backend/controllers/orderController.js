@@ -34,9 +34,17 @@ const priceFor = (food, size) => {
 // GET /api/order/config — public shop config for checkout (no auth needed)
 const getConfig = async (req, res) => {
   try {
-    res.json({ success: true, data: { onlinePayment: await isOnlinePaymentOn() } });
+    res.json({
+      success: true,
+      data: {
+        onlinePayment: await isOnlinePaymentOn(),
+        // key_id is public by design — frontend reads it from here so
+        // test/live mismatch between deploy envs can never happen again
+        razorpayKeyId: process.env.RAZORPAY_KEY_ID || "",
+      },
+    });
   } catch (error) {
-    res.json({ success: true, data: { onlinePayment: false } });
+    res.json({ success: true, data: { onlinePayment: false, razorpayKeyId: "" } });
   }
 };
 

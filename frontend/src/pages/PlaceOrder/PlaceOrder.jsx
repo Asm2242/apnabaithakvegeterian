@@ -30,6 +30,7 @@ const PlaceOrder = () => {
   const [pin, setPin] = useState(null);
   const [saved, setSaved] = useState([]);
   const [onlineOn, setOnlineOn] = useState(true);
+  const [rzpKey, setRzpKey] = useState(import.meta.env.VITE_RAZORPAY_KEY_ID || "");
 
   const {
     getTotalCartAmount, token, cartLines, url,
@@ -74,12 +75,15 @@ const PlaceOrder = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
-  // admin ka online payment switch — off hai to COD hi milega
+  // admin ka online payment switch + razorpay key (backend is source of truth)
   useEffect(() => {
     axios
       .get(url + "/api/order/config")
       .then((res) => {
-        if (res.data.success) setOnlineOn(!!res.data.data.onlinePayment);
+        if (res.data.success) {
+          setOnlineOn(!!res.data.data.onlinePayment);
+          if (res.data.data.razorpayKeyId) setRzpKey(res.data.data.razorpayKeyId);
+        }
       })
       .catch(() => {});
   }, [url]);
@@ -264,8 +268,8 @@ const PlaceOrder = () => {
       }
 
       const ok = await loadRazorpayScript();
-      if (!ok) {
-        toast.error("Razorpay failed to load. Are you online?");
+      if (!ok || !rzpKey) {
+        toast.error("Payment gateway load nahi hua. Cash on Delivery chuno ya thodi der bahi try karo.");
         await axios.post(url + "/api/order/failed", { orderId: response.data.orderId }, { headers: { token } });
         setPlacing(false);
         return;
@@ -273,7 +277,7 @@ const PlaceOrder = () => {
 
       const { razorpayOrderId, orderId, amount, currency } = response.data;
       const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        key: rzpKey,
         amount,
         currency,
         name: "Apna Baithak",
