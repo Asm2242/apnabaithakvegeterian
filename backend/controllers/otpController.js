@@ -366,53 +366,63 @@ const diag = async (req, res) => {
         return false;
     };
     await hit("balance", [
-        "https://api.msg91.com/api/v5/balance",
-        "https://api.msg91.com/api/v2/balance",
-        "https://api.msg91.com/api/balance"
+        "https://api.msg91.com/api/balance.php?type=1",
+        "https://api.msg91.com/api/balance.php?type=default",
+        "https://api.msg91.com/api/v5/balance"
     ]);
     await hit("senders", [
         "https://api.msg91.com/api/v5/sender",
         "https://api.msg91.com/api/v5/senderid",
-        "https://api.msg91.com/api/v2/senderid",
-        "https://api.msg91.com/api/sender"
+        "https://api.msg91.com/api/v2/senderid"
     ]);
     await hit("templates", [
         "https://api.msg91.com/api/v5/template",
         "https://api.msg91.com/api/v5/templateid",
-        "https://api.msg91.com/api/v2/template",
-        "https://api.msg91.com/api/template"
+        "https://api.msg91.com/api/v2/template"
     ]);
     res.json(out);
 };
 
 export { diag };
 
-// POST /api/otp/testsend { phone } — send a real OTP and return MSG91 raw body.
-// Confirms exactly what the gateway says about one specific number.
+// POST/GET /api/otp/testsend?phone=...&mode=withTemplate|withoutTemplate
+// Sends a real OTP to one number and returns MSG91's raw response body.
 const testSend = async (req, res) => {
-    const { phone } = req.body;
-    if (!/^[6-9]\d{9}$/.test(phone || "")) {
+    const phone = (req.body?.phone || req.query?.phone || "").replace(/\D/g, "").slice(-10);
+    const mode = req.body?.mode || req.query?.mode || "withTemplate";
+    if (!/^[6-9]\d{9}$/.test(phone)) {
         return res.json({ success: false, message: "Invalid mobile" });
     }
     if (!process.env.MSG91_API_KEY) {
         return res.json({ success: false, message: "MSG91 not configured" });
     }
     const otp = String(crypto.randomInt(100000, 1000000));
+    const payload = {
+        mobile: `91${phone}`,
+        sender: process.env.MSG91_SENDER,
+        otp
+    };
+    if (mode !== "withoutTemplate" && process.env.MSG91_TEMPLATE_ID) {
+        payload.template_id = process.env.MSG91_TEMPLATE_ID;
+    }
     try {
         const r = await fetch("https://api.msg91.com/api/v5/otp", {
             method: "POST",
             headers: { "Content-Type": "application/json", authkey: process.env.MSG91_API_KEY },
-            body: JSON.stringify({
-                mobile: `91${phone}`,
-                sender: process.env.MSG91_SENDER,
-                otp,
-                ...(process.env.MSG91_TEMPLATE_ID ? { template_id: process.env.MSG91_TEMPLATE_ID } : {})
-            })
+            body: JSON.stringify(payload)
         });
         const txt = await r.text();
         let j = null;
         try { j = JSON.parse(txt); } catch { /* not json */ }
-        res.json({ success: true, httpStatus: r.status, raw: j || txt, otp, sender: process.env.MSG91_SENDER, template: process.env.MSG91_TEMPLATE_ID });
+        res.json({
+            success: true,
+            httpStatus: r.status,
+            mode,
+            raw: j || txt,
+            otp,
+            sender: process.env.MSG91_SENDER,
+            template: payload.template_id || "(none)"
+        });
     } catch (e) {
         res.json({ success: false, message: e.message });
     }
