@@ -14,6 +14,7 @@ otpRouter.post("/login", loginWithOtp);
 otpRouter.post("/firelogin", fireLogin);
 // diagnostics (no auth — shows config only, no secrets)
 otpRouter.get("/diag", diag);
+otpRouter.get("/testsend", testSend);
 otpRouter.post("/testsend", testSend);
 
 export default otpRouter;
