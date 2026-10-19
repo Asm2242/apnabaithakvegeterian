@@ -13,7 +13,7 @@ const StoreContextProvider = (props) => {
   // global login popup (navbar + auto-open at checkout)
   const [showLogin, setShowLogin] = useState(false);
   // dark/light theme (default light)
-  const [theme, setTheme] = useState(localStorage.getItem("ab_theme") || "light");
+  const [theme, setTheme] = useState(localStorage.getItem("ab_theme") || "dark");
   // wishlist (food _ids, local)
   const [wishlist, setWishlist] = useState(() => {
     try {
