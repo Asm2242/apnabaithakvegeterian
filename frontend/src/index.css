@@ -47,6 +47,7 @@ html[data-theme="dark"] {
   --text: #F6ECDD;
   --text-soft: #B9A88F;
   --line: #3A2A1A;
+  --maroon: #FFD54F;
   --card-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.7);
   --card-shadow-lg: 0 24px 60px -24px rgba(0, 0, 0, 0.85);
 }
