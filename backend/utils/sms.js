@@ -8,9 +8,11 @@ const provider = () => (process.env.OTP_PROVIDER || "msg91").toLowerCase();
 
 const stripPlus = (p) => String(p || "").replace(/\D/g, "");
 
+let lastRaw = "";
+export const smsLastRaw = () => lastRaw;
+
 const viaMsg91 = async (phone, otp) => {
-    const res = await fetch("https://api.msg91.com/api/v5/otp", {
-        method: "POST",
+    const res = await fetch("https://api.msg91.com/api/v5/otp", {        method: "POST",
         headers: { "Content-Type": "application/json", authkey: process.env.MSG91_API_KEY },
         body: JSON.stringify({
             mobile: `91${phone}`,
@@ -41,9 +43,10 @@ const viaTwoFactor = async (phone, otp) => {
     let parsed = null;
     try { parsed = JSON.parse(body); } catch { /* not json */ }
     console.log(`[sms:2factor] ${phone} -> ${body.slice(0, 300)}`);
+    lastRaw = body;
     const status = parsed?.Status || parsed?.status;
     const details = parsed?.Details || "";
-    if (!res.ok || (status && /error/i.test(String(status)))) {
+    if (!res.ok || (status && /error|fail/i.test(String(status)))) {
         throw new Error(`2Factor: ${details || body?.slice(0, 200) || `HTTP ${res.status}`}`);
     }
     if (/fail/i.test(String(details))) {

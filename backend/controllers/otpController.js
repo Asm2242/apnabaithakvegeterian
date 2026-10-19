@@ -341,7 +341,8 @@ const testSend = async (req, res) => {
             provider: sms.smsProviderName(),
             phone,
             otp,
-            result
+            result,
+            raw: sms.smsLastRaw()
         });
     } catch (e) {
         res.json({
@@ -349,7 +350,8 @@ const testSend = async (req, res) => {
             provider: sms.smsProviderName(),
             phone,
             otp,
-            error: e.message
+            error: e.message,
+            raw: sms.smsLastRaw()
         });
     }
 };
