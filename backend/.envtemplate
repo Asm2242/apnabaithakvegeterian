@@ -5,3 +5,28 @@ JWT_SECRET="random#secret"
 
 RAZORPAY_KEY_ID="#razorpay Key_id"
 RAZORPAY_SECRET="#Razorpay secret"
+
+# ---- OTP / SMS provider ----
+# switch provider with OTP_PROVIDER: msg91 | twofactor | textlocal | fast2sms | console
+OTP_PROVIDER="msg91"
+
+# 1) MSG91 (2,000 free SMS on signup, needs DLT + approved sender/template)
+MSG91_API_KEY=""
+MSG91_SENDER=""
+MSG91_TEMPLATE_ID=""
+
+# 2) 2Factor (free 1000 OTP SMS/month, NO DLT needed - easiest)
+#    get key from https://2factor.in -> account -> API key
+TWO_FACTOR_API_KEY=""
+
+# 3) Textlocal (free trial, needs DLT)
+TEXTLOCAL_USERNAME=""
+TEXTLOCAL_PASSWORD=""
+TEXTLOCAL_SENDER=""
+
+# 4) Fast2SMS (needs DLT)
+FAST2SMS_API_KEY=""
+FAST2SMS_SENDER_ID="FSTSMS"
+
+# show the OTP on screen instead of sending SMS (TESTING ONLY - never in production)
+OTP_DEV_SHOW=""

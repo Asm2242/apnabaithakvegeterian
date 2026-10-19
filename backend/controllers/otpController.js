@@ -2,6 +2,7 @@ import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import otpModel from "../models/otpModel.js";
 import userModel from "../models/userModel.js";
+import * as sms from "../utils/sms.js";
 const OTP_TTL_MS = 5 * 60 * 1000;      // 5 minutes
 const RESEND_COOLDOWN_MS = 30 * 1000;  // 30 seconds
 const MAX_ATTEMPTS = 5;
@@ -12,65 +13,22 @@ const pepper = () => process.env.OTP_PEPPER || "apna-baithak-dev-pepper-change-m
 const hashOtp = (otp) => crypto.createHash("sha256").update(`${otp}:${pepper()}`).digest("hex");
 const newOtp = () => String(crypto.randomInt(100000, 1000000));
 
-// MSG91 SMS -> WhatsApp Cloud -> dev console fallback. Secrets stay server-side.
+// SMS provider lives in utils/sms.js (switch with OTP_PROVIDER env var).
 const sendOtpSms = async (phone, otp) => {
-    if (process.env.MSG91_API_KEY && process.env.MSG91_SENDER) {
-        const res = await fetch("https://api.msg91.com/api/v5/otp", {
-            method: "POST",
-            headers: { "Content-Type": "application/json", authkey: process.env.MSG91_API_KEY },
-            body: JSON.stringify({
-                mobile: `91${phone}`,
-                sender: process.env.MSG91_SENDER,
-                otp,
-                ...(process.env.MSG91_TEMPLATE_ID ? { template_id: process.env.MSG91_TEMPLATE_ID } : {})
-            })
-        });
-        const body = await res.text();
-        let parsed = null;
-        try { parsed = JSON.parse(body); } catch { /* non-json */ }
-        // MSG91 returns HTTP 200 even for failures -> must check body.type
-        const ok = res.ok && (!parsed || parsed.type === "success");
-        if (!ok) {
-            const reason =
-                parsed?.message?.statement ||
-                parsed?.message?.code ||
-                parsed?.error?.message ||
-                body?.slice(0, 300) ||
-                `HTTP ${res.status}`;
-            console.log(`[otp] MSG91 REJECTED ${phone}: ${reason}`);
-            throw new Error(`MSG91: ${reason}`);
-        }
-        console.log(`[otp] MSG91 sent to ${phone} | ${parsed?.message?.statement || "ok"}`);
-        return;
-    }
-    if (process.env.WHATSAPP_TOKEN && process.env.WHATSAPP_PHONE_ID) {
-        const res = await fetch(`https://graph.facebook.com/v21.0/${process.env.WHATSAPP_PHONE_ID}/messages`, {
-            method: "POST",
-            headers: { Authorization: `Bearer ${process.env.WHATSAPP_TOKEN}`, "Content-Type": "application/json" },
-            body: JSON.stringify({
-                messaging_product: "whatsapp",
-                to: `91${phone}`,
-                type: "template",
-                template: {
-                    name: process.env.WHATSAPP_OTP_TEMPLATE || "otp_verification",
-                    language: { code: "en" },
-                    components: [{ type: "body", parameters: [{ type: "text", text: otp }] }]
-                }
-            })
-        });
-        if (!res.ok) throw new Error("Could not send WhatsApp OTP");
-        return;
-    }
-    // no SMS provider configured — log loudly so it is visible in Render logs
-    console.log(`[OTP dev] ${phone}: ${otp}`);
+    const result = await sms.sendOtpSms(phone, otp);
+    console.log(`[otp] ${sms.smsProviderName()} sent to ${phone} | ${result}`);
+    return result;
 };
 
 // no SMS provider + OTP_DEV_SHOW=1 -> return the code in the response so the
 // app can show it (testing only). Never enable this in production.
 const devOtpEnabled = () =>
     process.env.OTP_DEV_SHOW === "1" &&
-    !process.env.MSG91_API_KEY &&
-    !process.env.WHATSAPP_TOKEN;
+    (sms.smsProviderName() === "console" ||
+        (!process.env.MSG91_API_KEY &&
+            !process.env.TWO_FACTOR_API_KEY &&
+            !process.env.TEXTLOCAL_USERNAME &&
+            !process.env.FAST2SMS_API_KEY));
 
 // POST /api/otp/request  { phone } — needs login (same as checkout)
 const requestOtp = async (req, res) => {
@@ -107,8 +65,8 @@ const requestOtp = async (req, res) => {
         console.log("[otp] send fail:", error.message);
         res.json({
             success: false,
-            message: /MSG91/.test(error.message)
-                ? `SMS nahi gaya: ${error.message.replace("MSG91: ", "")}`
+            message: /^(MSG91|2Factor|Textlocal|Fast2SMS):/.test(error.message)
+                ? `SMS nahi gaya: ${error.message.replace(/^[A-Za-z0-9]+: /, "")}`
                 : "Could not send OTP"
         });
     }
@@ -185,8 +143,8 @@ const startOtp = async (req, res) => {
         console.log("[otp] send fail:", error.message);
         res.json({
             success: false,
-            message: /MSG91/.test(error.message)
-                ? `SMS nahi gaya: ${error.message.replace("MSG91: ", "")}`
+            message: /^(MSG91|2Factor|Textlocal|Fast2SMS):/.test(error.message)
+                ? `SMS nahi gaya: ${error.message.replace(/^[A-Za-z0-9]+: /, "")}`
                 : "Could not send OTP"
         });
     }
@@ -330,101 +288,69 @@ const checkCustomer = async (req, res) => {
 
 export { checkCustomer };
 
-// GET /api/otp/diag — admin diagnostic: MSG91 wallet, sender id, template status.
-// Tries several MSG91 endpoint shapes because paths differ per account plan.
+// GET /api/otp/diag — which SMS provider is active + is it configured?
 const diag = async (req, res) => {
     const out = {
-        hasAuthKey: !!process.env.MSG91_API_KEY,
-        hasSender: !!process.env.MSG91_SENDER,
-        sender: process.env.MSG91_SENDER || "",
-        hasTemplate: !!process.env.MSG91_TEMPLATE_ID,
-        template: process.env.MSG91_TEMPLATE_ID || "",
+        provider: sms.smsProviderName(),
+        msg91: {
+            hasAuthKey: !!process.env.MSG91_API_KEY,
+            hasSender: !!process.env.MSG91_SENDER,
+            sender: process.env.MSG91_SENDER || "",
+            hasTemplate: !!process.env.MSG91_TEMPLATE_ID,
+            template: process.env.MSG91_TEMPLATE_ID || ""
+        },
+        twofactor: { hasKey: !!process.env.TWO_FACTOR_API_KEY },
+        textlocal: {
+            hasUser: !!process.env.TEXTLOCAL_USERNAME,
+            hasPass: !!process.env.TEXTLOCAL_PASSWORD
+        },
+        fast2sms: { hasKey: !!process.env.FAST2SMS_API_KEY },
         hasWhatsapp: !!(process.env.WHATSAPP_TOKEN && process.env.WHATSAPP_PHONE_ID),
         devOtp: devOtpEnabled()
     };
-    if (!process.env.MSG91_API_KEY) {
-        out.error = "MSG91_API_KEY missing in env";
-        return res.json(out);
-    }
-    const key = process.env.MSG91_API_KEY;
-    const hit = async (label, urls) => {
-        for (const url of urls) {
-            try {
-                const r = await fetch(url, { headers: { authkey: key } });
-                const txt = await r.text();
-                let j = null;
-                try { j = JSON.parse(txt); } catch { /* not json */ }
-                if (r.ok && j && j.type !== "error" && !/route missing/i.test(txt)) {
-                    out[label] = { url, data: j };
-                    return true;
-                }
-                out[label] = { url, status: r.status, body: j || txt?.slice(0, 200) };
-            } catch (e) {
-                out[label] = { url, error: e.message };
-            }
+    if (process.env.MSG91_API_KEY) {
+        try {
+            const w = await fetch("https://api.msg91.com/api/balance.php?type=1", {
+                headers: { authkey: process.env.MSG91_API_KEY }
+            });
+            const wt = await w.text();
+            let j = null;
+            try { j = JSON.parse(wt); } catch { /* not json */ }
+            out.msg91.balance = j || wt.slice(0, 200);
+        } catch (e) {
+            out.msg91.balanceError = e.message;
         }
-        return false;
-    };
-    await hit("balance", [
-        "https://api.msg91.com/api/balance.php?type=1",
-        "https://api.msg91.com/api/balance.php?type=default",
-        "https://api.msg91.com/api/v5/balance"
-    ]);
-    await hit("senders", [
-        "https://api.msg91.com/api/v5/sender",
-        "https://api.msg91.com/api/v5/senderid",
-        "https://api.msg91.com/api/v2/senderid"
-    ]);
-    await hit("templates", [
-        "https://api.msg91.com/api/v5/template",
-        "https://api.msg91.com/api/v5/templateid",
-        "https://api.msg91.com/api/v2/template"
-    ]);
+    }
     res.json(out);
 };
 
 export { diag };
 
-// POST/GET /api/otp/testsend?phone=...&mode=withTemplate|withoutTemplate
-// Sends a real OTP to one number and returns MSG91's raw response body.
+// GET/POST /api/otp/testsend?phone=... — send a real OTP through the ACTIVE
+// provider and return the gateway's raw response.
 const testSend = async (req, res) => {
-    const phone = (req.body?.phone || req.query?.phone || "").replace(/\D/g, "").slice(-10);
-    const mode = req.body?.mode || req.query?.mode || "withTemplate";
+    const phone = String(req.body?.phone || req.query?.phone || "").replace(/\D/g, "").slice(-10);
     if (!/^[6-9]\d{9}$/.test(phone)) {
         return res.json({ success: false, message: "Invalid mobile" });
     }
-    if (!process.env.MSG91_API_KEY) {
-        return res.json({ success: false, message: "MSG91 not configured" });
-    }
     const otp = String(crypto.randomInt(100000, 1000000));
-    const payload = {
-        mobile: `91${phone}`,
-        sender: process.env.MSG91_SENDER,
-        otp
-    };
-    if (mode !== "withoutTemplate" && process.env.MSG91_TEMPLATE_ID) {
-        payload.template_id = process.env.MSG91_TEMPLATE_ID;
-    }
     try {
-        const r = await fetch("https://api.msg91.com/api/v5/otp", {
-            method: "POST",
-            headers: { "Content-Type": "application/json", authkey: process.env.MSG91_API_KEY },
-            body: JSON.stringify(payload)
-        });
-        const txt = await r.text();
-        let j = null;
-        try { j = JSON.parse(txt); } catch { /* not json */ }
+        const result = await sms.sendOtpSms(phone, otp);
         res.json({
             success: true,
-            httpStatus: r.status,
-            mode,
-            raw: j || txt,
+            provider: sms.smsProviderName(),
+            phone,
             otp,
-            sender: process.env.MSG91_SENDER,
-            template: payload.template_id || "(none)"
+            result
         });
     } catch (e) {
-        res.json({ success: false, message: e.message });
+        res.json({
+            success: false,
+            provider: sms.smsProviderName(),
+            phone,
+            otp,
+            error: e.message
+        });
     }
 };
 
