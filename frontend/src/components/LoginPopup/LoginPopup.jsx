@@ -5,7 +5,7 @@ import { StoreContext } from "../../Context/StoreContext";
 import axios from "axios";
 import { toast } from "react-toastify";
 import PropTypes from "prop-types";
-import { fbSend, fbVerify, fbReset } from "../../lib/firebase";
+import { fbSend, fbVerify, fbReset, fbErrorText } from "../../lib/firebase";
 
 // Step 1: enter number only.
 // Step 2a returning customer: "Welcome back, NAME!" + OTP.
@@ -59,12 +59,16 @@ const LoginPopup = ({ setShowLogin }) => {
       fbReset();
       setFbMode(false);
       try {
-        const res = await axios.post(url + "/api/otp/start", { phone });
-        if (res.data.success) {
-          setStep(2);
-          startCooldown(res.data.resendAfter || 30);
+      const res = await axios.post(url + "/api/otp/start", { phone });
+      if (res.data.success) {
+        setStep(2);
+        startCooldown(res.data.resendAfter || 30);
+        if (res.data.devOtp) {
+          toast.success(`OTP sent — test code ${res.data.devOtp}`);
+        } else {
           toast.success("OTP sent to +91 " + phone);
-        } else toast.error(res.data.message);
+        }
+      } else toast.error(res.data.message);
       } catch {
         toast.error("Could not continue");
       }
@@ -128,11 +132,12 @@ const LoginPopup = ({ setShowLogin }) => {
           return;
         }
         throw new Error(res.data.message || "firelogin");
-      } catch {
+      } catch (e) {
+        console.error("[fb-verify]", e?.code || e?.message);
         fbReset();
         setFbMode(false);
         setBusy(false);
-        toast.error("Firebase failed — resend OTP to retry");
+        toast.error(fbErrorText(e?.code));
         return;
       }
     }
@@ -218,9 +223,9 @@ const LoginPopup = ({ setShowLogin }) => {
                   maxLength={1}
                   onChange={(e) => {
                     const d = e.target.value.replace(/\D/g, "").slice(-1);
-                    const next = (code + "      ").split("");
+                    const next = code.padEnd(6, " ").split("");
                     next[i] = d;
-                    setCode(next.join("").trim());
+                    setCode(next.join("").replace(/\s/g, "").slice(0, 6));
                     if (d) moveBox(i, 1);
                   }}
                   onKeyDown={(e) => {

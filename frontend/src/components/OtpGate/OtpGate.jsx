@@ -3,7 +3,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { StoreContext } from "../../Context/StoreContext";
 import "./OtpGate.css";
-import { fbSend, fbVerify, fbReset } from "../../lib/firebase";
+import { fbSend, fbVerify, fbReset, fbErrorText } from "../../lib/firebase";
 import PropTypes from "prop-types";
 
 // Start page: Step 1 number only -> Step 2a name shown / 2b name asked + OTP.
@@ -49,6 +49,7 @@ const OtpGate = ({ onDone }) => {
       startCooldown(30);
       toast.success("OTP sent to +91 " + phone);
     } catch (e) {
+      console.error("[fb-send]", e?.code || e?.message);
       fbReset();
       setFbMode(false);
       try {
@@ -56,7 +57,11 @@ const OtpGate = ({ onDone }) => {
         if (res.data.success) {
           setStep(2);
           startCooldown(res.data.resendAfter || 30);
-          toast.success("OTP sent to +91 " + phone);
+          if (res.data.devOtp) {
+            toast.success(`OTP sent — test code ${res.data.devOtp}`);
+          } else {
+            toast.success("OTP sent to +91 " + phone);
+          }
         } else toast.error(res.data.message);
       } catch {
         toast.error("Could not send OTP");
@@ -96,11 +101,12 @@ const OtpGate = ({ onDone }) => {
           return;
         }
         throw new Error(res.data.message || "firelogin");
-      } catch {
+      } catch (e) {
+        console.error("[fb-verify]", e?.code || e?.message);
         fbReset();
         setFbMode(false);
         setBusy(false);
-        toast.error("Firebase failed — resend OTP to retry");
+        toast.error(fbErrorText(e?.code));
         return;
       }
     }
@@ -167,11 +173,13 @@ const OtpGate = ({ onDone }) => {
                   maxLength={1}
                   onChange={(e) => {
                     const d = e.target.value.replace(/\D/g, "").slice(-1);
-                    const next = (code + "      ").split("");
+                    const next = code.padEnd(6, " ").split("");
                     next[i] = d;
-                    setCode(next.join("").trim());
-                    const nextBox = document.getElementById(`gate-otp-${i + 1}`);
-                    if (d && nextBox) nextBox.focus();
+                    setCode(next.join("").replace(/\s/g, "").slice(0, 6));
+                    if (d) {
+                      const nextBox = document.getElementById(`gate-otp-${i + 1}`);
+                      if (nextBox) nextBox.focus();
+                    }
                   }}
                   onKeyDown={(e) => {
                     if (e.key === "Backspace" && !code[i]) {

@@ -25,7 +25,9 @@ const sendOtpSms = async (phone, otp) => {
                 ...(process.env.MSG91_TEMPLATE_ID ? { template_id: process.env.MSG91_TEMPLATE_ID } : {})
             })
         });
-        if (!res.ok) throw new Error("Could not send OTP SMS");
+        const body = await res.text();
+        if (!res.ok) throw new Error(`MSG91 ${res.status}: ${body}`);
+        console.log(`[otp] MSG91 sent to ${phone}`);
         return;
     }
     if (process.env.WHATSAPP_TOKEN && process.env.WHATSAPP_PHONE_ID) {
@@ -46,8 +48,21 @@ const sendOtpSms = async (phone, otp) => {
         if (!res.ok) throw new Error("Could not send WhatsApp OTP");
         return;
     }
+    // no SMS provider configured — log loudly so it is visible in Render logs
     console.log(`[OTP dev] ${phone}: ${otp}`);
-}
+};
+
+// Firebase Phone Auth is the free 10k/month path. When it is not configured
+// (no service account / billing off) the backend OTP is the fallback.
+const firebaseConfigured = () =>
+    !!(process.env.FIREBASE_SERVICE_ACCOUNT || process.env.FIREBASE_KEY_FILE);
+
+// no SMS provider + OTP_DEV_SHOW=1 -> return the code in the response so the
+// app can show it (testing only). Never enable this in production.
+const devOtpEnabled = () =>
+    process.env.OTP_DEV_SHOW === "1" &&
+    !process.env.MSG91_API_KEY &&
+    !process.env.WHATSAPP_TOKEN;
 
 // POST /api/otp/request  { phone } — needs login (same as checkout)
 const requestOtp = async (req, res) => {
@@ -74,7 +89,12 @@ const requestOtp = async (req, res) => {
             expiresAt: new Date(Date.now() + OTP_TTL_MS)
         }).save();
         await sendOtpSms(phone, otp);
-        res.json({ success: true, message: "OTP sent", resendAfter: 30 });
+        res.json({
+            success: true,
+            message: "OTP sent",
+            resendAfter: 30,
+            ...(devOtpEnabled() ? { devOtp: otp } : {})
+        });
     } catch (error) {
         console.log(error);
         res.json({ success: false, message: "Could not send OTP" });
@@ -142,7 +162,12 @@ const startOtp = async (req, res) => {
             expiresAt: new Date(Date.now() + OTP_TTL_MS)
         }).save();
         await sendOtpSms(phone, otp);
-        res.json({ success: true, message: "OTP sent", resendAfter: 30 });
+        res.json({
+            success: true,
+            message: "OTP sent",
+            resendAfter: 30,
+            ...(devOtpEnabled() ? { devOtp: otp } : {})
+        });
     } catch (error) {
         console.log(error);
         res.json({ success: false, message: "Could not send OTP" });

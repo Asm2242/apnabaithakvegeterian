@@ -44,3 +44,26 @@ export const fbReset = () => {
   } catch { /* ignore */ }
   verifier = null;
 };
+
+// Firebase error codes -> message user ko dikhana hai (Hinglish + hint)
+export const fbErrorText = (code) => {
+  switch (code) {
+    case "auth/invalid-otp":
+    case "auth/invalid-verification-code":
+      return "OTP galat hai — dhyan se type karo";
+    case "auth/code-expired":
+      return "OTP expire ho gaya — Resend karo";
+    case "auth/billing-not-enabled":
+      return "SMS provider band hai — shop ko contact karo";
+    case "auth/unauthorized-domain":
+      return "Ye site allow nahi hai — shop ko contact karo";
+    case "auth/operation-not-allowed":
+      return "Phone login band hai — shop ko contact karo";
+    case "auth/too-many-requests":
+      return "Bahut zyada try — thodi der baad karo";
+    case "auth/network-request-failed":
+      return "Network error — check connection";
+    default:
+      return "OTP verify nahi hua — Resend karo";
+  }
+};
