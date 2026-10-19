@@ -40,10 +40,12 @@ const viaTwoFactor = async (phone, otp) => {
     const body = await res.text();
     let parsed = null;
     try { parsed = JSON.parse(body); } catch { /* not json */ }
-    if (!res.ok || (parsed && (parsed.Status === "Error" || parsed.status === "error"))) {
+    console.log(`[sms:2factor] ${phone} -> ${body.slice(0, 300)}`);
+    const status = parsed?.Status || parsed?.status;
+    if (!res.ok || (status && /error/i.test(String(status)))) {
         throw new Error(`2Factor: ${parsed?.Details || body?.slice(0, 200) || `HTTP ${res.status}`}`);
     }
-    return parsed?.Details || "ok";
+    return parsed?.Details || status || "ok";
 };
 
 const viaTextlocal = async (phone, otp) => {
