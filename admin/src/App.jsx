@@ -184,6 +184,12 @@ function Orders({ token }) {
   );
 }
 
+const FOOD_CATEGORIES = [
+  "Chai & Coffee", "Breakfast", "Maggi", "Sandwich", "Burger", "Pizza",
+  "Chinese", "Snacks", "Paratha & Roti", "Dal & Sabzi", "Raita", "Dessert",
+  "Thali", "Combo"
+];
+
 function Foods({ token, imgBase }) {
   const foodImg = (image) => {
     if (!image) return "";
@@ -194,28 +200,35 @@ function Foods({ token, imgBase }) {
   const [form, setForm] = useState({ name: "", description: "", price: "", halfPrice: "", fullPrice: "", category: "Snacks", isPizza: false, bestSeller: false });
   const [file, setFile] = useState(null);
   const [editing, setEditing] = useState(null);
+  const [busy, setBusy] = useState(null);
+
   const load = async () => {
     const res = await axios.get(API + "/api/food/list");
     if (res.data.success) setFoods(res.data.data);
   };
   useEffect(() => { load(); }, []);
+
   const submit = async (e) => {
     e.preventDefault();
+    setBusy("save");
     const fd = new FormData();
     Object.entries(form).forEach(([k, v]) => fd.append(k, v));
     if (file) fd.append("image", file);
-    if (editing) {
-      fd.append("id", editing);
-      await api(token).post("/api/food/update", fd);
-    } else {
-      if (!file) { alert("Photo required for new dish"); return; }
-      await api(token).post("/api/food/add", fd);
-    }
-    setForm({ name: "", description: "", price: "", halfPrice: "", fullPrice: "", category: "Snacks", isPizza: false, bestSeller: false });
-    setFile(null);
-    setEditing(null);
-    load();
+    try {
+      if (editing) {
+        fd.append("id", editing);
+        await api(token).post("/api/food/update", fd);
+      } else {
+        if (!file) { alert("Photo required for new dish"); return; }
+        await api(token).post("/api/food/add", fd);
+      }
+      setForm({ name: "", description: "", price: "", halfPrice: "", fullPrice: "", category: "Snacks", isPizza: false, bestSeller: false });
+      setFile(null);
+      setEditing(null);
+      load();
+    } finally { setBusy(null); }
   };
+
   const startEdit = (f) => {
     setEditing(f._id);
     setForm({
@@ -225,53 +238,112 @@ function Foods({ token, imgBase }) {
     });
     window.scrollTo(0, 0);
   };
+
   const toggleAvail = async (f) => {
-    await api(token).post("/api/food/update", { id: f._id, available: !f.available });
-    load();
+    setBusy(f._id);
+    try {
+      await api(token).post("/api/food/update", { id: f._id, available: !f.available });
+      load();
+    } finally { setBusy(null); }
   };
+
   const remove = async (id) => {
     if (!window.confirm("Delete this dish?")) return;
-    await api(token).post("/api/food/remove", { id });
-    load();
+    setBusy(id);
+    try {
+      await api(token).post("/api/food/remove", { id });
+      load();
+    } finally { setBusy(null); }
   };
+
   const set = (k) => (e) => {
     const v = e.target.type === "checkbox" ? e.target.checked : e.target.value;
     setForm((f) => ({ ...f, [k]: v }));
   };
+
+  const resetForm = () => {
+    setEditing(null);
+    setFile(null);
+    setForm({ name: "", description: "", price: "", halfPrice: "", fullPrice: "", category: "Snacks", isPizza: false, bestSeller: false });
+  };
+
   return (
     <div>
       <form onSubmit={submit} className="card">
-        <h3>{editing ? "Edit dish" : "Add dish"}</h3>
+        <h3>{editing ? "✏️ Edit dish" : "🍽️ Add new dish"}</h3>
         <div className="grid">
-          <input value={form.name} onChange={set("name")} placeholder="Name" required />
-          <input value={form.category} onChange={set("category")} placeholder="Category" required />
-          <input value={form.price} onChange={set("price")} placeholder="Price ₹ (Half/Small)" type="number" required />
-          <input value={form.halfPrice} onChange={set("halfPrice")} placeholder="Half ₹ / Small ₹" type="number" />
-          <input value={form.fullPrice} onChange={set("fullPrice")} placeholder="Full ₹ / Regular ₹" type="number" />
-          <input type="file" accept="image/*" onChange={(e) => setFile(e.target.files[0])} />
+          <div className="field">
+            <label className="field-label">Dish name</label>
+            <input value={form.name} onChange={set("name")} placeholder="e.g. Paneer Butter Masala" required />
+          </div>
+          <div className="field">
+            <label className="field-label">Category</label>
+            <select value={form.category} onChange={set("category")} required>
+              {FOOD_CATEGORIES.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </div>
+          <div className="field">
+            <label className="field-label">Price ₹ (Half / Small)</label>
+            <input value={form.price} onChange={set("price")} placeholder="e.g. 120" type="number" required />
+          </div>
+          <div className="field">
+            <label className="field-label">Half ₹ / Small ₹ (optional)</label>
+            <input value={form.halfPrice} onChange={set("halfPrice")} placeholder="e.g. 70" type="number" />
+          </div>
+          <div className="field">
+            <label className="field-label">Full ₹ / Regular ₹ (optional)</label>
+            <input value={form.fullPrice} onChange={set("fullPrice")} placeholder="e.g. 130" type="number" />
+          </div>
+          <div className="field">
+            <label className="field-label">Photo (required for new dish)</label>
+            <input className="file-input" type="file" accept="image/*" onChange={(e) => setFile(e.target.files[0])} />
+          </div>
         </div>
-        <input value={form.description} onChange={set("description")} placeholder="Description" />
-        <label><input type="checkbox" checked={form.isPizza} onChange={set("isPizza")} /> Pizza (Small/Regular labels)</label>
-        <label><input type="checkbox" checked={form.bestSeller} onChange={set("bestSeller")} /> Bestseller</label>
+        <div className="field">
+          <label className="field-label">Description</label>
+          <input value={form.description} onChange={set("description")} placeholder="Short description shown on menu" />
+        </div>
+        <div className="check-row">
+          <label><input type="checkbox" checked={form.isPizza} onChange={set("isPizza")} /> 🍕 Pizza (Small/Regular size labels)</label>
+          <label><input type="checkbox" checked={form.bestSeller} onChange={set("bestSeller")} /> ⭐ Bestseller</label>
+        </div>
         <div className="row">
-          <button type="submit">{editing ? "Save" : "Add dish"}</button>
-          {editing && <button type="button" onClick={() => { setEditing(null); setForm({ name: "", description: "", price: "", halfPrice: "", fullPrice: "", category: "Snacks", isPizza: false, bestSeller: false }); }}>Cancel</button>}
+          <button type="submit" disabled={busy === "save"}>{busy === "save" ? "Saving…" : editing ? "💾 Save changes" : "➕ Add dish"}</button>
+          {editing && <button type="button" className="ghost" onClick={resetForm}>Cancel</button>}
         </div>
       </form>
-      {foods.map((f) => (
-        <div key={f._id} className="card food-row">
-          <img src={foodImg(f.image)} alt="" />
-          <div>
-            <b>{f.name}</b> <span>({f.category})</span>
-            <p>₹{f.price}{f.halfPrice != null ? ` • Half ₹${f.halfPrice} / Full ₹${f.fullPrice}` : ""} {f.available ? "" : "• SOLD OUT"}</p>
+
+      <h3 className="list-head">All dishes ({foods.length})</h3>
+      <div className="food-list">
+        {foods.map((f) => (
+          <div key={f._id} className={`food-item-card ${!f.available ? "soldout" : ""}`}>
+            <div className="food-item-img">
+              <img src={foodImg(f.image)} alt={f.name} />
+              {!f.available && <span className="soldout-tag">SOLD OUT</span>}
+              {f.bestSeller && <span className="best-tag">⭐ Bestseller</span>}
+            </div>
+            <div className="food-item-body">
+              <div className="food-item-title">
+                <b>{f.name}</b>
+                <span className="cat-chip">{f.category}</span>
+              </div>
+              <p className="food-item-desc">{f.description}</p>
+              <p className="food-item-price">
+                ₹{f.price}
+                {f.halfPrice != null && <span className="price-sub"> • Half ₹{f.halfPrice} / Full ₹{f.fullPrice}</span>}
+              </p>
+              <div className="food-item-actions">
+                <Switch checked={f.available} disabled={busy === f._id} onChange={() => toggleAvail(f)} />
+                <button onClick={() => startEdit(f)} disabled={busy === f._id}>✏️ Edit</button>
+                <button className="danger" onClick={() => remove(f._id)} disabled={busy === f._id}>🗑️ Delete</button>
+              </div>
+            </div>
           </div>
-          <div className="row">
-            <button onClick={() => startEdit(f)}>Edit</button>
-            <button onClick={() => toggleAvail(f)}>{f.available ? "Hide" : "Show"}</button>
-            <button onClick={() => remove(f._id)} className="danger">Delete</button>
-          </div>
-        </div>
-      ))}
+        ))}
+        {foods.length === 0 && <p className="empty">No dishes yet. Add your first dish above.</p>}
+      </div>
     </div>
   );
 }
