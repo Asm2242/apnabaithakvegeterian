@@ -1,11 +1,13 @@
 .food-item{
     width: 100%;
     margin: auto;
-    border-radius: 15px;
+    border-radius: 18px;
     box-shadow: 0px 0px 10px #00000015;
-    transition: 0.3s;
+    transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
     animation: fadeIn 1s;
     position: relative;
+    background: var(--cream);
+    border: 1px solid var(--line);
 }
 .wish-btn{
     position: absolute;
@@ -21,7 +23,12 @@
     cursor: pointer;
 }
 .food-item:hover{
-    transform: scale(1.02);
+    transform: translateY(-8px) scale(1.02);
+    border-color: rgba(255, 213, 79, 0.75);
+    box-shadow:
+      0 0 0 1px rgba(255, 213, 79, 0.6),
+      0 24px 60px -18px rgba(74, 14, 14, 0.45),
+      0 0 48px rgba(255, 213, 79, 0.28);
 }
 .food-item-img-container{
     position: relative;

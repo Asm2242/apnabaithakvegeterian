@@ -13,30 +13,46 @@
     align-items: center;
     gap: 30px;
     font-size: 14px;
-    padding: 10px 20px;
-    color: #454545;
-    border: 1px solid tomato;
+    padding: 14px 20px;
+    color: var(--text);
+    border: 1px solid rgba(255, 213, 79, 0.35);
+    border-radius: 16px;
+    background: var(--cream);
+    box-shadow: var(--card-shadow);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.my-orders-order:hover{
+    transform: translateX(4px);
+    box-shadow: var(--gold-glow);
+    border-color: rgba(255, 213, 79, 0.6);
 }
 .my-orders-order img{
     width: 50px;
     height: 50px;
     object-fit: cover;
-    border-radius: 8px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
 }
 .my-orders-order p span{
-    color: tomato;
+    color: var(--saffron);
+    font-weight: 600;
 }
 .my-orders-order p b{
     font-weight: 500;
-    color: #454545;
+    color: var(--text);
 }
 .my-orders button{
     border: none;
     padding: 12px 0px;
-    border-radius: 4px;
-    background-color: #FFE1E1;
+    border-radius: 10px;
+    background-color: rgba(255, 213, 79, 0.2);
     cursor: pointer;
-    color: #454545;
+    color: var(--text);
+    font-weight: 600;
+    transition: all 0.25s;
+}
+.my-orders button:hover{
+    background-color: rgba(255, 213, 79, 0.4);
 }
 .order-actions{
     display: flex;
@@ -47,8 +63,12 @@
     padding: 10px 14px !important;
 }
 .order-actions button.reorder{
-    background-color: #9a3412 !important;
+    background: linear-gradient(135deg, var(--saffron), var(--saffron-deep)) !important;
     color: #fff !important;
+    box-shadow: var(--saffron-glow);
+}
+html[data-theme="dark"] .my-orders-order{
+    background: var(--cream-2);
 }
 @media (max-width:900px) {
     .my-orders-order{

@@ -1,7 +1,7 @@
-.live-map{
+﻿.live-map{
     border-radius: 14px;
     overflow: hidden;
-    border: 1px solid #d4a017;
+    border: 1px solid #FFD54F;
     margin-top: 10px;
 }
 .live-map-box{
@@ -20,7 +20,7 @@
 .live-caption{
     text-align: center;
     font-size: 13px;
-    color: #9a3412;
+    color: #FF6F00;
     font-weight: 600;
     padding: 8px;
     margin: 0;
@@ -30,3 +30,4 @@
     0%,100%{transform:scale(1)}
     50%{transform:scale(1.2)}
 }
+

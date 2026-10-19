@@ -1,11 +1,11 @@
-.otp-gate{
+﻿.otp-gate{
     position: fixed;
     inset: 0;
     z-index: 100;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(160deg, #3b1d0c, #9a3412);
+    background: linear-gradient(160deg, #4A0E0E, #FF6F00);
     padding: 20px;
     animation: fadeIn 0.5s;
 }
@@ -16,16 +16,16 @@
     width: 100%;
     max-width: 380px;
     text-align: center;
-    border-top: 6px solid #d4a017;
+    border-top: 6px solid #FFD54F;
 }
 .otp-gate-logo{
     font-size: 30px;
     font-weight: 700;
-    color: #9a3412;
+    color: #FF6F00;
 }
 .otp-gate-sub{
     font-size: 12px;
-    color: #676767;
+    color: #8A7A6C;
     margin-bottom: 16px;
 }
 .otp-gate-card h2{
@@ -44,7 +44,7 @@
     background: #f5f5f5;
     padding: 12px;
     font-weight: 700;
-    color: #9a3412;
+    color: #FF6F00;
 }
 .otp-gate-phone input{
     border: none;
@@ -64,7 +64,7 @@
     box-sizing: border-box;
 }
 .otp-gate-new{
-    color: #9a3412;
+    color: #FF6F00;
     font-weight: 700;
     letter-spacing: 1px;
     margin: 4px 0 8px 0;
@@ -84,11 +84,11 @@
     border: 1px solid #c9c9c9;
     border-radius: 10px;
     outline: none;
-    color: #9a3412;
+    color: #FF6F00;
 }
 .otp-gate-btn{
     width: 100%;
-    background: #9a3412;
+    background: #FF6F00;
     color: #fff;
     border: none;
     border-radius: 10px;
@@ -105,7 +105,7 @@
 .otp-gate-link{
     background: none;
     border: none;
-    color: #676767;
+    color: #8A7A6C;
     text-decoration: underline;
     font-size: 14px;
     cursor: pointer;
@@ -115,3 +115,4 @@
     opacity: 0.5;
     text-decoration: none;
 }
+

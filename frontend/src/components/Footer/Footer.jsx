@@ -53,6 +53,7 @@ const Footer = () => {
         </div>
       </div>
       <hr />
+      <p className="footer-greeting">🪔 शुभ दशहरा! आपके परिवार के साथ यह त्योहार मंगलमय हो।</p>
       <p className="footer-copyright">
         Copyright {new Date().getFullYear()} © Apna Baithak Vegetarian Restaurant, Eldeco City, Lucknow - All Rights Reserved.
       </p>

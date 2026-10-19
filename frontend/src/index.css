@@ -1,4 +1,26 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Baloo+2:wght@500;600;700;800&display=swap');
+
+:root {
+  --cream: #FFF8EC;
+  --cream-2: #FFF1DC;
+  --cream-3: #F7E8D0;
+  --saffron: #FF6F00;
+  --saffron-deep: #E65100;
+  --marigold: #FFD54F;
+  --marigold-deep: #FFB300;
+  --maroon: #4A0E0E;
+  --maroon-deep: #2E0808;
+  --maroon-soft: #6E2A18;
+  --leaf: #2E7D32;
+  --gold-glow: 0 0 24px rgba(255, 213, 79, 0.55);
+  --gold-glow-strong: 0 0 44px rgba(255, 213, 79, 0.9), 0 18px 48px -12px rgba(255, 111, 0, 0.85);
+  --saffron-glow: 0 0 22px rgba(255, 111, 0, 0.5);
+  --card-shadow: 0 10px 30px -12px rgba(74, 14, 14, 0.25);
+  --card-shadow-lg: 0 24px 60px -24px rgba(74, 14, 14, 0.45);
+  --text: #3B1D0C;
+  --text-soft: #8A7A6C;
+  --line: #F0E2CC;
+}
 
 * {
   margin: 0;
@@ -10,66 +32,84 @@
 
 body {
   min-height: 100vh;
+  background:
+    radial-gradient(900px 420px at 12% -6%, rgba(255, 111, 0, 0.10), transparent 60%),
+    radial-gradient(800px 380px at 95% 4%, rgba(255, 213, 79, 0.12), transparent 55%),
+    var(--cream);
+  color: var(--text);
 }
 
-/* ---- dark theme (toggle in navbar) ---- */
-html[data-theme="dark"] body{
-  background: #17100a;
-  color: #f3e7d3;
+/* ---- dark theme ---- */
+html[data-theme="dark"] {
+  --cream: #1C130C;
+  --cream-2: #241A12;
+  --cream-3: #2E2015;
+  --text: #F6ECDD;
+  --text-soft: #B9A88F;
+  --line: #3A2A1A;
+  --card-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.7);
+  --card-shadow-lg: 0 24px 60px -24px rgba(0, 0, 0, 0.85);
+}
+html[data-theme="dark"] body {
+  background:
+    radial-gradient(900px 420px at 12% -6%, rgba(255, 111, 0, 0.16), transparent 60%),
+    radial-gradient(800px 380px at 95% 4%, rgba(255, 213, 79, 0.08), transparent 55%),
+    #17100A;
+  color: var(--text);
 }
 html[data-theme="dark"] .food-item,
 html[data-theme="dark"] .cart-total,
 html[data-theme="dark"] .login-popup-container,
 html[data-theme="dark"] .otp-gate-card,
-html[data-theme="dark"] .place-order-right .cart-total{
+html[data-theme="dark"] .place-order-right .cart-total {
   background: #241811;
-  color: #f3e7d3;
+  color: var(--text);
 }
 html[data-theme="dark"] .food-item-desc,
 html[data-theme="dark"] .explore-menu-text,
 html[data-theme="dark"] .otp-gate-sub,
-html[data-theme="dark"] .footer-content p{
-  color: #c9b896;
+html[data-theme="dark"] .footer-content p {
+  color: #C9B896;
 }
 html[data-theme="dark"] .navbar-menu,
-html[data-theme="dark"] .navbar-right button{
-  color: #f3e7d3;
+html[data-theme="dark"] .navbar-right button {
+  color: var(--text);
 }
 html[data-theme="dark"] .explore-menu-list-item p,
 html[data-theme="dark"] .cart-items-title p,
 html[data-theme="dark"] .cart-total-details p,
-html[data-theme="dark"] .my-orders-order p{
-  color: #f3e7d3;
+html[data-theme="dark"] .my-orders-order p {
+  color: var(--text);
 }
 html[data-theme="dark"] input,
 html[data-theme="dark"] textarea,
-html[data-theme="dark"] select{
-  background: #2e2015;
-  color: #f3e7d3;
-  border-color: #5a4028;
+html[data-theme="dark"] select {
+  background: #2E2015;
+  color: var(--text);
+  border-color: #5A4028;
 }
 html[data-theme="dark"] .login-popup-inputs input,
 html[data-theme="dark"] .otp-gate-phone input,
 html[data-theme="dark"] .otp-gate-input,
-html[data-theme="dark"] .otp-boxes input{
-  background: #2e2015;
-  color: #f3e7d3;
-  border-color: #5a4028;
+html[data-theme="dark"] .otp-boxes input {
+  background: #2E2015;
+  color: var(--text);
+  border-color: #5A4028;
 }
-html[data-theme="dark"] .food-item-counter{
-  background: #2e2015;
+html[data-theme="dark"] .food-item-counter {
+  background: #2E2015;
 }
-html[data-theme="dark"] .size-btn{
-  background: #2e2015;
-  color: #f5c542;
-  border-color: #5a4028;
+html[data-theme="dark"] .size-btn {
+  background: #2E2015;
+  color: var(--marigold);
+  border-color: #5A4028;
 }
-html[data-theme="dark"] .size-btn.active{
-  background: #9a3412;
+html[data-theme="dark"] .size-btn.active {
+  background: var(--saffron);
   color: #fff;
 }
-html[data-theme="dark"] hr{
-  border-color: #3a2a1a;
+html[data-theme="dark"] hr {
+  border-color: #3A2A1A;
 }
 
 a {
@@ -82,14 +122,33 @@ a {
   margin: auto;
 }
 
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-  }
+::selection {
+  background: var(--marigold);
+  color: var(--maroon);
+}
 
-  100% {
-    opacity: 1;
-  }
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: var(--cream-2); }
+::-webkit-scrollbar-thumb { background: linear-gradient(var(--marigold), var(--saffron)); border-radius: 8px; }
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: var(--gold-glow); }
+  50% { box-shadow: var(--gold-glow-strong); }
+}
+
+@keyframes sway {
+  0%, 100% { transform: rotate(-4deg); }
+  50% { transform: rotate(4deg); }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.15; transform: scale(0.7); }
+  50% { opacity: 1; transform: scale(1.25); }
 }
 
 @media (max-width:1050px) {

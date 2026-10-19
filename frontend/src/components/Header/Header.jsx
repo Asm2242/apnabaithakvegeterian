@@ -8,12 +8,23 @@ const Header = () => {
 
   return (
     <div className="header">
+      <div className="toran">
+        <div className="thread"></div>
+        <div className="flowers">
+          {Array.from({ length: 14 }).map((_, i) => (
+            <div className="flower-wrap" key={i}>
+              <div className="flower"></div>
+              <div className="leaf"></div>
+            </div>
+          ))}
+        </div>
+      </div>
       <div className="header-overlay" />
       <div className="header-contents">
-        <span className="hero-badge">🟢 100% Pure Veg • Eldeco City, Lucknow</span>
+        <span className="hero-badge">🪔 100% Pure Veg • Eldeco City, Lucknow</span>
         <h2>
-          Apna Baithak
-          <span className="hero-line">Taste the Tradition • Feel the Comfort</span>
+          इस दशहरे, अपने परिवार के साथ
+          <span className="hero-line">मनाएं स्वाद का उत्सव!</span>
         </h2>
         <p>
           81 dishes across 14 categories — thali, maggi, pizza, momos, Chinese
@@ -25,7 +36,7 @@ const Header = () => {
           <div><b>7:30–10</b><span>Open daily</span></div>
         </div>
         <div className="hero-btns">
-          <button className="btn-gold" onClick={scrollToMenu}>View Menu</button>
+          <button className="btn-gold" onClick={scrollToMenu}>Explore Festive Feast</button>
           <a className="btn-ghost" href="tel:+919454999442">📞 Call to Order</a>
         </div>
       </div>

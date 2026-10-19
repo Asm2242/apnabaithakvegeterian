@@ -2,23 +2,24 @@
     margin: 100px 0px;
 }
 .offer-banner{
-    background: linear-gradient(90deg, #3b1d0c, #9a3412);
-    color: #f5c542;
-    border-radius: 12px;
-    padding: 14px 18px;
+    background: linear-gradient(90deg, var(--maroon-deep), var(--maroon-soft));
+    color: var(--marigold);
+    border-radius: 16px;
+    padding: 16px 20px;
     font-size: 15px;
     margin-bottom: 16px;
-    border: 1px solid #d4a017;
+    border: 1px solid rgba(255, 213, 79, 0.5);
+    box-shadow: 0 8px 24px -10px rgba(74, 14, 14, 0.4);
 }
 .rm-coupon{
     cursor: pointer;
-    color: #b3261e;
+    color: #FF8A80;
     font-weight: 700;
 }
 
 .cart hr {
     height: 1px;
-    background-color: #E2E2E2;
+    background-color: var(--line);
     border: none;
 }
 
@@ -26,31 +27,44 @@
     display: grid;
     grid-template-columns: 1fr 1.5fr 1fr 1fr 1fr 0.5fr;
     align-items: center;
-    color: grey;
+    color: var(--text-soft);
     font-size: max(1vw, 12px);
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--line);
 }
 
 .cart-items-item {
     margin: 10px 0px;
-    color: black;
+    color: var(--text);
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
 }
 
 .cart-items-item img {
     width: 50px;
     height: 50px;
     object-fit: cover;
-    border-radius: 8px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
 }
 
 .cart-items-item div {
     max-width: 40px;
     text-align: center;
-    border: 1px solid #EBEBEB;
+    border: 1px solid var(--line);
     padding: 8px 8px;
     font-size: 12px;
+    border-radius: 8px;
+    background: var(--cream);
 }
 .cart-items-remove-icon{
     cursor: pointer;
+    color: var(--saffron);
+    font-weight: 700;
+    transition: transform 0.2s;
+}
+.cart-items-remove-icon:hover{
+    transform: scale(1.15);
 }
 .cart-bottom {
     margin-top: 80px;
@@ -64,12 +78,17 @@
     display: flex;
     flex-direction: column;
     gap: 20px;
+    background: var(--cream);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 28px;
+    box-shadow: var(--card-shadow);
 }
 
 .cart-total-details {
     display: flex;
     justify-content: space-between;
-    color: #555555;
+    color: var(--text-soft);
 }
 
 .cart-total hr {
@@ -79,40 +98,74 @@
 .cart-total button {
     border: none;
     color: white;
-    background-color: #FF4C24;
+    background: linear-gradient(135deg, var(--saffron), var(--saffron-deep));
     width: max(15vw,200px);
-    padding: 12px 0px;
-    border-radius: 4px;
+    padding: 14px 0px;
+    border-radius: 12px;
     cursor: pointer;
+    font-weight: 700;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    box-shadow: var(--saffron-glow);
+}
+.cart-total button:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 0 36px rgba(255, 111, 0, 0.7);
 }
 
 .cart-promocode {
     flex: 1;
+    background: var(--cream);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 28px;
+    box-shadow: var(--card-shadow);
 }
 .cart-promocode p{
-    color: #555555;
+    color: var(--text-soft);
 }
 .cart-promocode-input{
     margin-top: 10px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #eaeaea;
-    border-radius: 4px;
+    background-color: var(--cream-2);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 6px;
 }
 .cart-promocode-input input{
     background: transparent;
     border: none;
     outline: none;
     padding-left: 10px;
+    color: var(--text);
+    flex: 1;
 }
 .cart-promocode-input button{
     width: max(10vw,150px);
     padding: 12px 5px;
-    background-color: black;
+    background: linear-gradient(135deg, var(--marigold), var(--saffron));
     border: none;
-    color: white;
-    border-radius: 4px;
+    color: var(--maroon-deep);
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.25s;
+}
+.cart-promocode-input button:hover{
+    box-shadow: var(--gold-glow);
+}
+
+html[data-theme="dark"] .cart-total,
+html[data-theme="dark"] .cart-promocode{
+    background: var(--cream-2);
+}
+html[data-theme="dark"] .cart-items-item div{
+    background: var(--cream-2);
+}
+html[data-theme="dark"] .cart-promocode-input{
+    background: var(--cream-3);
 }
 
 @media(max-width:750px) {
