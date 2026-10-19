@@ -1,5 +1,5 @@
 import express from 'express';
-import { requestOtp, verifyOtp, startOtp, loginWithOtp, checkCustomer, fireLogin, diag } from '../controllers/otpController.js';
+import { requestOtp, verifyOtp, startOtp, loginWithOtp, checkCustomer, fireLogin, diag, testSend } from '../controllers/otpController.js';
 import authMiddleware from '../middleware/auth.js';
 
 const otpRouter = express.Router();
@@ -14,5 +14,6 @@ otpRouter.post("/login", loginWithOtp);
 otpRouter.post("/firelogin", fireLogin);
 // diagnostics (no auth — shows config only, no secrets)
 otpRouter.get("/diag", diag);
+otpRouter.post("/testsend", testSend);
 
 export default otpRouter;

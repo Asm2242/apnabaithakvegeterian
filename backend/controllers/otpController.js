@@ -331,7 +331,7 @@ const checkCustomer = async (req, res) => {
 export { checkCustomer };
 
 // GET /api/otp/diag — admin diagnostic: MSG91 wallet, sender id, template status.
-// Helps find out WHY the SMS is not landing on the phone.
+// Tries several MSG91 endpoint shapes because paths differ per account plan.
 const diag = async (req, res) => {
     const out = {
         hasAuthKey: !!process.env.MSG91_API_KEY,
@@ -346,34 +346,76 @@ const diag = async (req, res) => {
         out.error = "MSG91_API_KEY missing in env";
         return res.json(out);
     }
-    try {
-        const w = await fetch("https://api.msg91.com/api/v5/balance", {
-            headers: { authkey: process.env.MSG91_API_KEY }
-        });
-        const wj = await w.json();
-        out.wallet = wj;
-    } catch (e) {
-        out.walletError = e.message;
-    }
-    try {
-        const s = await fetch("https://api.msg91.com/api/v5/sender", {
-            headers: { authkey: process.env.MSG91_API_KEY }
-        });
-        const sj = await s.json();
-        out.senders = Array.isArray(sj) ? sj : (sj.data || sj);
-    } catch (e) {
-        out.senderError = e.message;
-    }
-    try {
-        const t = await fetch("https://api.msg91.com/api/v5/template", {
-            headers: { authkey: process.env.MSG91_API_KEY }
-        });
-        const tj = await t.json();
-        out.templates = Array.isArray(tj) ? tj : (tj.data || tj);
-    } catch (e) {
-        out.templateError = e.message;
-    }
+    const key = process.env.MSG91_API_KEY;
+    const hit = async (label, urls) => {
+        for (const url of urls) {
+            try {
+                const r = await fetch(url, { headers: { authkey: key } });
+                const txt = await r.text();
+                let j = null;
+                try { j = JSON.parse(txt); } catch { /* not json */ }
+                if (r.ok && j && j.type !== "error" && !/route missing/i.test(txt)) {
+                    out[label] = { url, data: j };
+                    return true;
+                }
+                out[label] = { url, status: r.status, body: j || txt?.slice(0, 200) };
+            } catch (e) {
+                out[label] = { url, error: e.message };
+            }
+        }
+        return false;
+    };
+    await hit("balance", [
+        "https://api.msg91.com/api/v5/balance",
+        "https://api.msg91.com/api/v2/balance",
+        "https://api.msg91.com/api/balance"
+    ]);
+    await hit("senders", [
+        "https://api.msg91.com/api/v5/sender",
+        "https://api.msg91.com/api/v5/senderid",
+        "https://api.msg91.com/api/v2/senderid",
+        "https://api.msg91.com/api/sender"
+    ]);
+    await hit("templates", [
+        "https://api.msg91.com/api/v5/template",
+        "https://api.msg91.com/api/v5/templateid",
+        "https://api.msg91.com/api/v2/template",
+        "https://api.msg91.com/api/template"
+    ]);
     res.json(out);
 };
 
 export { diag };
+
+// POST /api/otp/testsend { phone } — send a real OTP and return MSG91 raw body.
+// Confirms exactly what the gateway says about one specific number.
+const testSend = async (req, res) => {
+    const { phone } = req.body;
+    if (!/^[6-9]\d{9}$/.test(phone || "")) {
+        return res.json({ success: false, message: "Invalid mobile" });
+    }
+    if (!process.env.MSG91_API_KEY) {
+        return res.json({ success: false, message: "MSG91 not configured" });
+    }
+    const otp = String(crypto.randomInt(100000, 1000000));
+    try {
+        const r = await fetch("https://api.msg91.com/api/v5/otp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", authkey: process.env.MSG91_API_KEY },
+            body: JSON.stringify({
+                mobile: `91${phone}`,
+                sender: process.env.MSG91_SENDER,
+                otp,
+                ...(process.env.MSG91_TEMPLATE_ID ? { template_id: process.env.MSG91_TEMPLATE_ID } : {})
+            })
+        });
+        const txt = await r.text();
+        let j = null;
+        try { j = JSON.parse(txt); } catch { /* not json */ }
+        res.json({ success: true, httpStatus: r.status, raw: j || txt, otp, sender: process.env.MSG91_SENDER, template: process.env.MSG91_TEMPLATE_ID });
+    } catch (e) {
+        res.json({ success: false, message: e.message });
+    }
+};
+
+export { testSend };
