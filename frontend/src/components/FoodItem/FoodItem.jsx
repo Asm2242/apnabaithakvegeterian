@@ -4,7 +4,7 @@ import { StoreContext } from "../../Context/StoreContext";
 import "./FoodItem.css";
 import PropTypes from "prop-types";
 
-const FoodItem = ({ image, name, price, desc, id, food }) => {
+const FoodItem = ({ image, name, price, desc, id, food, index }) => {
   const {
     cartItems,
     addToCart,
@@ -28,7 +28,7 @@ const FoodItem = ({ image, name, price, desc, id, food }) => {
   const qty = cartItems[key] || 0;
 
   return (
-    <div className="food-item">
+    <div className="food-item" style={{ animationDelay: `${(index || 0) * 60}ms` }}>
       <button
         type="button"
         aria-label="wishlist"

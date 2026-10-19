@@ -6,17 +6,155 @@
     padding: 30px 28px;
     margin-bottom: 18px;
     box-shadow: 0 12px 30px -12px rgba(74, 14, 14, 0.4);
+    position: relative;
+    overflow: hidden;
+}
+.menu-hero::after{
+    content: "🍽️";
+    position: absolute;
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 72px;
+    opacity: 0.25;
+    filter: drop-shadow(0 0 18px rgba(255, 213, 79, 0.5));
 }
 .menu-hero h1{color: var(--marigold);font-size:clamp(28px,4vw,40px);margin:0 0 6px 0}
 .menu-hero p{color:#F6ECDDcc;margin:0}
+
+/* toolbar: search + sort */
+.menu-toolbar{
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+.menu-search{
+    flex: 1;
+    min-width: 240px;
+    padding: 13px 20px;
+    border: 1px solid var(--line);
+    border-radius: 50px;
+    font-size: 15px;
+    outline: none;
+    background: var(--cream);
+    color: var(--text);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.menu-search:focus{border-color: var(--saffron);box-shadow: 0 0 0 4px rgba(255,111,0,0.15)}
+.sort-box{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.sort-label{
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-soft);
+}
+.sort-chips{
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.sort-chip{
+    border: 1px solid rgba(255, 213, 79, 0.5);
+    background: var(--cream);
+    color: var(--maroon);
+    border-radius: 50px;
+    padding: 9px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+.sort-chip:hover{
+    border-color: var(--saffron);
+    color: var(--saffron);
+    transform: translateY(-1px);
+}
+.sort-chip.active{
+    background: linear-gradient(135deg, var(--saffron), var(--saffron-deep));
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 6px 18px -6px rgba(255, 111, 0, 0.6);
+}
+html[data-theme="dark"] .sort-chip{background: var(--cream-2);color: var(--text)}
+html[data-theme="dark"] .sort-chip.active{color: #fff}
+
 .menu-count{color:var(--text-soft);margin-bottom:16px}
 .menu-search{width:100%;max-width:480px;padding:12px 18px;border:1px solid var(--line);border-radius:50px;font-size:15px;outline:none;margin-bottom:14px;box-sizing:border-box;background:var(--cream);color:var(--text);transition:border-color 0.2s, box-shadow 0.2s}
 .menu-search:focus{border-color:var(--saffron);box-shadow:0 0 0 4px rgba(255,111,0,0.15)}
 .menu-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
-.menu-pills button{border:1px solid rgba(255,213,79,0.5);background:var(--cream);color:var(--maroon);border-radius:50px;padding:8px 18px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.25s}
-.menu-pills button:hover{border-color:var(--saffron);color:var(--saffron)}
-.menu-pills button.active{background:linear-gradient(135deg,var(--saffron),var(--saffron-deep));color:#fff;border-color:transparent;box-shadow:var(--saffron-glow)}
-.menu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:28px}
+.menu-pills button{
+    border:1px solid rgba(255,213,79,0.5);
+    background:var(--cream);
+    color:var(--maroon);
+    border-radius:50px;
+    padding:8px 16px;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    transition:all 0.25s;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+}
+.menu-pills button:hover{
+    border-color:var(--saffron);
+    color:var(--saffron);
+    transform:translateY(-1px);
+}
+.menu-pills button.active{
+    background:linear-gradient(135deg,var(--saffron),var(--saffron-deep));
+    color:#fff;
+    border-color:transparent;
+    box-shadow:var(--saffron-glow);
+}
+.pill-count{
+    background:rgba(74,14,14,0.08);
+    border-radius:999px;
+    padding:1px 8px;
+    font-size:11px;
+    font-weight:800;
+}
+.menu-pills button.active .pill-count{
+    background:rgba(255,255,255,0.25);
+}
+html[data-theme="dark"] .menu-pills button{background:var(--cream-2);color:var(--text)}
+html[data-theme="dark"] .menu-pills button.active{color:#fff}
+html[data-theme="dark"] .pill-count{background:rgba(255,255,255,0.1)}
+.menu-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+    gap:28px;
+}
+.menu-grid .food-item{
+    animation: fadeSlideUp 0.5s ease both;
+}
+@keyframes fadeSlideUp{
+    from{opacity:0; transform:translateY(18px)}
+    to{opacity:1; transform:translateY(0)}
+}
+.menu-empty{
+    text-align:center;
+    padding:70px 20px;
+    color:var(--text-soft);
+}
+.empty-emoji{
+    font-size:56px;
+    display:block;
+    margin-bottom:14px;
+    filter:drop-shadow(0 8px 16px rgba(255,213,79,0.4));
+}
+@media(max-width:750px){
+    .sort-box{width:100%}
+    .sort-chips{width:100%}
+}
 html[data-theme="dark"] .menu-count{color:#c9b896}
 html[data-theme="dark"] .menu-pills button{background:var(--cream-2);color:var(--text)}
 html[data-theme="dark"] .menu-pills button.active{color:#fff}
