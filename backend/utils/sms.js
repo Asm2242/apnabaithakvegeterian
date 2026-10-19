@@ -42,10 +42,15 @@ const viaTwoFactor = async (phone, otp) => {
     try { parsed = JSON.parse(body); } catch { /* not json */ }
     console.log(`[sms:2factor] ${phone} -> ${body.slice(0, 300)}`);
     const status = parsed?.Status || parsed?.status;
+    const details = parsed?.Details || "";
     if (!res.ok || (status && /error/i.test(String(status)))) {
-        throw new Error(`2Factor: ${parsed?.Details || body?.slice(0, 200) || `HTTP ${res.status}`}`);
+        throw new Error(`2Factor: ${details || body?.slice(0, 200) || `HTTP ${res.status}`}`);
     }
-    return parsed?.Details || status || "ok";
+    if (/fail/i.test(String(details))) {
+        // gateway accepted the call but did not dispatch — surface the raw body
+        throw new Error(`2Factor: ${body.slice(0, 300)}`);
+    }
+    return details || status || "ok";
 };
 
 const viaTextlocal = async (phone, otp) => {
