@@ -26,8 +26,21 @@ const sendOtpSms = async (phone, otp) => {
             })
         });
         const body = await res.text();
-        if (!res.ok) throw new Error(`MSG91 ${res.status}: ${body}`);
-        console.log(`[otp] MSG91 sent to ${phone}`);
+        let parsed = null;
+        try { parsed = JSON.parse(body); } catch { /* non-json */ }
+        // MSG91 returns HTTP 200 even for failures -> must check body.type
+        const ok = res.ok && (!parsed || parsed.type === "success");
+        if (!ok) {
+            const reason =
+                parsed?.message?.statement ||
+                parsed?.message?.code ||
+                parsed?.error?.message ||
+                body?.slice(0, 300) ||
+                `HTTP ${res.status}`;
+            console.log(`[otp] MSG91 REJECTED ${phone}: ${reason}`);
+            throw new Error(`MSG91: ${reason}`);
+        }
+        console.log(`[otp] MSG91 sent to ${phone} | ${parsed?.message?.statement || "ok"}`);
         return;
     }
     if (process.env.WHATSAPP_TOKEN && process.env.WHATSAPP_PHONE_ID) {
@@ -51,11 +64,6 @@ const sendOtpSms = async (phone, otp) => {
     // no SMS provider configured — log loudly so it is visible in Render logs
     console.log(`[OTP dev] ${phone}: ${otp}`);
 };
-
-// Firebase Phone Auth is the free 10k/month path. When it is not configured
-// (no service account / billing off) the backend OTP is the fallback.
-const firebaseConfigured = () =>
-    !!(process.env.FIREBASE_SERVICE_ACCOUNT || process.env.FIREBASE_KEY_FILE);
 
 // no SMS provider + OTP_DEV_SHOW=1 -> return the code in the response so the
 // app can show it (testing only). Never enable this in production.
@@ -96,8 +104,13 @@ const requestOtp = async (req, res) => {
             ...(devOtpEnabled() ? { devOtp: otp } : {})
         });
     } catch (error) {
-        console.log(error);
-        res.json({ success: false, message: "Could not send OTP" });
+        console.log("[otp] send fail:", error.message);
+        res.json({
+            success: false,
+            message: /MSG91/.test(error.message)
+                ? `SMS nahi gaya: ${error.message.replace("MSG91: ", "")}`
+                : "Could not send OTP"
+        });
     }
 }
 
@@ -169,8 +182,13 @@ const startOtp = async (req, res) => {
             ...(devOtpEnabled() ? { devOtp: otp } : {})
         });
     } catch (error) {
-        console.log(error);
-        res.json({ success: false, message: "Could not send OTP" });
+        console.log("[otp] send fail:", error.message);
+        res.json({
+            success: false,
+            message: /MSG91/.test(error.message)
+                ? `SMS nahi gaya: ${error.message.replace("MSG91: ", "")}`
+                : "Could not send OTP"
+        });
     }
 }
 
@@ -311,3 +329,51 @@ const checkCustomer = async (req, res) => {
 }
 
 export { checkCustomer };
+
+// GET /api/otp/diag — admin diagnostic: MSG91 wallet, sender id, template status.
+// Helps find out WHY the SMS is not landing on the phone.
+const diag = async (req, res) => {
+    const out = {
+        hasAuthKey: !!process.env.MSG91_API_KEY,
+        hasSender: !!process.env.MSG91_SENDER,
+        sender: process.env.MSG91_SENDER || "",
+        hasTemplate: !!process.env.MSG91_TEMPLATE_ID,
+        template: process.env.MSG91_TEMPLATE_ID || "",
+        hasWhatsapp: !!(process.env.WHATSAPP_TOKEN && process.env.WHATSAPP_PHONE_ID),
+        devOtp: devOtpEnabled()
+    };
+    if (!process.env.MSG91_API_KEY) {
+        out.error = "MSG91_API_KEY missing in env";
+        return res.json(out);
+    }
+    try {
+        const w = await fetch("https://api.msg91.com/api/v5/balance", {
+            headers: { authkey: process.env.MSG91_API_KEY }
+        });
+        const wj = await w.json();
+        out.wallet = wj;
+    } catch (e) {
+        out.walletError = e.message;
+    }
+    try {
+        const s = await fetch("https://api.msg91.com/api/v5/sender", {
+            headers: { authkey: process.env.MSG91_API_KEY }
+        });
+        const sj = await s.json();
+        out.senders = Array.isArray(sj) ? sj : (sj.data || sj);
+    } catch (e) {
+        out.senderError = e.message;
+    }
+    try {
+        const t = await fetch("https://api.msg91.com/api/v5/template", {
+            headers: { authkey: process.env.MSG91_API_KEY }
+        });
+        const tj = await t.json();
+        out.templates = Array.isArray(tj) ? tj : (tj.data || tj);
+    } catch (e) {
+        out.templateError = e.message;
+    }
+    res.json(out);
+};
+
+export { diag };
