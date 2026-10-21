@@ -44,5 +44,11 @@ const roleMiddleware = (roles) => {
 const adminAuth = roleMiddleware(['admin']);
 const riderAuth = roleMiddleware(['rider', 'admin']);
 
+// admin only, but token may come from ?token= (for browser links / diagnostics)
+const adminAuthQuery = async (req, res, next) => {
+    if (!req.headers.token && req.query?.token) req.headers.token = req.query.token;
+    return adminAuth(req, res, next);
+};
+
 export default authMiddleware;
-export { adminAuth, riderAuth, roleMiddleware };
+export { adminAuth, riderAuth, roleMiddleware, adminAuthQuery };

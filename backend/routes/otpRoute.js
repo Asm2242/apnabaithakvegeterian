@@ -1,6 +1,6 @@
 import express from 'express';
 import { requestOtp, verifyOtp, startOtp, loginWithOtp, checkCustomer, fireLogin, diag, testSend } from '../controllers/otpController.js';
-import authMiddleware from '../middleware/auth.js';
+import authMiddleware, { adminAuthQuery } from '../middleware/auth.js';
 
 const otpRouter = express.Router();
 
@@ -12,9 +12,9 @@ otpRouter.post("/check", checkCustomer);
 otpRouter.post("/start", startOtp);
 otpRouter.post("/login", loginWithOtp);
 otpRouter.post("/firelogin", fireLogin);
-// diagnostics (no auth — shows config only, no secrets)
-otpRouter.get("/diag", diag);
-otpRouter.get("/testsend", testSend);
-otpRouter.post("/testsend", testSend);
+// diagnostics — ADMIN ONLY (these can send real SMS, must not be public)
+otpRouter.get("/diag", adminAuthQuery, diag);
+otpRouter.get("/testsend", adminAuthQuery, testSend);
+otpRouter.post("/testsend", adminAuthQuery, testSend);
 
 export default otpRouter;
