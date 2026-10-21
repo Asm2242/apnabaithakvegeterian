@@ -9,6 +9,7 @@ const MAX_ATTEMPTS = 5;
 const MAX_REQUESTS_PER_10MIN = 5;
 
 const isIndianMobile = (phone) => /^[6-9]\d{9}$/.test(phone);
+const DEFAULT_PROFILE_NAME = "Abhigyan singh";
 const pepper = () => process.env.OTP_PEPPER || "apna-baithak-dev-pepper-change-me";
 const hashOtp = (otp) => crypto.createHash("sha256").update(`${otp}:${pepper()}`).digest("hex");
 const newOtp = () => String(crypto.randomInt(100000, 1000000));
@@ -177,7 +178,7 @@ const loginWithOtp = async (req, res) => {
         let user = await userModel.findOne({ phone });
         if (!user) {
             user = await new userModel({
-                name: (name || "").trim() || `Guest ${phone.slice(-4)}`,
+                name: (name || "").trim() || DEFAULT_PROFILE_NAME,
                 email: `91${phone}@otp.apnabaithak.com`,
                 password: crypto.randomBytes(24).toString("hex"),
                 role: "customer",
@@ -241,7 +242,7 @@ const fireLogin = async (req, res) => {
         let user = await userModel.findOne({ phone: m });
         if (!user) {
             user = await new userModel({
-                name: (name || "").trim() || `Guest ${m.slice(-4)}`,
+                name: (name || "").trim() || DEFAULT_PROFILE_NAME,
                 email: `91${m}@otp.apnabaithak.com`,
                 password: crypto.randomBytes(24).toString("hex"),
                 role: "customer",

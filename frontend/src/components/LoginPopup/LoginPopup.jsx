@@ -6,6 +6,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import PropTypes from "prop-types";
 import { fbSend, fbVerify, fbReset, fbErrorText } from "../../lib/firebase";
+import { DEFAULT_PROFILE_NAME } from "../../lib/profile";
 
 // Step 1: enter number only.
 // Step 2a returning customer: "Welcome back, NAME!" + OTP.
@@ -14,7 +15,7 @@ const LoginPopup = ({ setShowLogin }) => {
   const { setToken, url, loadCartData } = useContext(StoreContext);
   const [step, setStep] = useState(1);
   const [phone, setPhone] = useState("");
-  const [name, setName] = useState("");
+  const [name, setName] = useState(DEFAULT_PROFILE_NAME);
   const [knownName, setKnownName] = useState("");
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
@@ -124,7 +125,7 @@ const LoginPopup = ({ setShowLogin }) => {
         const idToken = await fbVerify(code);
         const res = await axios.post(url + "/api/otp/firelogin", {
           idToken,
-          name: knownName || name,
+          name: knownName || name.trim() || DEFAULT_PROFILE_NAME,
         });
         if (res.data.success) {
           await finish(res.data.token, res.data.name);
@@ -145,7 +146,7 @@ const LoginPopup = ({ setShowLogin }) => {
       const res = await axios.post(url + "/api/otp/login", {
         phone,
         otp: code,
-        name: knownName || name,
+        name: knownName || name.trim() || DEFAULT_PROFILE_NAME,
       });
       if (res.data.success) {
         await finish(res.data.token, res.data.name);

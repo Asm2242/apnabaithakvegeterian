@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { StoreContext } from "../../Context/StoreContext";
 import "./OtpGate.css";
 import { fbSend, fbVerify, fbReset, fbErrorText } from "../../lib/firebase";
+import { DEFAULT_PROFILE_NAME } from "../../lib/profile";
 import PropTypes from "prop-types";
 
 // Start page: Step 1 number only -> Step 2a name shown / 2b name asked + OTP.
@@ -12,7 +13,7 @@ const OtpGate = ({ onDone }) => {
   const { url, setToken, loadCartData } = useContext(StoreContext);
   const [step, setStep] = useState(1);
   const [phone, setPhone] = useState("");
-  const [name, setName] = useState("");
+  const [name, setName] = useState(DEFAULT_PROFILE_NAME);
   const [knownName, setKnownName] = useState("");
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
@@ -93,7 +94,7 @@ const OtpGate = ({ onDone }) => {
         const idToken = await fbVerify(code);
         const res = await axios.post(url + "/api/otp/firelogin", {
           idToken,
-          name: knownName || name,
+          name: knownName || name.trim() || DEFAULT_PROFILE_NAME,
         });
         if (res.data.success) {
           await finishLogin(res.data.token, res.data.name);
@@ -114,7 +115,7 @@ const OtpGate = ({ onDone }) => {
       const res = await axios.post(url + "/api/otp/login", {
         phone,
         otp: code,
-        name: knownName || name,
+        name: knownName || name.trim() || DEFAULT_PROFILE_NAME,
       });
       if (res.data.success) {
         await finishLogin(res.data.token, res.data.name);
