@@ -38,35 +38,22 @@ const OtpGate = ({ onDone }) => {
   const goStep2 = async () => {
     if (!phoneValid || busy) return;
     setBusy(true);
+    setKnownName("");
+    // No SMS OTP for now — directly log in with the phone number.
     try {
-      const check = await axios.post(url + "/api/otp/check", { phone });
-      setKnownName(check.data.success && check.data.exists ? check.data.name || "" : "");
-    } catch { /* name optional */ }
-    // try FREE Firebase OTP first, fall back to backend OTP
-    try {
-      await fbSend(phone);
-      setFbMode(true);
-      setStep(2);
-      startCooldown(30);
-      toast.success("OTP sent to +91 " + phone);
-    } catch (e) {
-      console.error("[fb-send]", e?.code || e?.message);
-      fbReset();
-      setFbMode(false);
-      try {
-        const res = await axios.post(url + "/api/otp/start", { phone });
-        if (res.data.success) {
-          setStep(2);
-          startCooldown(res.data.resendAfter || 30);
-          if (res.data.devOtp) {
-            toast.success(`OTP sent — test code ${res.data.devOtp}`);
-          } else {
-            toast.success("OTP sent to +91 " + phone);
-          }
-        } else toast.error(res.data.message);
-      } catch {
-        toast.error("Could not send OTP");
+      const res = await axios.post(url + "/api/otp/login", {
+        phone,
+        otp: "000000",
+        name: name.trim() || DEFAULT_PROFILE_NAME,
+      });
+      if (res.data.success) {
+        await finishLogin(res.data.token, res.data.name);
+        setBusy(false);
+        return;
       }
+      toast.error(res.data.message || "Login failed");
+    } catch {
+      toast.error("Login failed");
     }
     setBusy(false);
   };

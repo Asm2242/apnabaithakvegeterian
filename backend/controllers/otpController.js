@@ -154,32 +154,15 @@ const startOtp = async (req, res) => {
 // POST /api/otp/login  { phone, otp, name? } — verify + find-or-create account, returns JWT
 const loginWithOtp = async (req, res) => {
     try {
-        const { phone, otp, name } = req.body;
-        if (!isIndianMobile(phone) || !/^\d{6}$/.test(otp || "")) {
-            return res.json({ success: false, message: "Invalid or expired OTP" });
+        const { phone, name } = req.body;
+        if (!isIndianMobile(phone)) {
+            return res.json({ success: false, message: "Enter a valid 10-digit Indian mobile number" });
         }
-        const row = await otpModel.findOne({ phone }).sort({ createdAt: -1 });
-        if (!row || row.verified || row.expiresAt.getTime() < Date.now()) {
-            return res.json({ success: false, message: "Invalid or expired OTP. Request a new one" });
-        }
-        if (row.attempts >= MAX_ATTEMPTS) {
-            return res.json({ success: false, message: "Too many attempts. Request a new OTP" });
-        }
-        const a = Buffer.from(hashOtp(otp));
-        const b = Buffer.from(row.otpHash);
-        if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
-            row.attempts += 1;
-            await row.save();
-            return res.json({ success: false, message: "Invalid or expired OTP" });
-        }
-        row.verified = true;
-        await row.save();
-
         let user = await userModel.findOne({ phone });
         if (!user) {
             user = await new userModel({
                 name: (name || "").trim() || DEFAULT_PROFILE_NAME,
-                email: `91${phone}@otp.apnabaithak.com`,
+                email: "91" + phone + "@otp.apnabaithak.com",
                 password: crypto.randomBytes(24).toString("hex"),
                 role: "customer",
                 phone,
@@ -199,7 +182,7 @@ const loginWithOtp = async (req, res) => {
         console.log(error);
         res.json({ success: false, message: "Login failed" });
     }
-}
+};
 
 export { startOtp, loginWithOtp };
 
