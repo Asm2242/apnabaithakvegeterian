@@ -8,12 +8,12 @@ import "./Track.css";
 
 // Live tracking: animated status + ETA + always-on map (no number chart)
 const STATUS_INFO = {
-  PLACED: { emoji: "🎉", title: "Order received!", sub: "Restaurant confirm kar raha hai…", eta: "~35 min left" },
+  PLACED: { emoji: "🎉", title: "Order received!", sub: "The restaurant is confirming your order…", eta: "~35 min left" },
   CONFIRMED: { emoji: "✅", title: "Restaurant confirmed!", sub: "Kitchen me bheja gaya…", eta: "30 minutes left" },
-  PREPARING: { emoji: "👨‍🍳", title: "Your food is being made…", sub: "Fresh tawa par hai…", eta: "20 minutes left" },
-  READY: { emoji: "📦", title: "Packing your order…", sub: "Rider dhoonda ja raha hai…", eta: "10 minutes left" },
-  OUT_FOR_DELIVERY: { emoji: "🛵", title: "Rider is on the way!", sub: "Live map me dekho…", eta: "Arriving soon" },
-  DELIVERED: { emoji: "🎉", title: "Delivered! Enjoy!", sub: "Rate karna na bhoolo ⭐", eta: "" },
+  PREPARING: { emoji: "👨‍🍳", title: "Your food is being made…", sub: "Fresh off the tawa…", eta: "20 minutes left" },
+  READY: { emoji: "📦", title: "Packing your order…", sub: "Your rider is on the way…", eta: "10 minutes left" },
+  OUT_FOR_DELIVERY: { emoji: "🛵", title: "Rider is on the way!", sub: "Watch it live on the map…", eta: "Arriving soon" },
+  DELIVERED: { emoji: "🎉", title: "Delivered! Enjoy!", sub: "Don't forget to rate us ⭐", eta: "" },
   CANCELLED: { emoji: "❌", title: "Order cancelled", sub: "Call +91 94549 99442 for help.", eta: "" },
 };
 
@@ -182,7 +182,7 @@ const Track = () => {
         </div>
         {botOpen && !closed && (
           <div className="aibot">
-            <p>Cancel, item nikalo ya badlo — request bhejo, restaurant turant dekhega:</p>
+            <p>Cancel, remove or change an item — send a request and the restaurant will see it instantly:</p>
             <div className="aibot-types">
               {[
                 ["cancel", "Cancel order"],
@@ -202,7 +202,7 @@ const Track = () => {
             <textarea
               value={reqText}
               onChange={(e) => setReqText(e.target.value)}
-              placeholder="Jaise: 'Paneer momos nikalo' ya 'address change karna hai'…"
+              placeholder="e.g. 'Remove paneer momos' or 'I need to change my address'…"
               rows={2}
             />
             <button onClick={sendRequest} disabled={sending} className="send-btn">

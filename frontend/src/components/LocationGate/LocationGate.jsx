@@ -54,7 +54,7 @@ const LocationGate = ({ onDone }) => {
       pick([p.lat, p.lng]);
       toast.success("Location mil gayi!");
     } catch {
-      toast.error("Location nahi mili — map par tap karo");
+      toast.error("Location not found — tap on the map");
     }
     setLocating(false);
   };
@@ -69,13 +69,13 @@ const LocationGate = ({ onDone }) => {
     <div className="otp-gate">
       <div className="otp-gate-card loc-gate-card">
         <p className="otp-gate-logo">📍 Delivery location</p>
-        <p className="otp-gate-sub">Apna kahan khana bhejein?</p>
+        <p className="otp-gate-sub">Where should we deliver your food?</p>
         <div className="loc-gate-btns">
           <button onClick={useGps} disabled={locating} className="otp-gate-btn">
-            {locating ? "Dhoond raha hai…" : "📡 Current location use karo"}
+            {locating ? "Finding your location…" : "📡 Use my current location"}
           </button>
         </div>
-        <p className="loc-or">— ya map par tap karke pin lagao —</p>
+        <p className="loc-or">— or tap on the map to drop a pin —</p>
         <MapContainer center={pos || fallback} zoom={14} scrollWheelZoom={false} className="loc-gate-map">
           <Recenter pos={pos} />
           <TileLayer
@@ -100,7 +100,7 @@ const LocationGate = ({ onDone }) => {
             onClick={() => done(pos ? { lat: pos[0], lng: pos[1] } : null)}
             className="otp-gate-btn"
           >
-            {pos ? "✅ Confirm pin" : "Confirm (bina pin)"}
+            {pos ? "✅ Confirm pin" : "Confirm (without pin)"}
           </button>
           <button onClick={() => done(null)} className="otp-gate-link">
             Skip

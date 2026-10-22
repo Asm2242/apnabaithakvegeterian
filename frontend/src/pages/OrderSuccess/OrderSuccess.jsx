@@ -77,7 +77,7 @@ const OrderSuccess = () => {
             <svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="25" /><path d="M17 17l18 18M35 17L17 35" /></svg>
           </div>
           <h2>Something failed</h2>
-          <p>Payment nahi hua ya order nahi mila. Paisa kata ho to 3-5 din me wapas ayega.</p>
+          <p>Payment was not completed or the order was not found. If any amount was deducted, it will be refunded within 3-5 days.</p>
           <div className="fail-btns">
             <Link to="/cart" className="track-link">Try again</Link>
             <Link to="/myorders" className="ghost-link">My orders</Link>

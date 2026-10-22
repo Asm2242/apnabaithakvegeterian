@@ -57,8 +57,8 @@ function Settings({ token }) {
             </span>
           </b>
           <small>
-            OFF karte hi customers ko checkout par online payment option nahi dikhega —
-            sirf Cash on Delivery rahega. Naye orders par turant apply hota hai.
+            When switched off, customers will not see the online payment option at checkout —
+            only Cash on Delivery will be available. It applies instantly to new orders.
           </small>
         </div>
         <Switch
@@ -73,7 +73,7 @@ function Settings({ token }) {
           <b>Razorpay Keys</b>
           <small>
             Live key ID <code>{import.meta.env.VITE_RAZORPAY_KEY_ID || "set in Render env"}</code>.
-            Secret sirf Render environment me hai — kabhi yaha ya browser me na aaye.
+            The secret stays only in the Render environment — never paste it here or in the browser.
           </small>
         </div>
       </div>
@@ -523,7 +523,7 @@ function Requests({ token }) {
 
 function Chat({ token }) {
   const [msgs, setMsgs] = useState([
-    { from: "bot", text: "Namaste! 🙏 Main Apna Baithak helper hun. Neeche button dabao ya likho — jaise 'advance all', 'report', 'chai hide karo'." }
+    { from: "bot", text: "Hello! 🙏 I'm the Apna Baithak assistant. Tap a button below or type — like 'advance all', 'report', 'hide chai'." }
   ]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -547,7 +547,7 @@ function Chat({ token }) {
       const res = await api(token).post("/api/admin/bot", { message: msg });
       setMsgs((m) => [...m, { from: "bot", text: res.data.reply || res.data.message }]);
     } catch {
-      setMsgs((m) => [...m, { from: "bot", text: "Bot error. Phir try karo." }]);
+      setMsgs((m) => [...m, { from: "bot", text: "Bot error. Please try again." }]);
     }
     setBusy(false);
   };
@@ -558,7 +558,7 @@ function Chat({ token }) {
     setZipBusy(true);
     setPending(null);
     setMapping({});
-    setMsgs((m) => [...m, { from: "me", text: `📦 ${file.name} upload kar raha hun…` }]);
+    setMsgs((m) => [...m, { from: "me", text: `📦 ${file.name} uploading…` }]);
     try {
       const fd = new FormData();
       fd.append("zip", file);
@@ -576,10 +576,10 @@ function Chat({ token }) {
           if (foods.data.success) setDishes(foods.data.data);
         }
       } else if (d.unmatched?.length) {
-        setMsgs((m) => [...m, { from: "bot", text: `❌ Match nahi hui: ` + d.unmatched.slice(0, 10).join(", ") }]);
+        setMsgs((m) => [...m, { from: "bot", text: `❌ Could not match: ` + d.unmatched.slice(0, 10).join(", ") }]);
       }
     } catch {
-      setMsgs((m) => [...m, { from: "bot", text: "Zip upload fail. 50MB se chhota .zip bhejo." }]);
+      setMsgs((m) => [...m, { from: "bot", text: "Zip upload failed. Please send a .zip smaller than 50MB." }]);
     }
     setZipBusy(false);
     e.target.value = "";
@@ -591,7 +591,7 @@ function Chat({ token }) {
       if (mapping[s.file]) map[s.file] = mapping[s.file];
     }
     if (Object.keys(map).length === 0) {
-      setMsgs((m) => [...m, { from: "bot", text: "Koi dish select nahi ki. Dropdown se chuno." }]);
+      setMsgs((m) => [...m, { from: "bot", text: "No dish selected. Please choose from the dropdown." }]);
       return;
     }
     setZipBusy(true);
@@ -617,7 +617,7 @@ function Chat({ token }) {
         ))}
         {pending && (
           <div className="msg bot suggest-box">
-            <b>🤔 Spelling mismatch? Sahi dish chuno:</b>
+            <b>🤔 Spelling mismatch? Please choose the right dish:</b>
             {pending.suggestions.map((s) => (
               <div key={s.file} className="suggest-row">
                 <span className="suggest-file">{s.file}</span>
@@ -625,7 +625,7 @@ function Chat({ token }) {
                   value={mapping[s.file] || ""}
                   onChange={(e) => setMapping((mp) => ({ ...mp, [s.file]: e.target.value }))}
                 >
-                  <option value="">— chhodo —</option>
+                  <option value="">— skip —</option>
                   {s.options.map((o) => (
                     <option key={o.id} value={o.id}>{o.name} ({Math.round(o.score * 100)}%)</option>
                   ))}
@@ -638,7 +638,7 @@ function Chat({ token }) {
               </div>
             ))}
             <button className="confirm-btn" onClick={confirmMapping} disabled={zipBusy}>
-              {zipBusy ? "Lag rahi hain…" : "✅ Accept & lagao"}
+              {zipBusy ? "Applying…" : "✅ Accept & apply"}
             </button>
           </div>
         )}
@@ -663,7 +663,7 @@ function Chat({ token }) {
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Likho… jaise 'samosa hide karo'"
+          placeholder="Type... e.g. 'hide samosa'"
         />
         <button type="submit" disabled={busy}>➤</button>
       </form>

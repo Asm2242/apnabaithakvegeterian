@@ -81,9 +81,9 @@ const AddressPopup = ({ onConfirm, onClose }) => {
     try {
       const p = await getPos();
       pick([p.lat, p.lng]);
-      toast.success("Current location pin ho gaya!");
+      toast.success("Current location pinned!");
     } catch {
-      toast.error("Location nahi mili — map par tap karo");
+      toast.error("Location not found — tap on the map");
     }
     setLocating(false);
   };
@@ -133,7 +133,7 @@ const AddressPopup = ({ onConfirm, onClose }) => {
         onConfirm({ addr: null, pin, isNew: true });
       }
     } catch {
-      toast.error("Save fail. Phir try karo.");
+      toast.error("Save failed. Please try again.");
     }
     setBusy(false);
   };
@@ -141,7 +141,7 @@ const AddressPopup = ({ onConfirm, onClose }) => {
   return (
     <div className="addr-pop">
       <div className="addr-pop-card">
-        <h3>📍 Delivery address chuno</h3>
+        <h3>📍 Choose delivery address</h3>
 
         {list.length > 0 && (
           <div className="addr-list">
@@ -180,7 +180,7 @@ const AddressPopup = ({ onConfirm, onClose }) => {
 
         <div className="addr-map-row">
           <button type="button" onClick={useGps} disabled={locating} className="gps-btn">
-            {locating ? "Dhoond raha hai…" : "📡 Current location par pin"}
+            {locating ? "Finding your location…" : "📡 Pin at current location"}
           </button>
         </div>
         <MapContainer center={pin || fallback} zoom={15} scrollWheelZoom={false} className="addr-map">
@@ -204,8 +204,8 @@ const AddressPopup = ({ onConfirm, onClose }) => {
         </MapContainer>
         <p className="addr-hint">
           {pin
-            ? `Pin: ${pin[0].toFixed(5)}, ${pin[1].toFixed(5)} — tap karke badlo`
-            : "Map par tap karo ya GPS dabao"}
+            ? `Pin: ${pin[0].toFixed(5)}, ${pin[1].toFixed(5)} — tap to change`
+            : "Tap on the map or use GPS"}
         </p>
 
         <div className="addr-actions">

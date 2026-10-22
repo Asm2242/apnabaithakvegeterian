@@ -81,10 +81,10 @@ const OrderMap = ({ order, livePos }) => {
       </MapContainer>
       {cust ? (
         <p className="dist-line">
-          📍 Customer pin{cust && livePos ? ` — ${kmBetween(livePos, cust).toFixed(1)} km from you` : " locked"}
+          📍 Customer pin{cust && livePos ? ` — ${kmBetween(livePos, cust).toFixed(1)} km from you` : " not pinned"}
         </p>
       ) : (
-        <p className="no-pin">Customer ne pin nahi lagaya — address se jao.</p>
+        <p className="no-pin">The customer did not drop a pin — go by the address.</p>
       )}
     </div>
   );
@@ -223,7 +223,7 @@ const App = () => {
   const markPickedUp = (orderId) => setStatus(orderId, "OUT_FOR_DELIVERY");
 
   const collectMoney = async (orderId) => {
-    if (!window.confirm("Cash mil gaya? Confirm karo.")) return;
+    if (!window.confirm("Cash received? Please confirm.")) return;
     try {
       const res = await axios.post(API + "/api/rider/collect", { orderId }, auth);
       if (res.data.success) {
@@ -325,8 +325,8 @@ const App = () => {
             {onDuty
               ? gps?.accuracy != null
                 ? `🛰️ GPS ±${gps.accuracy}m ${gps.accuracy > 100 ? "(weak — bahar jao)" : "(accurate ✓)"}`
-                : "🛰️ GPS dhoond raha hai… (location ON karo, bahar jao)"
-              : "Duty OFF hai — GPS band"}
+                : "🛰️ Finding GPS signal… (turn on location, step outside)"
+              : "Duty is OFF — GPS is off"}
           </p>
         </div>
         <div>
@@ -392,12 +392,12 @@ const App = () => {
           <div className="qr-box" onClick={(e) => e.stopPropagation()}>
             <h3>Scan & Pay ₹{qrOrder.amount}</h3>
             {qrBusy && !qrUrl ? (
-              <p>Razorpay link ban raha hai…</p>
+              <p>Creating Razorpay link…</p>
             ) : qrUrl ? (
               <>
                 <QRCodeSVG value={qrUrl} size={230} />
                 <p>Apna Baithak • Razorpay secure</p>
-                <p className="qr-note">Customer scan kare → UPI/card se pay</p>
+                <p className="qr-note">Customer scans → pay via UPI/card</p>
                 <button onClick={checkPaid} disabled={qrBusy} className="check-btn">
                   {qrBusy ? "Checking…" : "✓ Check payment"}
                 </button>

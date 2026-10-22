@@ -54,11 +54,11 @@ const LocationPicker = ({ value, onChange }) => {
     try {
       const p = await getPos();
       if (p.accuracy && p.accuracy > 500) {
-        toast.info("GPS weak hai — bahar khule me try karo");
+        toast.info("GPS signal is weak — try again in an open area");
       }
       pick([p.lat, p.lng]);
     } catch {
-      toast.error("Location nahi mili — map par tap karo");
+      toast.error("Location not found — tap on the map");
     }
     setLocating(false);
   };
@@ -92,8 +92,8 @@ const LocationPicker = ({ value, onChange }) => {
       </MapContainer>
       <p className="loc-hint">
         {pos
-          ? `Pin: ${pos[0].toFixed(5)}, ${pos[1].toFixed(5)} — rider seedha yahin ayega`
-          : "Map par tap karo ya GPS dabao — rider seedha pin par ayega"}
+          ? `Pin: ${pos[0].toFixed(5)}, ${pos[1].toFixed(5)} — the rider will come straight here`
+          : "Tap on the map or use GPS — the rider will come straight to the pin"}
       </p>
     </div>
   );

@@ -95,7 +95,7 @@ const PlaceOrder = () => {
   // ---- step 1: pin ----
   const savePin = () => {
     if (mode === "delivery" && !pin) {
-      toast.error("Map par pin lagao ya Current location dabao");
+      toast.error("Drop a pin on the map or use your current location");
       return;
     }
     if (pin) localStorage.setItem("ab_pin", JSON.stringify(pin));
@@ -167,7 +167,7 @@ const PlaceOrder = () => {
       return;
     }
     if (data.altPhone && !/^[6-9]\d{9}$/.test(cleanMobile(data.altPhone))) {
-      toast.error("Alt number galat hai (optional hai — khaali chhodo ya sahi dalo)");
+      toast.error("Alternate number is invalid (optional — leave it blank or enter a valid number)");
       return;
     }
     if (!phoneVerified) {
@@ -269,7 +269,7 @@ const PlaceOrder = () => {
 
       const ok = await loadRazorpayScript();
       if (!ok || !rzpKey) {
-        toast.error("Payment gateway load nahi hua. Cash on Delivery chuno ya thodi der bahi try karo.");
+        toast.error("Payment gateway could not load. Choose Cash on Delivery or try again in a moment.");
         await axios.post(url + "/api/order/failed", { orderId: response.data.orderId }, { headers: { token } });
         setPlacing(false);
         return;
@@ -365,8 +365,8 @@ const PlaceOrder = () => {
 
       {step === "pin" && mode === "delivery" && (
         <div className="step-card">
-          <h2>📍 Apni location pin karo</h2>
-          <p className="muted">Rider seedha isi pin par ayega. Tap karo ya GPS dabao.</p>
+          <h2>📍 Drop your location pin</h2>
+          <p className="muted">The rider will come straight to this pin. Tap the map or use GPS.</p>
           <LocationPicker
             value={pin ? [pin.lat, pin.lng] : null}
             onChange={setPin}
@@ -454,7 +454,7 @@ const PlaceOrder = () => {
             </div>
             {!onlineOn && (
               <p className="pay-off-note">
-                Online payment abhi temporarily band hai — Cash on Delivery chuna gaya hai.
+                Online payment is temporarily disabled — Cash on Delivery has been selected.
               </p>
             )}
             <button type="button" className="back-btn" onClick={() => setStep("details")}>← Details</button>

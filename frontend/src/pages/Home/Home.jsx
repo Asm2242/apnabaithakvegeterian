@@ -8,7 +8,7 @@ import { StoreContext } from "../../Context/StoreContext";
 import "./Home.css";
 
 const TESTIMONIALS = [
-  { name: "Rahul Verma", area: "Eldeco City", text: "Dussehra thali was amazing — pure ghar jaisa swaad. Family loved it!", stars: 5 },
+  { name: "Rahul Verma", area: "Eldeco City", text: "Dussehra thali was amazing — pure home-style taste. The whole family loved it!", stars: 5 },
   { name: "Priya Singh", area: "IIM Road", text: "Best pure veg food in Lucknow. Hot delivery, great packaging.", stars: 5 },
   { name: "Amit Kumar", area: "Gomti Nagar", text: "Ordered the Utsav combo for 6 people. Value for money and tasty.", stars: 4 },
   { name: "Sneha Gupta", area: "Hazratganj", text: "Momos and maggi taste like street style but hygienic. Highly recommended!", stars: 5 },

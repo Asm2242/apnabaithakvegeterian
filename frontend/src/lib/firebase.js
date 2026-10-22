@@ -50,20 +50,20 @@ export const fbErrorText = (code) => {
   switch (code) {
     case "auth/invalid-otp":
     case "auth/invalid-verification-code":
-      return "OTP galat hai — dhyan se type karo";
+      return "Incorrect OTP — please type it carefully";
     case "auth/code-expired":
-      return "OTP expire ho gaya — Resend karo";
+      return "OTP has expired — please resend";
     case "auth/billing-not-enabled":
-      return "SMS provider band hai — shop ko contact karo";
+      return "SMS service is unavailable — please contact the restaurant";
     case "auth/unauthorized-domain":
-      return "Ye site allow nahi hai — shop ko contact karo";
+      return "This site is not allowed — please contact the restaurant";
     case "auth/operation-not-allowed":
-      return "Phone login band hai — shop ko contact karo";
+      return "Phone login is disabled — please contact the restaurant";
     case "auth/too-many-requests":
-      return "Bahut zyada try — thodi der baad karo";
+      return "Too many attempts — please try again later";
     case "auth/network-request-failed":
       return "Network error — check connection";
     default:
-      return "OTP verify nahi hua — Resend karo";
+      return "Could not verify the OTP — please resend";
   }
 };
