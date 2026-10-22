@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wizarding World Fan Hub</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <canvas id="particles"></canvas>
+
+    <nav class="main-nav">
+        <div class="nav-brand">
+            <span class="brand-icon">&#9760;</span>
+            <span class="brand-text">Wizarding World</span>
+        </div>
+        <div class="nav-links" id="navLinks">
+            <a href="#home" class="nav-link active">Home</a>
+            <a href="#houses" class="nav-link">Houses</a>
+            <a href="#magic" class="nav-link">Magic</a>
+            <a href="#artifacts" class="nav-link">Artifacts</a>
+        </div>
+        <div class="nav-auth" id="navAuth">
+            <button class="btn btn-outline" onclick="showModal('login')">Log In</button>
+            <button class="btn btn-gold" onclick="showModal('signup')">Sign Up</button>
+        </div>
+        <div class="nav-user hidden" id="navUser">
+            <span id="userName"></span>
+            <span id="userHouse" class="house-badge"></span>
+            <button class="btn btn-outline btn-sm" onclick="logout()">Log Out</button>
+        </div>
+    </nav>
+
+    <section id="home" class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title animated-title">
+                <span class="title-line">Welcome to the</span>
+                <span class="title-line gold">Wizarding World</span>
+            </h1>
+            <p class="hero-subtitle">A Fan-Made Tribute to the Magic of Harry Potter</p>
+            <div class="hero-buttons">
+                <button class="btn btn-gold btn-lg" onclick="showModal('signup')">Begin Your Journey</button>
+                <a href="#houses" class="btn btn-outline btn-lg">Explore Houses</a>
+            </div>
+        </div>
+        <div class="hero-scroll">
+            <div class="snitch">&#9679;</div>
+            <span>Scroll to explore</span>
+        </div>
+    </section>
+
+    <section id="houses" class="section houses-section">
+        <h2 class="section-title animated-reveal">The Four Houses of Hogwarts</h2>
+        <div class="houses-grid" id="housesGrid"></div>
+    </section>
+
+    <section id="magic" class="section magic-section">
+        <h2 class="section-title animated-reveal">Magical Arts</h2>
+        <div class="magic-grid">
+            <div class="magic-card animated-card" data-spell="Expecto Patronum">
+                <div class="spell-icon patronus"></div>
+                <h3>Expecto Patronum</h3>
+                <p>Conjure your Patronus — a guardian of pure light and hope.</p>
+                <button class="btn btn-gold btn-sm" onclick="castSpell('Expecto Patronum')">Cast Spell</button>
+            </div>
+            <div class="magic-card animated-card" data-spell="Wingardium Leviosa">
+                <div class="spell-icon leviosa"></div>
+                <h3>Wingardium Leviosa</h3>
+                <p>Levitate objects with a swish and flick.</p>
+                <button class="btn btn-gold btn-sm" onclick="castSpell('Wingardium Leviosa')">Cast Spell</button>
+            </div>
+            <div class="magic-card animated-card" data-spell="Lumos">
+                <div class="spell-icon lumos"></div>
+                <h3>Lumos</h3>
+                <p>Light up the darkness with the tip of your wand.</p>
+                <button class="btn btn-gold btn-sm" onclick="castSpell('Lumos')">Cast Spell</button>
+            </div>
+            <div class="magic-card animated-card" data-spell="Expelliarmus">
+                <div class="spell-icon expelliarmus"></div>
+                <h3>Expelliarmus</h3>
+                <p>Disarm your opponent with this classic charm.</p>
+                <button class="btn btn-gold btn-sm" onclick="castSpell('Expelliarmus')">Cast Spell</button>
+            </div>
+        </div>
+        <div class="spell-effect hidden" id="spellEffect">
+            <div class="spell-burst" id="spellBurst"></div>
+            <p class="spell-text" id="spellText"></p>
+        </div>
+    </section>
+
+    <section id="artifacts" class="section artifacts-section">
+        <h2 class="section-title animated-reveal">Legendary Artifacts</h2>
+        <div class="artifacts-carousel" id="artifactsCarousel">
+            <div class="artifact-slide active" data-artifact="Elder Wand">
+                <div class="artifact-icon elder-wand"></div>
+                <h3>The Elder Wand</h3>
+                <p>The Deathstick, the Wand of Destiny. The most powerful wand ever created.</p>
+            </div>
+            <div class="artifact-slide" data-artifact="Invisibility Cloak">
+                <div class="artifact-icon cloak"></div>
+                <h3>The Invisibility Cloak</h3>
+                <p>One of the three Deathly Hallows. A cloak that truly renders its wearer invisible.</p>
+            </div>
+            <div class="artifact-slide" data-artifact="Resurrection Stone">
+                <div class="artifact-icon stone"></div>
+                <h3>The Resurrection Stone</h3>
+                <p>The second Deathly Hallow, said to recall shades of the dead.</p>
+            </div>
+            <div class="artifact-slide" data-artifact="Sorcerer's Stone">
+                <div class="artifact-icon philosopher-stone"></div>
+                <h3>The Philosopher's Stone</h3>
+                <p>A legendary substance capable of turning metal into gold and producing the Elixir of Life.</p>
+            </div>
+        </div>
+        <div class="carousel-controls">
+            <button class="btn btn-outline btn-sm" onclick="changeSlide(-1)">&larr; Previous</button>
+            <span id="slideIndicator">1 / 4</span>
+            <button class="btn btn-outline btn-sm" onclick="changeSlide(1)">Next &rarr;</button>
+        </div>
+    </section>
+
+    <section id="quotes" class="section quotes-section">
+        <h2 class="section-title animated-reveal">Words of Wisdom</h2>
+        <div class="quote-display animated-reveal">
+            <blockquote id="quoteText">"Happiness can be found even in the darkest of times, if one only remembers to turn on the light."</blockquote>
+            <cite id="quoteAuthor">— Albus Dumbledore</cite>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="nextQuote()">Another Quote</button>
+    </section>
+
+    <footer class="main-footer">
+        <p>This is an unofficial fan site. Harry Potter and all related characters are trademarks of J.K. Rowling and Warner Bros.</p>
+        <p>&copy; 2026 Wizarding World Fan Hub. Made with magic and code.</p>
+    </footer>
+
+    <div class="modal-overlay hidden" id="modalOverlay" onclick="hideModal()">
+        <div class="modal" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="hideModal()">&times;</button>
+
+            <div class="modal-content" id="loginModal">
+                <h2 class="modal-title">Welcome Back</h2>
+                <p class="modal-subtitle">Log in to continue your magical journey</p>
+                <form onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="loginEmail">Email</label>
+                        <input type="email" id="loginEmail" required placeholder="your@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" required placeholder="Your password">
+                    </div>
+                    <button type="submit" class="btn btn-gold btn-full">Log In</button>
+                </form>
+                <p class="modal-switch">New here? <a href="#" onclick="showModal('signup')">Create an account</a></p>
+            </div>
+
+            <div class="modal-content hidden" id="signupModal">
+                <h2 class="modal-title">Join the Wizarding World</h2>
+                <p class="modal-subtitle">Create your account and get sorted</p>
+                <form onsubmit="handleSignup(event)">
+                    <div class="form-group">
+                        <label for="signupUsername">Wizard Name</label>
+                        <input type="text" id="signupUsername" required placeholder="e.g. TheChosenOne" minlength="3">
+                    </div>
+                    <div class="form-group">
+                        <label for="signupEmail">Email</label>
+                        <input type="email" id="signupEmail" required placeholder="your@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="signupPassword">Password</label>
+                        <input type="password" id="signupPassword" required placeholder="At least 6 characters" minlength="6">
+                    </div>
+                    <div class="form-group">
+                        <label for="signupHouse">House</label>
+                        <select id="signupHouse">
+                            <option value="Gryffindor">Gryffindor</option>
+                            <option value="Slytherin">Slytherin</option>
+                            <option value="Ravenclaw">Ravenclaw</option>
+                            <option value="Hufflepuff">Hufflepuff</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-gold btn-full">Sign Up</button>
+                </form>
+                <p class="modal-switch">Already a wizard? <a href="#" onclick="showModal('login')">Log in</a></p>
+            </div>
+
+            <div id="authMessage" class="auth-message hidden"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

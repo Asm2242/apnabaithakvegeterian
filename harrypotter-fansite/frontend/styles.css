@@ -1,0 +1,644 @@
+:root {
+    --bg-dark: #0a0a12;
+    --bg-medium: #12121f;
+    --gold: #d4a843;
+    --gold-light: #f0d080;
+    --silver: #c0c0c0;
+    --text: #e8e0d0;
+    --text-muted: #a09888;
+    --gryffindor: #740001;
+    --gryffindor-gold: #d3a625;
+    --slytherin: #1a472a;
+    --slytherin-silver: #aaaaaa;
+    --ravenclaw: #0e1a40;
+    --ravenclaw-bronze: #946b2d;
+    --hufflepuff: #ecb939;
+    --hufflepuff-black: #372e29;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'EB Garamond', Georgia, serif;
+    background: var(--bg-dark);
+    color: var(--text);
+    overflow-x: hidden;
+    line-height: 1.6;
+}
+
+#particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.main-nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 2rem;
+    background: rgba(10, 10, 18, 0.85);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+    border-bottom: 1px solid rgba(212, 168, 67, 0.2);
+    transition: all 0.3s ease;
+}
+
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'Cinzel', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--gold);
+}
+
+.brand-icon {
+    font-size: 1.6rem;
+    animation: pulse-glow 3s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+    0%, 100% { text-shadow: 0 0 8px rgba(212, 168, 67, 0.5); }
+    50% { text-shadow: 0 0 20px rgba(212, 168, 67, 0.9), 0 0 40px rgba(212, 168, 67, 0.3); }
+}
+
+.nav-links {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.nav-link {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 1rem;
+    transition: color 0.3s;
+    position: relative;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: var(--gold-light);
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--gold);
+    transition: width 0.3s;
+}
+
+.nav-link:hover::after, .nav-link.active::after {
+    width: 100%;
+}
+
+.nav-auth {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.nav-user {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.house-badge {
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.house-Gryffindor { background: var(--gryffindor); color: var(--gryffindor-gold); }
+.house-Slytherin { background: var(--slytherin); color: var(--slytherin-silver); }
+.house-Ravenclaw { background: var(--ravenclaw); color: #bebebe; }
+.house-Hufflepuff { background: var(--hufflepuff); color: var(--hufflepuff-black); }
+
+.hero-section {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+    padding: 2rem;
+}
+
+.hero-content {
+    text-align: center;
+    max-width: 800px;
+}
+
+.hero-title {
+    font-family: 'Cinzel', serif;
+    margin-bottom: 1.5rem;
+}
+
+.title-line {
+    display: block;
+    font-size: clamp(2rem, 5vw, 4rem);
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    opacity: 0;
+    animation: fadeUp 1s ease forwards;
+}
+
+.title-line:nth-child(1) { animation-delay: 0.2s; }
+.title-line:nth-child(2) {
+    animation-delay: 0.6s;
+    font-size: clamp(2.5rem, 6vw, 5rem);
+}
+
+.gold {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 30px rgba(212, 168, 67, 0.4));
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.hero-subtitle {
+    font-size: clamp(1rem, 2vw, 1.4rem);
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeUp 1s ease 1s forwards;
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 1s ease 1.4s forwards;
+}
+
+.hero-scroll {
+    position: absolute;
+    bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.snitch {
+    color: var(--gold);
+    font-size: 1.5rem;
+    animation: float 2s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+}
+
+.section {
+    padding: 6rem 2rem;
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.section-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    text-align: center;
+    margin-bottom: 3rem;
+    color: var(--gold);
+}
+
+.houses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+}
+
+.house-card {
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    cursor: pointer;
+}
+
+.house-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+
+.house-card h3 {
+    font-family: 'Cinzel', serif;
+    margin-bottom: 0.5rem;
+}
+
+.house-card p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.house-Gryffindor-card { background: linear-gradient(135deg, rgba(116, 0, 1, 0.2), rgba(211, 166, 37, 0.1)); }
+.house-Slytherin-card { background: linear-gradient(135deg, rgba(26, 71, 42, 0.2), rgba(170, 170, 170, 0.1)); }
+.house-Ravenclaw-card { background: linear-gradient(135deg, rgba(14, 26, 64, 0.2), rgba(148, 107, 45, 0.1)); }
+.house-Hufflepuff-card { background: linear-gradient(135deg, rgba(236, 185, 57, 0.15), rgba(55, 46, 41, 0.2)); }
+
+.magic-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+}
+
+.magic-card {
+    background: var(--bg-medium);
+    border: 1px solid rgba(212, 168, 67, 0.15);
+    border-radius: 12px;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    transition: all 0.3s;
+}
+
+.magic-card:hover {
+    border-color: var(--gold);
+    box-shadow: 0 0 30px rgba(212, 168, 67, 0.15);
+    transform: scale(1.02);
+}
+
+.spell-icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 1rem;
+    border-radius: 50%;
+    animation: spell-glow 3s ease-in-out infinite;
+}
+
+.spell-icon.patronus { background: radial-gradient(circle, #aaccff, #4466aa); }
+.spell-icon.leviosa { background: radial-gradient(circle, #88ffaa, #228844); }
+.spell-icon.lumos { background: radial-gradient(circle, #ffffcc, #ccaa44); }
+.spell-icon.expelliarmus { background: radial-gradient(circle, #ff8888, #aa2222); }
+
+@keyframes spell-glow {
+    0%, 100% { box-shadow: 0 0 15px currentColor; }
+    50% { box-shadow: 0 0 35px currentColor; }
+}
+
+.magic-card h3 {
+    font-family: 'Cinzel', serif;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.magic-card p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.spell-effect {
+    text-align: center;
+    margin-top: 2rem;
+    position: relative;
+}
+
+.spell-burst {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin: 0 auto 1rem;
+    background: radial-gradient(circle, var(--gold-light), transparent);
+    animation: burst 0.6s ease-out;
+}
+
+@keyframes burst {
+    0% { transform: scale(0); opacity: 1; }
+    100% { transform: scale(2); opacity: 0; }
+}
+
+.spell-text {
+    font-family: 'Cinzel', serif;
+    font-size: 1.5rem;
+    color: var(--gold);
+}
+
+.artifacts-carousel {
+    position: relative;
+    min-height: 300px;
+}
+
+.artifact-slide {
+    display: none;
+    text-align: center;
+    padding: 2rem;
+    animation: fadeUp 0.5s ease;
+}
+
+.artifact-slide.active {
+    display: block;
+}
+
+.artifact-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    border-radius: 50%;
+    border: 2px solid var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: var(--gold);
+}
+
+.artifact-icon.elder-wand::after { content: "\1F9D9"; }
+.artifact-icon.cloak::after { content: "\1F9E5"; }
+.artifact-icon.stone::after { content: "\1F48E"; }
+.artifact-icon.philosopher-stone::after { content: "\1F48D"; }
+
+.artifact-slide h3 {
+    font-family: 'Cinzel', serif;
+    margin-bottom: 0.5rem;
+    font-size: 1.4rem;
+}
+
+.artifact-slide p {
+    color: var(--text-muted);
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.carousel-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.carousel-controls span {
+    color: var(--text-muted);
+}
+
+.quotes-section {
+    text-align: center;
+}
+
+.quote-display {
+    max-width: 700px;
+    margin: 0 auto 2rem;
+}
+
+.quote-display blockquote {
+    font-size: clamp(1.2rem, 3vw, 1.8rem);
+    font-style: italic;
+    line-height: 1.8;
+    margin-bottom: 1rem;
+}
+
+.quote-display cite {
+    color: var(--gold);
+    font-size: 1.1rem;
+}
+
+.main-footer {
+    text-align: center;
+    padding: 3rem 2rem;
+    border-top: 1px solid rgba(212, 168, 67, 0.1);
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    position: relative;
+    z-index: 1;
+}
+
+.btn {
+    font-family: 'Cinzel', serif;
+    font-size: 0.95rem;
+    padding: 0.7rem 1.5rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: 600;
+}
+
+.btn-gold {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: var(--bg-dark);
+}
+
+.btn-gold:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(212, 168, 67, 0.4);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+}
+
+.btn-outline:hover {
+    background: rgba(212, 168, 67, 0.1);
+}
+
+.btn-lg {
+    padding: 0.9rem 2rem;
+    font-size: 1.1rem;
+}
+
+.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+}
+
+.btn-full {
+    width: 100%;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal {
+    background: var(--bg-medium);
+    border: 1px solid rgba(212, 168, 67, 0.2);
+    border-radius: 16px;
+    padding: 2.5rem;
+    width: 90%;
+    max-width: 420px;
+    position: relative;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.modal-close:hover { color: var(--text); }
+
+.modal-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1.6rem;
+    margin-bottom: 0.25rem;
+    color: var(--gold);
+}
+
+.modal-subtitle {
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-size: 0.9rem;
+    color: var(--text);
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text);
+    font-size: 1rem;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--gold);
+}
+
+.modal-switch {
+    text-align: center;
+    margin-top: 1.25rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.modal-switch a {
+    color: var(--gold);
+    text-decoration: none;
+}
+
+.modal-switch a:hover { text-decoration: underline; }
+
+.auth-message {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.auth-message.success {
+    background: rgba(40, 167, 69, 0.15);
+    color: #4caf50;
+    border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.auth-message.error {
+    background: rgba(220, 53, 69, 0.15);
+    color: #ef5350;
+    border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+.hidden { display: none !important; }
+
+.animated-reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.6s ease;
+}
+
+.animated-reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+    .main-nav {
+        flex-wrap: wrap;
+        padding: 0.75rem 1rem;
+        gap: 0.5rem;
+    }
+    .nav-links {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+        gap: 1rem;
+    }
+    .hero-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    .section {
+        padding: 4rem 1rem;
+    }
+}
