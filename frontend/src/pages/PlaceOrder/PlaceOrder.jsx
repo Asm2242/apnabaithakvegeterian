@@ -34,12 +34,9 @@ const PlaceOrder = () => {
 
   const {
     getTotalCartAmount, token, cartLines, url,
-    phoneVerified, phone, requestOtp, verifyOtp, setShowLogin,
+    phone, setShowLogin,
     coupon, applyCoupon,
   } = useContext(StoreContext);
-
-  const [otpSent, setOtpSent] = useState(false);
-  const [otp, setOtp] = useState("");
 
   const navigate = useNavigate();
 
@@ -133,50 +130,24 @@ const PlaceOrder = () => {
     });
   };
 
-  const sendOtp = async () => {
-    const mobile = cleanMobile(data.phone || phone);
-    if (!/^[6-9]\d{9}$/.test(mobile)) {
-      toast.error("Enter a valid 10-digit Indian mobile number");
-      return;
-    }
-    const res = await requestOtp(mobile);
-    if (res.success) {
-      setOtpSent(true);
-      toast.success("OTP sent to +91 " + mobile);
-    } else {
-      toast.error(res.message);
-    }
-  };
-
-  const doVerify = async () => {
-    const mobile = cleanMobile(data.phone || phone);
-    const res = await verifyOtp(mobile, otp);
-    if (res.success) toast.success("Mobile verified");
-    else toast.error(res.message);
-  };
-
   const saveDetails = async (e) => {
     e.preventDefault();
     if (!data.fullName.trim()) {
-      toast.error("Apna naam likho");
+      toast.error("Please enter your name");
       return;
     }
     const mobile = cleanMobile(data.phone || phone);
     if (!/^[6-9]\d{9}$/.test(mobile)) {
-      toast.error("Sahi 10-digit mobile number dalo");
+      toast.error("Please enter a valid 10-digit mobile number");
       return;
     }
     if (data.altPhone && !/^[6-9]\d{9}$/.test(cleanMobile(data.altPhone))) {
       toast.error("Alternate number is invalid (optional — leave it blank or enter a valid number)");
       return;
     }
-    if (!phoneVerified) {
-      toast.error("Verify OTP before continuing");
-      return;
-    }
     if (mode === "delivery") {
       if (!data.street.trim()) {
-        toast.error("Street / house likho");
+        toast.error("Please enter your street / house");
         return;
       }
       // save to address book (silent)
@@ -395,21 +366,6 @@ const PlaceOrder = () => {
               <input name="phone" value={data.phone} onChange={onChangeHandler} placeholder="10-digit mobile" required />
               <input name="altPhone" value={data.altPhone} onChange={onChangeHandler} placeholder="Alt number (optional)" />
             </div>
-            {!phoneVerified ? (
-              <div className="otp-box">
-                <div className="multi-field">
-                  <button type="button" onClick={sendOtp}>{otpSent ? "Resend OTP" : "Send OTP"}</button>
-                </div>
-                {otpSent && (
-                  <div className="multi-field">
-                    <input value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))} placeholder="6-digit OTP" inputMode="numeric" />
-                    <button type="button" onClick={doVerify}>Verify</button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <p className="verified">✓ +91 {data.phone || phone} verified</p>
-            )}
             {mode === "delivery" && (
               <>
                 <input name="flat" value={data.flat} onChange={onChangeHandler} placeholder="Block / Building / Apartment / Flat" />

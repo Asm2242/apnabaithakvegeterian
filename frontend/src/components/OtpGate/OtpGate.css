@@ -115,4 +115,47 @@
     opacity: 0.5;
     text-decoration: none;
 }
+.otp-gate-mode{
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+.otp-gate-mode button{
+    flex: 1;
+    background: #fff;
+    color: #FF6F00;
+    border: 1px solid #FF6F00;
+    border-radius: 10px;
+    padding: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+.otp-gate-mode button.active{
+    background: #FF6F00;
+    color: #fff;
+}
+.auth-switch{
+    text-align: center;
+    font-size: 13px;
+}
+.login-mode-toggle{
+    display: flex;
+    gap: 8px;
+}
+.login-mode-toggle button{
+    flex: 1;
+    background: #fff;
+    color: #FF6F00;
+    border: 1px solid #FF6F00;
+    border-radius: 8px;
+    padding: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+.login-mode-toggle button.active{
+    background: #FF6F00;
+    color: #fff;
+}
 

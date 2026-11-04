@@ -5,167 +5,44 @@ import { StoreContext } from "../../Context/StoreContext";
 import axios from "axios";
 import { toast } from "react-toastify";
 import PropTypes from "prop-types";
-import { fbSend, fbVerify, fbReset, fbErrorText } from "../../lib/firebase";
-import { DEFAULT_PROFILE_NAME } from "../../lib/profile";
 
-// Step 1: enter number only.
-// Step 2a returning customer: "Welcome back, NAME!" + OTP.
-// Step 2b new customer: "ENTER YOUR NAME" + OTP.
+// Simple email + password auth (login / sign up).
 const LoginPopup = ({ setShowLogin }) => {
   const { setToken, url, loadCartData } = useContext(StoreContext);
-  const [step, setStep] = useState(1);
-  const [phone, setPhone] = useState("");
-  const [name, setName] = useState(DEFAULT_PROFILE_NAME);
-  const [knownName, setKnownName] = useState("");
-  const [code, setCode] = useState("");
+  const [mode, setMode] = useState("login"); // login | register
+  const [data, setData] = useState({ name: "", email: "", password: "" });
   const [busy, setBusy] = useState(false);
-  const [cooldown, setCooldown] = useState(0);
-  const [fbMode, setFbMode] = useState(false);
 
-  const phoneValid = /^[6-9]\d{9}$/.test(phone);
+  const onChange = (e) => setData((d) => ({ ...d, [e.target.name]: e.target.value }));
 
-  const startCooldown = (s) => {
-    setCooldown(s);
-    const t = setInterval(() => {
-      setCooldown((c) => {
-        if (c <= 1) {
-          clearInterval(t);
-          return 0;
-        }
-        return c - 1;
-      });
-    }, 1000);
-  };
-
-  const goStep2 = async () => {
-    if (!phoneValid || busy) return;
-    setBusy(true);
-    try {
-      // who is this number? (returning name or new customer)
-      const check = await axios.post(url + "/api/otp/check", { phone });
-      if (check.data.success && check.data.exists) {
-        setKnownName(check.data.name || "");
-      } else {
-        setKnownName("");
-      }
-    } catch { /* name optional */ }
-    // FREE Firebase OTP first, backend OTP fallback
-    try {
-      await fbSend(phone);
-      setFbMode(true);
-      setStep(2);
-      startCooldown(30);
-      toast.success("OTP sent to +91 " + phone);
-    } catch {
-      fbReset();
-      setFbMode(false);
-      try {
-      const res = await axios.post(url + "/api/otp/start", { phone });
-      if (res.data.success) {
-        setStep(2);
-        startCooldown(res.data.resendAfter || 30);
-        if (res.data.devOtp) {
-          toast.success(`OTP sent — test code ${res.data.devOtp}`);
-        } else {
-          toast.success("OTP sent to +91 " + phone);
-        }
-      } else toast.error(res.data.message);
-      } catch {
-        toast.error("Could not continue");
-      }
-    }
-    setBusy(false);
-  };
-
-  const resend = async () => {
-    if (cooldown > 0 || busy) return;
-    setBusy(true);
-    if (fbMode) {
-      try {
-        await fbSend(phone);
-        startCooldown(30);
-        toast.success("OTP resent");
-      } catch {
-        toast.error("Could not resend OTP");
-      }
-      setBusy(false);
-      return;
-    }
-    try {
-      const res = await axios.post(url + "/api/otp/start", { phone });
-      if (res.data.success) {
-        startCooldown(res.data.resendAfter || 30);
-        toast.success("OTP resent");
-      } else toast.error(res.data.message);
-    } catch {
-      toast.error("Could not resend OTP");
-    }
-    setBusy(false);
-  };
-
-  const verify = async (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-    if (code.length !== 6 || busy) return;
-    if (!knownName && !name.trim()) {
-      toast.error("Please enter your name");
-      return;
-    }
+    if (busy) return;
     setBusy(true);
-    const finish = async (tok, nm) => {
-      setToken(tok);
-      localStorage.setItem("token", tok);
-      localStorage.setItem("ab_phone", phone);
-      localStorage.setItem("ab_phone_verified", "1");
-      await loadCartData(tok);
-      toast.success(`Welcome${knownName ? " back" : ""}, ${nm}!`);
-      setShowLogin(false);
-    };
-    if (fbMode) {
-      try {
-        const idToken = await fbVerify(code);
-        const res = await axios.post(url + "/api/otp/firelogin", {
-          idToken,
-          name: knownName || name.trim() || DEFAULT_PROFILE_NAME,
-        });
-        if (res.data.success) {
-          await finish(res.data.token, res.data.name);
-          setBusy(false);
-          return;
-        }
-        throw new Error(res.data.message || "firelogin");
-      } catch (e) {
-        console.error("[fb-verify]", e?.code || e?.message);
-        fbReset();
-        setFbMode(false);
-        setBusy(false);
-        toast.error(fbErrorText(e?.code));
-        return;
-      }
-    }
     try {
-      const res = await axios.post(url + "/api/otp/login", {
-        phone,
-        otp: code,
-        name: knownName || name.trim() || DEFAULT_PROFILE_NAME,
-      });
+      const res = await axios.post(
+        url + (mode === "login" ? "/api/user/login" : "/api/user/register"),
+        data
+      );
       if (res.data.success) {
-        await finish(res.data.token, res.data.name);
-      } else toast.error(res.data.message);
+        const tok = res.data.token;
+        setToken(tok);
+        localStorage.setItem("token", tok);
+        await loadCartData(tok);
+        toast.success(`Welcome${mode === "login" ? " back" : ""}, ${res.data.name || data.name}!`);
+        setShowLogin(false);
+      } else {
+        toast.error(res.data.message);
+      }
     } catch {
-      toast.error("Verification failed");
+      toast.error("Something went wrong. Please try again.");
     }
     setBusy(false);
-  };
-
-  const moveBox = (i, d) => {
-    const next = document.getElementById(`login-otp-${i + d}`);
-    if (next) next.focus();
   };
 
   return (
     <div className="login-popup">
-      <div id="recaptcha-container" />
-      <form onSubmit={step === 1 ? (e) => { e.preventDefault(); goStep2(); } : verify} className="login-popup-container otp-only">
+      <form onSubmit={submit} className="login-popup-container otp-only">
         <div className="login-popup-title">
           <div className="otp-brand">
             <img src={assets.baithakLogo} alt="Apna Baithak" />
@@ -179,74 +56,55 @@ const LoginPopup = ({ setShowLogin }) => {
           />
         </div>
 
-        {step === 1 ? (
-          <>
-            <p className="otp-tagline">Enter your number to continue</p>
-            <div className="phone-row">
-              <span>+91</span>
-              <input
-                value={phone}
-                onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                type="tel"
-                placeholder="10-digit mobile number"
-                inputMode="numeric"
-                autoFocus
-              />
-            </div>
-            <button disabled={!phoneValid || busy}>
-              {busy ? "Please wait…" : "Continue"}
-            </button>
-          </>
-        ) : (
-          <>
-            {knownName ? (
-              <p className="welcome-back">Welcome back, <b>{knownName}</b>! 👋</p>
-            ) : (
-              <>
-                <p className="welcome-new">New customer? <b>ENTER YOUR NAME</b></p>
-                <input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  type="text"
-                  placeholder="YOUR NAME"
-                  className="otp-input"
-                />
-              </>
-            )}
-            <p className="otp-sent">OTP sent to +91 {phone} <span onClick={() => setStep(1)}>Change</span></p>
-            <div className="otp-boxes">
-              {[0, 1, 2, 3, 4, 5].map((i) => (
-                <input
-                  key={i}
-                  id={`login-otp-${i}`}
-                  value={code[i] || ""}
-                  inputMode="numeric"
-                  maxLength={1}
-                  onChange={(e) => {
-                    const d = e.target.value.replace(/\D/g, "").slice(-1);
-                    const next = code.padEnd(6, " ").split("");
-                    next[i] = d;
-                    setCode(next.join("").replace(/\s/g, "").slice(0, 6));
-                    if (d) moveBox(i, 1);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Backspace" && !code[i]) moveBox(i, -1);
-                  }}
-                />
-              ))}
-            </div>
-            <button disabled={code.length !== 6 || busy}>
-              {busy ? "Verifying…" : "Verify & Login"}
-            </button>
-            <p className="resend">
-              {cooldown > 0 ? (
-                `Resend OTP in ${cooldown}s`
-              ) : (
-                <>Didn&apos;t get it? <span onClick={resend}>Resend</span></>
-              )}
-            </p>
-          </>
-        )}
+        <div className="login-mode-toggle">
+          <button type="button" className={mode === "login" ? "active" : ""} onClick={() => setMode("login")}>
+            Login
+          </button>
+          <button type="button" className={mode === "register" ? "active" : ""} onClick={() => setMode("register")}>
+            Sign Up
+          </button>
+        </div>
+
+        <div className="login-popup-inputs">
+          {mode === "register" && (
+            <input
+              name="name"
+              value={data.name}
+              onChange={onChange}
+              type="text"
+              placeholder="Your name"
+              required
+            />
+          )}
+          <input
+            name="email"
+            value={data.email}
+            onChange={onChange}
+            type="email"
+            placeholder="Email address"
+            required
+          />
+          <input
+            name="password"
+            value={data.password}
+            onChange={onChange}
+            type="password"
+            placeholder={mode === "register" ? "Password (min 8 characters)" : "Password"}
+            required
+          />
+        </div>
+
+        <button disabled={busy}>
+          {busy ? "Please wait…" : mode === "login" ? "Login" : "Create account"}
+        </button>
+
+        <p className="auth-switch">
+          {mode === "login" ? (
+            <>New here? <span onClick={() => setMode("register")}>Create an account</span></>
+          ) : (
+            <>Already have an account? <span onClick={() => setMode("login")}>Login</span></>
+          )}
+        </p>
       </form>
     </div>
   );
