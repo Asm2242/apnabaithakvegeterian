@@ -522,6 +522,13 @@ label input { width: auto; accent-color: var(--brand); }
   color: #05240f !important;
 }
 
+/* feedback tab */
+.fb-row { display: flex; gap: 14px; align-items: start; flex-wrap: wrap; }
+.fb-row.fb-new { border-color: rgba(217, 119, 6, 0.6); box-shadow: 0 0 0 1px rgba(217, 119, 6, 0.35), var(--shadow); }
+.fb-row-main { flex: 1; min-width: 220px; }
+.fb-stars-sm { color: #f59e0b; font-size: 14px; letter-spacing: 2px; }
+.fb-phone { color: var(--muted); font-size: 12px; }
+
 .empty { text-align: center; color: var(--muted); padding: 26px 10px; font-size: 14px; }
 
 /* ---- food tab: form fields ---- */

@@ -10,6 +10,7 @@ import otpRouter from "./routes/otpRoute.js";
 import riderRouter from "./routes/riderRoute.js";
 import adminRouter from "./routes/adminRoute.js";
 import couponRouter from "./routes/couponRoute.js";
+import feedbackRouter from "./routes/feedbackRoute.js";
 
 // app config
 const app = express();
@@ -33,6 +34,7 @@ app.use("/api/otp", otpRouter);
 app.use("/api/rider", riderRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/coupon", couponRouter);
+app.use("/api/feedback", feedbackRouter);
 
 app.get("/", (req, res) => {
   res.send("API Working");

@@ -521,6 +521,49 @@ function Requests({ token }) {
   );
 }
 
+function Feedback({ token }) {
+  const [list, setList] = useState([]);
+  const load = async () => {
+    const res = await api(token).get("/api/feedback");
+    if (res.data.success) setList(res.data.data);
+  };
+  useEffect(() => { load(); }, []);
+  const markSeen = async (id) => {
+    await api(token).post("/api/feedback/seen", { id });
+    load();
+  };
+  const del = async (id) => {
+    if (!window.confirm("Delete this feedback?")) return;
+    await api(token).post("/api/feedback/delete", { id });
+    load();
+  };
+  const unseen = list.filter((f) => !f.seen).length;
+  return (
+    <div>
+      <h3 className="list-head">💬 Customer feedback ({list.length}{unseen ? ` • ${unseen} new` : ""})</h3>
+      {list.map((f) => (
+        <div key={f._id} className={`card fb-row ${f.seen ? "" : "fb-new"}`}>
+          <div className="fb-row-main">
+            <div className="food-item-title">
+              <b>{f.name}</b>
+              <span className="fb-stars-sm">{"★".repeat(f.rating)}{"☆".repeat(5 - f.rating)}</span>
+              <span className="cat-chip">{new Date(f.createdAt).toLocaleDateString()}</span>
+              {!f.seen && <span className="pill off">NEW</span>}
+            </div>
+            <p className="food-item-desc">{f.message}</p>
+            {f.phone ? <small className="fb-phone">📞 {f.phone}</small> : null}
+          </div>
+          <div className="row">
+            {!f.seen && <button onClick={() => markSeen(f._id)}>✓ Mark read</button>}
+            <button className="danger" onClick={() => del(f._id)}>🗑️</button>
+          </div>
+        </div>
+      ))}
+      {list.length === 0 && <p className="empty">No feedback yet.</p>}
+    </div>
+  );
+}
+
 function Chat({ token }) {
   const [msgs, setMsgs] = useState([
     { from: "bot", text: "Hello! 🙏 I'm the Apna Baithak assistant. Tap a button below or type — like 'advance all', 'report', 'hide chai'." }
@@ -695,7 +738,7 @@ function App() {
       <header>
         <b>Apna Baithak Admin</b>
         <nav>
-          {["orders", "requests", "foods", "riders", "customers", "coupons", "settings", "chat"].map((t) => (
+          {["orders", "requests", "foods", "riders", "customers", "coupons", "settings", "feedback", "chat"].map((t) => (
             <button key={t} className={tab === t ? "active" : ""} onClick={() => setTab(t)}>
               {t === "chat" ? "🤖 chat" : t === "settings" ? "⚙️ settings" : t}
             </button>
@@ -714,6 +757,7 @@ function App() {
         {tab === "customers" && <Customers token={token} />}
         {tab === "coupons" && <Coupons token={token} />}
         {tab === "settings" && <Settings token={token} />}
+        {tab === "feedback" && <Feedback token={token} />}
         {tab === "chat" && <Chat token={token} />}
       </main>
     </div>
