@@ -43,27 +43,8 @@ const FoodItem = ({ image, name, price, desc, id, food, index }) => {
           src={imgUrl(image)}
           alt={name}
         />
-        {qty === 0 ? (
-          <img
-            className="add"
-            onClick={() => addToCart(itemId, size)}
-            src={assets.add_icon_white}
-            alt="add"
-          />
-        ) : (
-          <div className="food-item-counter">
-            <img
-              src={assets.remove_icon_red}
-              onClick={() => removeFromCart(itemId, size)}
-              alt="remove"
-            />
-            <p>{qty}</p>
-            <img
-              src={assets.add_icon_green}
-              onClick={() => addToCart(itemId, size)}
-              alt="add"
-            />
-          </div>
+        {qty > 0 && (
+          <div className="food-item-qty-badge">{qty} in cart</div>
         )}
       </div>
       <div className="food-item-info">
@@ -88,7 +69,38 @@ const FoodItem = ({ image, name, price, desc, id, food, index }) => {
             ))}
           </div>
         )}
-        <p className="food-item-price">₹{priceFor(item, size)}</p>
+        <div className="food-item-buy">
+          <p className="food-item-price">₹{priceFor(item, size)}</p>
+          {qty === 0 ? (
+            <button
+              type="button"
+              className="add-cart-btn"
+              onClick={() => addToCart(itemId, size)}
+            >
+              <span className="add-cart-plus">+</span> ADD
+            </button>
+          ) : (
+            <div className="add-cart-stepper">
+              <button
+                type="button"
+                className="step-minus"
+                aria-label="remove"
+                onClick={() => removeFromCart(itemId, size)}
+              >
+                −
+              </button>
+              <span className="step-qty">{qty}</span>
+              <button
+                type="button"
+                className="step-plus"
+                aria-label="add"
+                onClick={() => addToCart(itemId, size)}
+              >
+                +
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
