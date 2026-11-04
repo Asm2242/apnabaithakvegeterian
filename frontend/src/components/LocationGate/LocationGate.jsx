@@ -1,3 +1,4 @@
+import { voyagerUrl, cartoAttribution, CARTO_SUBDOMAINS } from "../../lib/mapTiles";
 ﻿import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
@@ -8,7 +9,7 @@ import { getPos } from "../../lib/location";
 
 const pinIcon = L.divIcon({
   className: "lp-pin",
-  html: "<div>ðŸ“</div>",
+  html: "<div>📍</div>",
   iconSize: [36, 36],
   iconAnchor: [18, 32],
 });
@@ -52,9 +53,9 @@ const LocationGate = ({ onDone }) => {
     try {
       const p = await getPos();
       pick([p.lat, p.lng]);
-      toast.success("Location mil gayi!");
+      toast.success("Location found!");
     } catch {
-      toast.error("Location not found â€” tap on the map");
+      toast.error("Location not found — tap on the map");
     }
     setLocating(false);
   };
@@ -68,20 +69,20 @@ const LocationGate = ({ onDone }) => {
   return (
     <div className="otp-gate">
       <div className="otp-gate-card loc-gate-card">
-        <p className="otp-gate-logo">ðŸ“ Delivery location</p>
+        <p className="otp-gate-logo">📍 Delivery location</p>
         <p className="otp-gate-sub">Where should we deliver your food?</p>
         <div className="loc-gate-btns">
           <button onClick={useGps} disabled={locating} className="otp-gate-btn">
-            {locating ? "Finding your locationâ€¦" : "ðŸ“¡ Use my current location"}
+            {locating ? "Finding your location…" : "📡 Use my current location"}
           </button>
         </div>
-        <p className="loc-or">â€” or tap on the map to drop a pin â€”</p>
+        <p className="loc-or">— or tap on the map to drop a pin —</p>
         <MapContainer center={pos || fallback} zoom={14} scrollWheelZoom={false} className="loc-gate-map">
           <Recenter pos={pos} />
           <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
-            url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-          subdomains={["a", "b", "c", "d"]}
+            attribution={cartoAttribution}
+            url={voyagerUrl()}
+          subdomains={CARTO_SUBDOMAINS}
           />
           <TapToSet onPick={pick} />
           {(pos || fallback) && (
@@ -101,7 +102,7 @@ const LocationGate = ({ onDone }) => {
             onClick={() => done(pos ? { lat: pos[0], lng: pos[1] } : null)}
             className="otp-gate-btn"
           >
-            {pos ? "âœ… Confirm pin" : "Confirm (without pin)"}
+            {pos ? "✅ Confirm pin" : "Confirm (without pin)"}
           </button>
           <button onClick={() => done(null)} className="otp-gate-link">
             Skip

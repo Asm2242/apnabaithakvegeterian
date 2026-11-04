@@ -26,14 +26,14 @@
     margin: 0;
 }
 .typing::after{
-    content: "â€¦";
+    content: "…";
     animation: dots 1.2s steps(4) infinite;
 }
 @keyframes dots{
     0%{content: ""}
     25%{content: "."}
     50%{content: ".."}
-    75%{content: "â€¦"}
+    75%{content: "…"}
 }
 .status-eta{
     display: inline-block;

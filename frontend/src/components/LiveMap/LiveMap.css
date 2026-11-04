@@ -4,6 +4,22 @@
   border: 1px solid #ffd54f;
   margin-top: 10px;
   box-shadow: 0 14px 34px -18px rgba(74, 14, 14, 0.5);
+  position: relative;
+}
+.route-eta {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 640;
+  background: #fff;
+  color: #1a73e8;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 8px 14px;
+  border-radius: 999px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+  pointer-events: none;
+  white-space: nowrap;
 }
 .live-map-box {
   height: 340px;

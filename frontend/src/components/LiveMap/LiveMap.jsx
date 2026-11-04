@@ -1,8 +1,10 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./LiveMap.css";
+import { voyagerUrl, cartoAttribution, CARTO_SUBDOMAINS } from "../../lib/mapTiles";
+import { getRoadRoute } from "../../lib/route";
 import PropTypes from "prop-types";
 
 export const SHOP = { lat: 26.9381402, lng: 80.9129123, name: "Apna Baithak, Eldeco City" };
@@ -56,7 +58,7 @@ const FitBoth = ({ riderPos, custPos }) => {
 // (removed: replaced by FitBoth)
 
 
-// Live map: shop pin + moving rider pin + customer home pin + route (free OSM)
+// Live map: shop pin + moving rider pin + customer home pin + road route (OSM roads via OSRM)
 const LiveMap = ({ rider, riderLabel, customer }) => {
   const riderPos =
     rider && rider.lat != null ? [rider.lat, rider.lng] : null;
@@ -64,6 +66,28 @@ const LiveMap = ({ rider, riderLabel, customer }) => {
   const custPos =
     customer && customer.lat != null ? [customer.lat, customer.lng] : null;
   const center = riderPos || custPos || shopPos;
+
+  // real road route (turns & corners) instead of a straight line
+  const [route, setRoute] = useState(null); // { coords, distance, duration }
+  const lastReq = useRef("");
+  const destPos = custPos || shopPos;
+
+  useEffect(() => {
+    if (!riderPos || !destPos) return;
+    const key =
+      destPos[0].toFixed(3) + "," + destPos[1].toFixed(3) + "|" +
+      riderPos[0].toFixed(3) + "," + riderPos[1].toFixed(3);
+    if (lastReq.current === key) return;
+    lastReq.current = key;
+    let dead = false;
+    getRoadRoute(riderPos, destPos)
+      .then((r) => { if (!dead) setRoute(r); })
+      .catch(() => { if (!dead) setRoute(null); });
+    return () => { dead = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [riderPos, custPos]);
+
+  const linePath = route?.coords?.length ? route.coords : (riderPos && destPos ? [riderPos, destPos] : null);
 
   return (
     <div className="live-map">
@@ -74,11 +98,11 @@ const LiveMap = ({ rider, riderLabel, customer }) => {
         className="live-map-box"
       >
         <FitBoth riderPos={riderPos} custPos={custPos} />
-        {/* Google-Maps-style basemap — CARTO Voyager (free, no API key) */}
+        {/* Google-Maps-style basemap — CARTO Voyager */}
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
-          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-          subdomains={["a", "b", "c", "d"]}
+          attribution={cartoAttribution}
+          url={voyagerUrl()}
+          subdomains={CARTO_SUBDOMAINS}
         />
         <Marker position={shopPos} icon={shopIcon}>
           <Popup>{SHOP.name}<br />7:30 AM – 10 PM</Popup>
@@ -99,18 +123,27 @@ const LiveMap = ({ rider, riderLabel, customer }) => {
                   : ""}
               </Popup>
             </Marker>
-            {/* Google Navigation-style route: white casing + flowing blue line */}
-            <Polyline
-              positions={[riderPos, custPos || shopPos]}
-              pathOptions={{ color: "#ffffff", weight: 10, opacity: 0.9 }}
-            />
-            <Polyline
-              positions={[riderPos, custPos || shopPos]}
-              pathOptions={{ color: "#1A73E8", weight: 5, opacity: 0.95, className: "live-route-anim" }}
-            />
+            {/* Road-following route: white casing + flowing blue line (turns like a real biker) */}
+            {linePath && (
+              <>
+                <Polyline
+                  positions={linePath}
+                  pathOptions={{ color: "#ffffff", weight: 10, opacity: 0.9 }}
+                />
+                <Polyline
+                  positions={linePath}
+                  pathOptions={{ color: "#1A73E8", weight: 5, opacity: 0.95, className: "live-route-anim" }}
+                />
+              </>
+            )}
           </>
         )}
       </MapContainer>
+      {riderPos && route && (
+        <div className="route-eta">
+          🛵 {(route.distance / 1000).toFixed(1)} km • ~{Math.max(1, Math.round(route.duration / 60))} min
+        </div>
+      )}
       {riderLabel && <p className="live-caption">{riderLabel}</p>}
     </div>
   );

@@ -1,3 +1,4 @@
+import { voyagerUrl, cartoAttribution, CARTO_SUBDOMAINS } from "../../lib/mapTiles";
 ﻿import axios from "axios";
 import { useContext, useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from "react-leaflet";
@@ -10,7 +11,7 @@ import { getPos } from "../../lib/location";
 
 const pinIcon = L.divIcon({
   className: "lp-pin",
-  html: "<div>ðŸ“</div>",
+  html: "<div>📍</div>",
   iconSize: [36, 36],
   iconAnchor: [18, 32],
 });
@@ -83,7 +84,7 @@ const AddressPopup = ({ onConfirm, onClose }) => {
       pick([p.lat, p.lng]);
       toast.success("Current location pinned!");
     } catch {
-      toast.error("Location not found â€” tap on the map");
+      toast.error("Location not found — tap on the map");
     }
     setLocating(false);
   };
@@ -129,7 +130,7 @@ const AddressPopup = ({ onConfirm, onClose }) => {
         }
         onConfirm({ addr: sel, pin, isNew: false });
       } else {
-        // no saved address at all â€” pin only
+        // no saved address at all — pin only
         onConfirm({ addr: null, pin, isNew: true });
       }
     } catch {
@@ -141,7 +142,7 @@ const AddressPopup = ({ onConfirm, onClose }) => {
   return (
     <div className="addr-pop">
       <div className="addr-pop-card">
-        <h3>ðŸ“ Choose delivery address</h3>
+        <h3>📍 Choose delivery address</h3>
 
         {list.length > 0 && (
           <div className="addr-list">
@@ -153,8 +154,8 @@ const AddressPopup = ({ onConfirm, onClose }) => {
                   onChange={() => choose(a)}
                 />
                 <span>
-                  <b>{a.label || "Address"}</b> â€” {a.street || "pin only"}
-                  {a.lat != null ? " ðŸ“" : ""}
+                  <b>{a.label || "Address"}</b> — {a.street || "pin only"}
+                  {a.lat != null ? " 📍" : ""}
                 </span>
               </label>
             ))}
@@ -173,22 +174,22 @@ const AddressPopup = ({ onConfirm, onClose }) => {
           <input
             value={label}
             onChange={(e) => setLabel(e.target.value)}
-            placeholder="Naam do â€” Home / Office (optional)"
+            placeholder="Label — Home / Office (optional)"
             className="addr-label"
           />
         )}
 
         <div className="addr-map-row">
           <button type="button" onClick={useGps} disabled={locating} className="gps-btn">
-            {locating ? "Finding your locationâ€¦" : "ðŸ“¡ Pin at current location"}
+            {locating ? "Finding your location…" : "📡 Pin at current location"}
           </button>
         </div>
         <MapContainer center={pin || fallback} zoom={15} scrollWheelZoom={false} className="addr-map">
           <Recenter pos={pin} />
           <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
-            url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-          subdomains={["a", "b", "c", "d"]}
+            attribution={cartoAttribution}
+            url={voyagerUrl()}
+          subdomains={CARTO_SUBDOMAINS}
           />
           <TapToSet onPick={pick} />
           {(pin || fallback) && (
@@ -205,13 +206,13 @@ const AddressPopup = ({ onConfirm, onClose }) => {
         </MapContainer>
         <p className="addr-hint">
           {pin
-            ? `Pin: ${pin[0].toFixed(5)}, ${pin[1].toFixed(5)} â€” tap to change`
+            ? `Pin: ${pin[0].toFixed(5)}, ${pin[1].toFixed(5)} — tap to change`
             : "Tap on the map or use GPS"}
         </p>
 
         <div className="addr-actions">
           <button onClick={confirm} disabled={busy} className="confirm-btn">
-            {busy ? "Savingâ€¦" : "âœ… Confirm address"}
+            {busy ? "Saving…" : "✅ Confirm address"}
           </button>
           <button onClick={onClose} className="cancel-btn">Cancel</button>
         </div>
