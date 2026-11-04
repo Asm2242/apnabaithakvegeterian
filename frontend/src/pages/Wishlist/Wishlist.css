@@ -1,0 +1,32 @@
+.wishlist-page {
+  padding: 20px 0 40px 0;
+}
+.wishlist-hero {
+  position: relative;
+  overflow: hidden;
+}
+.wishlist-hero::after {
+  content: "❤";
+  position: absolute;
+  right: 26px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 64px;
+  opacity: 0.22;
+  filter: drop-shadow(0 0 16px rgba(255, 79, 109, 0.6));
+}
+.wl-cta {
+  display: inline-block;
+  margin-top: 16px;
+  background: linear-gradient(135deg, #FF6F00, #E65100);
+  color: #fff;
+  font-weight: 800;
+  padding: 13px 30px;
+  border-radius: 50px;
+  box-shadow: 0 8px 22px -8px rgba(255, 111, 0, 0.8);
+  transition: transform 0.2s ease, box-shadow 0.25s ease;
+}
+.wl-cta:hover {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 0 26px rgba(255, 111, 0, 0.6), 0 14px 30px -10px rgba(255, 111, 0, 0.9);
+}

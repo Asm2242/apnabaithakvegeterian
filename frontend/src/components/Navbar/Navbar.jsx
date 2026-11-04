@@ -8,10 +8,24 @@ import PropTypes from "prop-types";
 const Navbar = ({ setShowLogin }) => {
   const [menu, setMenu] = useState("home");
   const [open, setOpen] = useState(false);
-  const { getTotalCartAmount, token, setToken, theme, toggleTheme } = useContext(StoreContext);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [q, setQ] = useState("");
+  const { cartItems, wishlist, token, setToken, theme, toggleTheme } = useContext(StoreContext);
   const navigate = useNavigate();
 
   const close = () => setOpen(false);
+  const cartCount = Object.values(cartItems || {}).reduce((a, b) => a + (b || 0), 0);
+  const wishCount = (wishlist || []).length;
+
+  const doSearch = (e) => {
+    e.preventDefault();
+    const query = q.trim();
+    if (!query) return;
+    navigate(`/menu?q=${encodeURIComponent(query)}`);
+    setQ("");
+    setSearchOpen(false);
+    close();
+  };
 
   const logout = () => {
     localStorage.removeItem("token");
@@ -58,13 +72,24 @@ const Navbar = ({ setShowLogin }) => {
         <button className="theme-btn" onClick={toggleTheme} title="Dark / light">
           {theme === "light" ? "🌙" : "☀️"}
         </button>
-        <img src={assets.search_icon} alt="" />
-        <Link to="/cart" className="navbar-search-icon" onClick={close}>
-          <img src={assets.basket_icon} alt="" />
-          <div className={getTotalCartAmount() > 0 ? "dot" : ""}></div>
+        <button
+          className="nav-icon-btn"
+          onClick={() => setSearchOpen((o) => !o)}
+          aria-label="Search"
+          title="Search dishes"
+        >
+          <img src={assets.search_icon} alt="" />
+        </button>
+        <Link to="/wishlist" className="nav-icon-btn wish-link" onClick={close} title="My wishlist">
+          <span className="wish-heart">❤</span>
+          {wishCount > 0 && <span className="icon-badge wish-badge">{wishCount}</span>}
+        </Link>
+        <Link to="/cart" className="nav-icon-btn cart-link" onClick={close} title="Cart">
+          <img src={assets.basket_icon} alt="Cart" />
+          {cartCount > 0 && <span className="icon-badge cart-badge">{cartCount}</span>}
         </Link>
         {!token ? (
-          <button onClick={() => setShowLogin(true)}>sign in</button>
+          <button className="signin-btn" onClick={() => setShowLogin(true)}>Sign In</button>
         ) : (
           <div className="navbar-profile">
             <img src={assets.profile_icon} alt="" />
@@ -72,6 +97,10 @@ const Navbar = ({ setShowLogin }) => {
               <li onClick={() => navigate("/profile")}>
                 {" "}
                 <img src={assets.profile_icon} alt="" /> <p>Profile</p>
+              </li>
+              <li onClick={() => navigate("/wishlist")}>
+                {" "}
+                <span className="drop-heart">❤</span> <p>Wishlist</p>
               </li>
               <li onClick={() => navigate("/myorders")}>
                 {" "}
@@ -95,6 +124,18 @@ const Navbar = ({ setShowLogin }) => {
           <span></span>
         </button>
       </div>
+      {searchOpen && (
+        <form className="navbar-search-bar" onSubmit={doSearch}>
+          <input
+            autoFocus
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Search dishes… e.g. paneer, momos, thali"
+          />
+          <button type="submit" className="ns-go">Search</button>
+          <button type="button" className="ns-close" onClick={() => setSearchOpen(false)}>✕</button>
+        </form>
+      )}
     </div>
   );
 };

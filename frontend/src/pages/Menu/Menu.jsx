@@ -1,4 +1,4 @@
-import { useContext, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { StoreContext } from "../../Context/StoreContext";
 import FoodItem from "../../components/FoodItem/FoodItem";
@@ -15,8 +15,14 @@ const SORTS = [
 const Menu = () => {
   const { food_list, menu_list } = useContext(StoreContext);
   const [params, setParams] = useSearchParams();
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(params.get("q") || "");
   const [sort, setSort] = useState("popular");
+
+  // navbar search se aayi query bhi uthao
+  useEffect(() => {
+    const q = params.get("q");
+    if (q !== null) setQuery(q);
+  }, [params]);
 
   const active = params.get("category") || "All";
   const setCategory = (c) => {

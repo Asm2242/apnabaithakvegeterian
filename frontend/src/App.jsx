@@ -4,6 +4,7 @@ import Footer from "./components/Footer/Footer";
 import Navbar from "./components/Navbar/Navbar";
 import { Route, Routes } from "react-router-dom";
 import Cart from "./pages/Cart/Cart";
+import Wishlist from "./pages/Wishlist/Wishlist";
 import LoginPopup from "./components/LoginPopup/LoginPopup";
 import OtpGate from "./components/OtpGate/OtpGate";
 import LocationGate from "./components/LocationGate/LocationGate";
@@ -64,6 +65,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/cart" element={<Cart />} />
+          <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/order" element={<PlaceOrder />} />
           <Route path="/myorders" element={<MyOrders />} />
           <Route path="/verify" element={<Verify />} />
