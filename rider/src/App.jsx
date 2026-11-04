@@ -1,4 +1,4 @@
-import axios from "axios";
+﻿import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -11,27 +11,27 @@ import "./App.css";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
-// Apna Baithak shop — every delivery route starts here
+// Apna Baithak shop â€” every delivery route starts here
 const SHOP_LAT = 26.9381402;
 const SHOP_LNG = 80.9129123;
 
 const shopIcon = L.divIcon({
   className: "rm-shop",
-  html: "<div>🍽️</div>",
+  html: "<div>ðŸ½ï¸</div>",
   iconSize: [34, 34],
   iconAnchor: [17, 17],
 });
 
 const homeIcon = L.divIcon({
   className: "rm-home",
-  html: "<div>🏠</div>",
+  html: "<div>ðŸ </div>",
   iconSize: [34, 34],
   iconAnchor: [17, 30],
 });
 
 const youIcon = L.divIcon({
   className: "rm-you",
-  html: "<div>🔵</div>",
+  html: "<div>ðŸ”µ</div>",
   iconSize: [30, 30],
   iconAnchor: [15, 15],
 });
@@ -59,8 +59,9 @@ const OrderMap = ({ order, livePos }) => {
     <div className="rider-minimap">
       <MapContainer center={cust || shop} zoom={14} scrollWheelZoom={false}>
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+          subdomains={["a", "b", "c", "d"]}
         />
         <Marker position={shop} icon={shopIcon}>
           <Popup>Apna Baithak (pickup)</Popup>
@@ -68,23 +69,23 @@ const OrderMap = ({ order, livePos }) => {
         {cust && (
           <>
             <Marker position={cust} icon={homeIcon}>
-              <Popup>Customer drop 📍 — EXACT pin</Popup>
+              <Popup>Customer drop ðŸ“ â€” EXACT pin</Popup>
             </Marker>
             <Polyline positions={[from, cust]} color="#0f8a0f" weight={4} dashArray="8 8" />
           </>
         )}
         {livePos && (
           <Marker position={livePos} icon={youIcon}>
-            <Popup>You are here 🔵</Popup>
+            <Popup>You are here ðŸ”µ</Popup>
           </Marker>
         )}
       </MapContainer>
       {cust ? (
         <p className="dist-line">
-          📍 Customer pin{cust && livePos ? ` — ${kmBetween(livePos, cust).toFixed(1)} km from you` : " not pinned"}
+          ðŸ“ Customer pin{cust && livePos ? ` â€” ${kmBetween(livePos, cust).toFixed(1)} km from you` : " not pinned"}
         </p>
       ) : (
-        <p className="no-pin">The customer did not drop a pin — go by the address.</p>
+        <p className="no-pin">The customer did not drop a pin â€” go by the address.</p>
       )}
     </div>
   );
@@ -97,7 +98,7 @@ const destOf = (o) => {
   return `${a} ${o.address?.city || "Lucknow"} ${o.address?.zipcode || ""}`.trim();
 };
 
-// Apna Baithak Rider — separate delivery partner app
+// Apna Baithak Rider â€” separate delivery partner app
 const App = () => {
   const [token, setToken] = useState(localStorage.getItem("ab_rider_token") || "");
   const [email, setEmail] = useState("");
@@ -113,7 +114,7 @@ const App = () => {
 
   const auth = { headers: { token } };
 
-  // continuous high-accuracy GPS while on duty — posts every ~10s
+  // continuous high-accuracy GPS while on duty â€” posts every ~10s
   const postGps = async (lat, lng, accuracy, tok) => {
     try {
       await axios.post(
@@ -211,7 +212,7 @@ const App = () => {
         auth
       );
       if (res.data.success) {
-        toast.success(status === "DELIVERED" ? "Delivered!" : "Picked up! Customer sees you moving 🛵");
+        toast.success(status === "DELIVERED" ? "Delivered!" : "Picked up! Customer sees you moving ðŸ›µ");
         load();
       } else toast.error(res.data.message);
     } catch {
@@ -227,7 +228,7 @@ const App = () => {
     try {
       const res = await axios.post(API + "/api/rider/collect", { orderId }, auth);
       if (res.data.success) {
-        toast.success("Cash collected ✓");
+        toast.success("Cash collected âœ“");
         load();
       } else toast.error(res.data.message);
     } catch {
@@ -245,7 +246,7 @@ const App = () => {
       if (res.data.success && !res.data.paid) {
         setQrUrl(res.data.short_url);
       } else if (res.data.paid) {
-        toast.success("Already paid ✓");
+        toast.success("Already paid âœ“");
         setQrOrder(null);
         load();
       } else toast.error(res.data.message);
@@ -261,7 +262,7 @@ const App = () => {
     try {
       const res = await axios.post(API + "/api/rider/paycheck", { orderId: qrOrder._id }, auth);
       if (res.data.paid) {
-        toast.success("Payment received ✓");
+        toast.success("Payment received âœ“");
         setQrOrder(null);
         setQrUrl("");
         load();
@@ -285,7 +286,7 @@ const App = () => {
       if (next) {
         localStorage.setItem("ab_duty", "1");
         startWatch();
-        toast.success("On duty — live GPS ON 🛰️");
+        toast.success("On duty â€” live GPS ON ðŸ›°ï¸");
       } else {
         localStorage.removeItem("ab_duty");
         stopWatch();
@@ -306,7 +307,7 @@ const App = () => {
           <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Rider email" type="email" required />
           <input value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" type="password" required />
           <button type="submit">Login</button>
-          <small>Account admin banayega (Admin panel → Riders)</small>
+          <small>Account admin banayega (Admin panel â†’ Riders)</small>
         </form>
       </div>
     );
@@ -324,14 +325,14 @@ const App = () => {
           <p className="gps-line">
             {onDuty
               ? gps?.accuracy != null
-                ? `🛰️ GPS ±${gps.accuracy}m ${gps.accuracy > 100 ? "(weak — bahar jao)" : "(accurate ✓)"}`
-                : "🛰️ Finding GPS signal… (turn on location, step outside)"
-              : "Duty is OFF — GPS is off"}
+                ? `ðŸ›°ï¸ GPS Â±${gps.accuracy}m ${gps.accuracy > 100 ? "(weak â€” bahar jao)" : "(accurate âœ“)"}`
+                : "ðŸ›°ï¸ Finding GPS signalâ€¦ (turn on location, step outside)"
+              : "Duty is OFF â€” GPS is off"}
           </p>
         </div>
         <div>
           <button className={onDuty ? "duty on" : "duty"} onClick={toggleDuty}>
-            {onDuty ? "On Duty ✓" : "Off Duty"}
+            {onDuty ? "On Duty âœ“" : "Off Duty"}
           </button>
           <button onClick={logout} className="ghost">Logout</button>
         </div>
@@ -340,13 +341,13 @@ const App = () => {
         <h2>To deliver ({active.length})</h2>
         {active.map((o) => (
           <div key={o._id} className="rider-card">
-            <b>₹{o.amount}</b> • {o.paymentMethod === "cod" ? "COLLECT CASH" : o.paymentStatus} • {o.mode}
-            <p>{o.customerName} • {o.phone}</p>
+            <b>â‚¹{o.amount}</b> â€¢ {o.paymentMethod === "cod" ? "COLLECT CASH" : o.paymentStatus} â€¢ {o.mode}
+            <p>{o.customerName} â€¢ {o.phone}</p>
             <p>{typeof o.address === "string" ? o.address : o.address?.street}, {o.address?.city} {o.address?.zipcode}</p>
             {o.landmark && <p>Landmark: {o.landmark}</p>}
             <OrderMap order={o} livePos={onDuty && gps?.lat != null ? [gps.lat, gps.lng] : null} />
             <ul>{(o.items || []).map((it, i) => (
-              <li key={i}>{it.name} ({it.size}) × {it.qty}</li>
+              <li key={i}>{it.name} ({it.size}) Ã— {it.qty}</li>
             ))}</ul>
             <a
               href={`https://www.google.com/maps/dir/?api=1&origin=${onDuty && gps?.lat != null ? `${gps.lat},${gps.lng}` : `${SHOP_LAT},${SHOP_LNG}`}&destination=${encodeURIComponent(destOf(o))}&travelmode=driving`}
@@ -354,27 +355,27 @@ const App = () => {
               rel="noreferrer"
               className="nav-btn"
             >
-              🗺️ Choose Route & Navigate
+              ðŸ—ºï¸ Choose Route & Navigate
             </a>
             {o.status === "READY" ? (
               <button onClick={() => markPickedUp(o._id)} className="deliver-btn pickup">
-                🛵 Picked Up — Start Delivery
+                ðŸ›µ Picked Up â€” Start Delivery
               </button>
             ) : (
               <button onClick={() => markDelivered(o._id)} className="deliver-btn">
-                ✅ Mark Delivered
+                âœ… Mark Delivered
               </button>
             )}
             {o.paymentMethod === "cod" && !o.cashCollected ? (
               <button onClick={() => collectMoney(o._id)} className="deliver-btn cash">
-                💰 Money Collected (₹{o.amount} cash)
+                ðŸ’° Money Collected (â‚¹{o.amount} cash)
               </button>
             ) : o.paymentMethod === "cod" ? (
-              <p className="cash-done">💰 Cash collected ✓</p>
+              <p className="cash-done">ðŸ’° Cash collected âœ“</p>
             ) : null}
             {(o.paymentMethod !== "cod" && o.paymentStatus !== "PAID") || (o.paymentMethod === "cod" && !o.cashCollected) ? (
               <button onClick={() => openQr(o)} className="deliver-btn qr">
-                📱 Razorpay QR (₹{o.amount})
+                ðŸ“± Razorpay QR (â‚¹{o.amount})
               </button>
             ) : null}
           </div>
@@ -383,23 +384,23 @@ const App = () => {
         <h2>Delivered ({done.length})</h2>
         {done.slice(0, 20).map((o) => (
           <div key={o._id} className="rider-card done">
-            <b>₹{o.amount}</b> • {o.customerName} • {new Date(o.date).toLocaleString("en-IN")}
+            <b>â‚¹{o.amount}</b> â€¢ {o.customerName} â€¢ {new Date(o.date).toLocaleString("en-IN")}
           </div>
         ))}
       </main>
       {qrOrder && (
         <div className="qr-modal" onClick={() => { setQrOrder(null); setQrUrl(""); }}>
           <div className="qr-box" onClick={(e) => e.stopPropagation()}>
-            <h3>Scan & Pay ₹{qrOrder.amount}</h3>
+            <h3>Scan & Pay â‚¹{qrOrder.amount}</h3>
             {qrBusy && !qrUrl ? (
-              <p>Creating Razorpay link…</p>
+              <p>Creating Razorpay linkâ€¦</p>
             ) : qrUrl ? (
               <>
                 <QRCodeSVG value={qrUrl} size={230} />
-                <p>Apna Baithak • Razorpay secure</p>
-                <p className="qr-note">Customer scans → pay via UPI/card</p>
+                <p>Apna Baithak â€¢ Razorpay secure</p>
+                <p className="qr-note">Customer scans â†’ pay via UPI/card</p>
                 <button onClick={checkPaid} disabled={qrBusy} className="check-btn">
-                  {qrBusy ? "Checking…" : "✓ Check payment"}
+                  {qrBusy ? "Checkingâ€¦" : "âœ“ Check payment"}
                 </button>
               </>
             ) : null}
@@ -413,3 +414,4 @@ const App = () => {
 };
 
 export default App;
+

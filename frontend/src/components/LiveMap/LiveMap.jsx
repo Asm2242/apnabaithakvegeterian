@@ -7,26 +7,25 @@ import PropTypes from "prop-types";
 
 export const SHOP = { lat: 26.9381402, lng: 80.9129123, name: "Apna Baithak, Eldeco City" };
 
-// Blinkit-style pins (no image assets needed)
-const shopIcon = L.divIcon({
-  className: "lm-shop",
-  html: "<div>🍽️</div>",
-  iconSize: [40, 40],
-  iconAnchor: [20, 20],
-});
+// Google-Maps-style teardrop pins (no image assets needed)
+const makePin = (emoji, bg) =>
+  L.divIcon({
+    className: "gm-pin",
+    html: `<div class="gm-pin-body" style="background:${bg}"><span>${emoji}</span></div>`,
+    iconSize: [34, 46],
+    iconAnchor: [17, 44],
+    popupAnchor: [0, -42],
+  });
+
+const shopIcon = makePin("🍽️", "linear-gradient(135deg,#FF8F00,#E65100)");
+const homeIcon = makePin("🏠", "linear-gradient(135deg,#EF5350,#B71C1C)");
 
 const riderIcon = L.divIcon({
-  className: "lm-rider",
-  html: "<div class='pulse'>🛵</div>",
-  iconSize: [40, 40],
-  iconAnchor: [20, 20],
-});
-
-const homeIcon = L.divIcon({
-  className: "lm-home",
-  html: "<div>🏠</div>",
-  iconSize: [36, 36],
-  iconAnchor: [18, 32],
+  className: "gm-rider",
+  html: `<div class="gm-rider-body"><div class="gm-rider-pulse"></div><span>🛵</span></div>`,
+  iconSize: [46, 46],
+  iconAnchor: [23, 23],
+  popupAnchor: [0, -26],
 });
 
 // (removed: replaced by FitBoth)
@@ -75,9 +74,11 @@ const LiveMap = ({ rider, riderLabel, customer }) => {
         className="live-map-box"
       >
         <FitBoth riderPos={riderPos} custPos={custPos} />
+        {/* Google-Maps-style basemap — CARTO Voyager (free, no API key) */}
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+          subdomains={["a", "b", "c", "d"]}
         />
         <Marker position={shopPos} icon={shopIcon}>
           <Popup>{SHOP.name}<br />7:30 AM – 10 PM</Popup>
@@ -98,7 +99,15 @@ const LiveMap = ({ rider, riderLabel, customer }) => {
                   : ""}
               </Popup>
             </Marker>
-            <Polyline positions={[riderPos, custPos || shopPos]} color="#9a3412" weight={4} dashArray="8 8" />
+            {/* Google Navigation-style route: white casing + flowing blue line */}
+            <Polyline
+              positions={[riderPos, custPos || shopPos]}
+              pathOptions={{ color: "#ffffff", weight: 10, opacity: 0.9 }}
+            />
+            <Polyline
+              positions={[riderPos, custPos || shopPos]}
+              pathOptions={{ color: "#1A73E8", weight: 5, opacity: 0.95, className: "live-route-anim" }}
+            />
           </>
         )}
       </MapContainer>

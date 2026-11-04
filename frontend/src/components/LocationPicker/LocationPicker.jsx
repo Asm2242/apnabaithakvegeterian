@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -8,7 +8,7 @@ import { getPos } from "../../lib/location";
 
 const pinIcon = L.divIcon({
   className: "lp-pin",
-  html: "<div>📍</div>",
+  html: "<div>ðŸ“</div>",
   iconSize: [36, 36],
   iconAnchor: [18, 32],
 });
@@ -54,11 +54,11 @@ const LocationPicker = ({ value, onChange }) => {
     try {
       const p = await getPos();
       if (p.accuracy && p.accuracy > 500) {
-        toast.info("GPS signal is weak — try again in an open area");
+        toast.info("GPS signal is weak â€” try again in an open area");
       }
       pick([p.lat, p.lng]);
     } catch {
-      toast.error("Location not found — tap on the map");
+      toast.error("Location not found â€” tap on the map");
     }
     setLocating(false);
   };
@@ -66,16 +66,17 @@ const LocationPicker = ({ value, onChange }) => {
   return (
     <div className="loc-picker">
       <div className="loc-head">
-        <span>📍 Delivery location pin</span>
+        <span>ðŸ“ Delivery location pin</span>
         <button type="button" onClick={useGps} disabled={locating}>
-          {locating ? "Locating…" : "📡 Use my location"}
+          {locating ? "Locatingâ€¦" : "ðŸ“¡ Use my location"}
         </button>
       </div>
       <MapContainer center={pos || fallback} zoom={15} scrollWheelZoom={false} className="loc-map">
         <Recenter pos={pos} />
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+          subdomains={["a", "b", "c", "d"]}
         />
         <TapToSet onPick={pick} />
         {(pos || fallback) && (
@@ -92,8 +93,8 @@ const LocationPicker = ({ value, onChange }) => {
       </MapContainer>
       <p className="loc-hint">
         {pos
-          ? `Pin: ${pos[0].toFixed(5)}, ${pos[1].toFixed(5)} — the rider will come straight here`
-          : "Tap on the map or use GPS — the rider will come straight to the pin"}
+          ? `Pin: ${pos[0].toFixed(5)}, ${pos[1].toFixed(5)} â€” the rider will come straight here`
+          : "Tap on the map or use GPS â€” the rider will come straight to the pin"}
       </p>
     </div>
   );
@@ -105,3 +106,4 @@ LocationPicker.propTypes = {
 };
 
 export default LocationPicker;
+
