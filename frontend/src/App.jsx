@@ -17,6 +17,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Verify from "./pages/Verify/Verify";
 import { StoreContext } from "./Context/StoreContext";
+import DiwaliSky from "./components/DiwaliSky/DiwaliSky";
 
 const App = () => {
   const { token, showLogin, setShowLogin } = useContext(StoreContext);
@@ -55,6 +56,7 @@ const App = () => {
 
   return (
     <>
+      <DiwaliSky />
       <ToastContainer />
       {showLogin ? <LoginPopup setShowLogin={setShowLogin} /> : <></>}
       <div className="app">

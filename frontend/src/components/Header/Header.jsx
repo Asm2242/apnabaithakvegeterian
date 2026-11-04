@@ -1,5 +1,6 @@
 //import React from 'react'
 import "./Header.css";
+import { FireworkBursts } from "../DiwaliSky/DiwaliSky";
 
 const Header = () => {
   const scrollToMenu = () => {
@@ -20,11 +21,12 @@ const Header = () => {
         </div>
       </div>
       <div className="header-overlay" />
+      <FireworkBursts field="fw-field fw-hero" />
       <div className="header-contents">
-        <span className="hero-badge">🪔 100% Pure Veg • Eldeco City, Lucknow</span>
+        <span className="hero-badge">🪔 दिवाली स्पेशल 2026 • 100% Pure Veg</span>
         <h2>
-          इस दशहरे, अपने परिवार के साथ
-          <span className="hero-line">मनाएं स्वाद का उत्सव!</span>
+          इस दिवाली, अपने परिवार के साथ
+          <span className="hero-line">मनाएं रोशनी का उत्सव!</span>
         </h2>
         <p>
           81 dishes across 14 categories — thali, maggi, pizza, momos, Chinese
@@ -40,6 +42,12 @@ const Header = () => {
           <a className="btn-ghost" href="tel:+919454999442">📞 Call to Order</a>
         </div>
       </div>
+      <div className="diya-row" aria-hidden="true">
+        {Array.from({ length: 7 }).map((_, i) => (
+          <span key={i} className="diya" style={{ animationDelay: `${i * 0.3}s` }}>🪔</span>
+        ))}
+      </div>
+      <div className="rangoli-strip" aria-hidden="true" />
     </div>
   );
 };

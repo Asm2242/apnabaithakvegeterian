@@ -1,0 +1,111 @@
+.diwali-sky {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* twinkling stars */
+.dw-stars {
+  position: absolute;
+  inset: 0;
+  opacity: 0.8;
+  animation: dwTwinkle 4s ease-in-out infinite alternate;
+  background-image:
+    radial-gradient(1.6px 1.6px at 8% 12%, #ffe9a8 50%, transparent 51%),
+    radial-gradient(1.2px 1.2px at 22% 30%, #fff6df 50%, transparent 51%),
+    radial-gradient(1.8px 1.8px at 34% 9%, #ffd54f 50%, transparent 51%),
+    radial-gradient(1.2px 1.2px at 47% 22%, #ffe9a8 50%, transparent 51%),
+    radial-gradient(1.6px 1.6px at 58% 7%, #fff 50%, transparent 51%),
+    radial-gradient(1.2px 1.2px at 71% 26%, #ffd54f 50%, transparent 51%),
+    radial-gradient(1.8px 1.8px at 84% 14%, #ffe9a8 50%, transparent 51%),
+    radial-gradient(1.2px 1.2px at 93% 34%, #fff6df 50%, transparent 51%),
+    radial-gradient(1.4px 1.4px at 15% 48%, #ffd54f 50%, transparent 51%),
+    radial-gradient(1.2px 1.2px at 90% 52%, #ffe9a8 50%, transparent 51%);
+}
+@keyframes dwTwinkle {
+  0% { opacity: 0.35; }
+  100% { opacity: 0.9; }
+}
+
+/* firework burst */
+.fw-wrap { position: absolute; }
+
+.fw {
+  position: relative;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  opacity: 0;
+  background: radial-gradient(circle, #fff 0%, var(--c) 35%, transparent 72%);
+  animation: dwFlash 3.6s ease-out infinite;
+  animation-delay: var(--d);
+}
+.fw::before {
+  /* flying sparks */
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 4px;
+  height: 4px;
+  margin: -2px 0 0 -2px;
+  border-radius: 50%;
+  background: var(--c);
+  opacity: 0;
+  animation: dwSparks 3.6s ease-out infinite;
+  animation-delay: var(--d);
+}
+.fw::after {
+  /* expanding ring */
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid var(--c);
+  opacity: 0;
+  animation: dwRing 3.6s ease-out infinite;
+  animation-delay: var(--d);
+}
+
+@keyframes dwFlash {
+  0%, 5% { opacity: 0; transform: scale(0.2); }
+  12% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.8; }
+  100% { opacity: 0; transform: scale(1.8); }
+}
+@keyframes dwRing {
+  0%, 8% { opacity: 0; transform: scale(0.25); }
+  20% { opacity: 0.85; }
+  100% { opacity: 0; transform: scale(5.5); }
+}
+@keyframes dwSparks {
+  0%, 8% {
+    opacity: 0;
+    box-shadow: 0 0 0 0 var(--c);
+  }
+  18% {
+    opacity: 1;
+    box-shadow:
+      0 -14px 0 0 var(--c), 0 14px 0 0 var(--c),
+      -14px 0 0 0 var(--c), 14px 0 0 0 var(--c),
+      -10px -10px 0 0 var(--c), 10px -10px 0 0 var(--c),
+      -10px 10px 0 0 var(--c), 10px 10px 0 0 var(--c);
+  }
+  100% {
+    opacity: 0;
+    box-shadow:
+      0 -40px 0 0 transparent, 0 40px 0 0 transparent,
+      -40px 0 0 0 transparent, 40px 0 0 0 transparent,
+      -28px -28px 0 0 transparent, 28px -28px 0 0 transparent,
+      -28px 28px 0 0 transparent, 28px 28px 0 0 transparent;
+  }
+}
+
+/* light theme: sky hidden (cream bg stays readable) */
+html[data-theme="light"] .diwali-sky { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .diwali-sky, .diwali-sky * { animation: none !important; }
+}

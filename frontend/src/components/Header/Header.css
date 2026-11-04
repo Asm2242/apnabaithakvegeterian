@@ -168,6 +168,54 @@
     border-radius: 50px;
     text-decoration: none;
 }
+/* ---------- diwali fireworks in hero ---------- */
+.fw-field,
+.fw-global {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.fw-field .fw-wrap,
+.fw-global .fw-wrap { position: absolute; }
+.fw-hero { z-index: 1; }
+
+/* ---------- glowing diya row ---------- */
+.diya-row {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 42px;
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  font-size: 30px;
+  pointer-events: none;
+  z-index: 1;
+}
+.diya {
+  display: inline-block;
+  animation: diyaGlow 1.9s ease-in-out infinite;
+}
+@keyframes diyaGlow {
+  0%, 100% { filter: drop-shadow(0 0 8px rgba(255, 170, 60, 0.75)); transform: scale(1); }
+  50% { filter: drop-shadow(0 0 20px rgba(255, 200, 90, 1)); transform: scale(1.15); }
+}
+
+/* ---------- rangoli strip at hero bottom ---------- */
+.rangoli-strip {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 16px;
+  opacity: 0.95;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 8px 8px, #ffd54f 2.5px, transparent 3.6px) 0 0 / 16px 16px repeat,
+    repeating-linear-gradient(90deg, #ff6f00 0 8px, #e91e8c 8px 16px, #7c2d12 16px 24px);
+}
+
 @media(max-width:750px){
     .header{
         min-height: 380px;
@@ -178,5 +226,10 @@
     }
     .hero-stats{
         gap: 18px;
+    }
+    .diya-row{
+        bottom: 18px;
+        gap: 16px;
+        font-size: 22px;
     }
 }
