@@ -1,11 +1,11 @@
 //import React from 'react'
 import "./Header.css";
+import { useNavigate } from "react-router-dom";
 import { FireworkBursts } from "../DiwaliSky/DiwaliSky";
 
 const Header = () => {
-  const scrollToMenu = () => {
-    document.getElementById("explore-menu")?.scrollIntoView({ behavior: "smooth" });
-  };
+  const navigate = useNavigate();
+  const goToMenu = () => navigate("/menu");
 
   return (
     <div className="header">
@@ -38,7 +38,7 @@ const Header = () => {
           <div><b>7:30–10</b><span>Open daily</span></div>
         </div>
         <div className="hero-btns">
-          <button className="btn-gold" onClick={scrollToMenu}>Explore Festive Feast</button>
+          <button className="btn-gold" onClick={goToMenu}>Explore Festive Feast</button>
           <a className="btn-ghost" href="tel:+919454999442">📞 Call to Order</a>
         </div>
       </div>
