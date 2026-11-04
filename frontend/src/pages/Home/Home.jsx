@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { useContext } from "react";
 import Header from "../../components/Header/Header";
 import FoodItem from "../../components/FoodItem/FoodItem";
-import AppDownload from "../../components/AppDownload/AppDownload";
 import { StoreContext } from "../../Context/StoreContext";
 import "./Home.css";
 
@@ -157,8 +156,6 @@ const Home = () => {
           ))}
         </div>
       </section>
-
-      <AppDownload />
     </>
   );
 };
