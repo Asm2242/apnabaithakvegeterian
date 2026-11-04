@@ -71,7 +71,10 @@
 .header{
     min-height: 520px;
     margin: 24px auto;
-    background: url('/header_img.png') center/cover no-repeat, linear-gradient(120deg, #2E0808, #4A0E0E 55%, #FF6F00 160%);
+    background:
+      url('/diwali-bg.jpg') center/cover no-repeat,
+      url('/header_img.png') center/cover no-repeat,
+      linear-gradient(120deg, #2E0808, #4A0E0E 55%, #FF6F00 160%);
     background-color: var(--maroon-deep);
     border-radius: 28px;
     position: relative;
@@ -82,7 +85,7 @@
 .header-overlay{
     position: absolute;
     inset: 0;
-    background: linear-gradient(100deg, rgba(30, 8, 4, 0.94) 20%, rgba(30, 8, 4, 0.6) 55%, rgba(30, 8, 4, 0.2) 100%);
+    background: linear-gradient(100deg, rgba(30, 8, 4, 0.9) 20%, rgba(30, 8, 4, 0.55) 55%, rgba(30, 8, 4, 0.25) 100%);
 }
 .header-contents{
     position: relative;

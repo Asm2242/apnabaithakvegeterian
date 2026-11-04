@@ -6,13 +6,23 @@
     align-items: center;
     justify-content: center;
     background:
+      url('/diwali-bg.jpg') center/cover no-repeat,
+      url('/header_img.png') center/cover no-repeat,
       radial-gradient(900px 400px at 50% 110%, rgba(255, 111, 0, 0.35), transparent 60%),
       radial-gradient(600px 300px at 15% 100%, rgba(255, 79, 160, 0.2), transparent 60%),
       linear-gradient(160deg, #150521 0%, #2a0a33 40%, #4a0e1e 75%, #6e1b0a 120%);
     padding: 20px;
     animation: fadeIn 0.5s;
 }
+.otp-gate::before{
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(21, 5, 33, 0.45);
+}
 .otp-gate-card{
+    position: relative;
+    z-index: 1;
     background: #fff;
     border-radius: 20px;
     padding: 32px 28px;
