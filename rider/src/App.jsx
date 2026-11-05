@@ -100,11 +100,6 @@ const OrderMap = ({ order, livePos }) => {
                 <Polyline positions={linePath} pathOptions={{ color: "#1A73E8", weight: 4, opacity: 0.95 }} />
               </>
             )}
-            {route && (
-              <div className="route-eta">
-                🛵 {(route.distance / 1000).toFixed(1)} km • ~{Math.max(1, Math.round(route.duration / 60))} min
-              </div>
-            )}
           </>
         )}
         {livePos && (
@@ -113,6 +108,11 @@ const OrderMap = ({ order, livePos }) => {
           </Marker>
         )}
       </MapContainer>
+      {route && (
+        <div className="route-eta">
+          🛵 {(route.distance / 1000).toFixed(1)} km • ~{Math.max(1, Math.round(route.duration / 60))} min
+        </div>
+      )}
       {cust ? (
         <p className="dist-line">
           📍 Customer pin{livePos ? (route
