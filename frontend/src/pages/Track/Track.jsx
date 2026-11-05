@@ -9,7 +9,7 @@ import "./Track.css";
 // Live tracking: animated status + ETA + always-on map (no number chart)
 const STATUS_INFO = {
   PLACED: { emoji: "🎉", title: "Order received!", sub: "The restaurant is confirming your order…", eta: "~35 min left" },
-  CONFIRMED: { emoji: "✅", title: "Restaurant confirmed!", sub: "Kitchen me bheja gaya…", eta: "30 minutes left" },
+  CONFIRMED: { emoji: "✅", title: "Restaurant confirmed!", sub: "Sent to the kitchen…", eta: "30 minutes left" },
   PREPARING: { emoji: "👨‍🍳", title: "Your food is being made…", sub: "Fresh off the tawa…", eta: "20 minutes left" },
   READY: { emoji: "📦", title: "Packing your order…", sub: "Your rider is on the way…", eta: "10 minutes left" },
   OUT_FOR_DELIVERY: { emoji: "🛵", title: "Rider is on the way!", sub: "Watch it live on the map…", eta: "Arriving soon" },
