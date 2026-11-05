@@ -12,6 +12,10 @@ const Cart = () => {
   const [code, setCode] = useState(coupon?.code || "");
   const [isFirst, setIsFirst] = useState(false);
 
+  const savedPin = (() => {
+    try { return JSON.parse(localStorage.getItem("ab_pin") || "null"); } catch { return null; }
+  })();
+
   useEffect(() => {
     if (!token) return;
     axios
@@ -53,6 +57,20 @@ const Cart = () => {
 
   return (
     <div className="cart">
+      {savedPin && (
+        <div className="cart-deliver-bar">
+          <div className="cart-deliver-info">
+            <span className="cart-deliver-label">Deliver to:</span>
+            <p className="cart-deliver-coords">
+              📍 {savedPin.lat?.toFixed(5)}, {savedPin.lng?.toFixed(5)}
+              <small>— your saved location</small>
+            </p>
+          </div>
+          <button type="button" className="cart-deliver-edit" onClick={() => navigate("/order")}>
+            ✏️ Change
+          </button>
+        </div>
+      )}
       {isFirst && subtotal >= 149 && !coupon && (
         <div className="offer-banner">
           🎉 First order? Use code <b>WELCOME50</b> — Rs.50 OFF above Rs.149!

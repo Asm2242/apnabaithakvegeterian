@@ -71,7 +71,6 @@ const PlaceOrder = () => {
     } catch { /* ignore */ }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
-
   // admin ka online payment switch + razorpay key (backend is source of truth)
   useEffect(() => {
     axios
@@ -335,17 +334,37 @@ const PlaceOrder = () => {
       </div>
 
       {step === "pin" && mode === "delivery" && (
-        <div className="step-card">
-          <h2>📍 Drop your location pin</h2>
-          <p className="muted">The rider will come straight to this pin. Tap the map or use GPS.</p>
-          <LocationPicker
-            value={pin ? [pin.lat, pin.lng] : null}
-            onChange={setPin}
-          />
-          <button className="place-order-submit" onClick={savePin}>
-            Save pin & continue →
-          </button>
-        </div>
+        pin ? (
+          <div className="step-card loc-confirm-card">
+            <h2>📍 Confirm your delivery location</h2>
+            <p className="muted">We will deliver to this pinned spot.</p>
+            <div className="loc-confirm-pin">
+              <div className="loc-confirm-icon">📍</div>
+              <div className="loc-confirm-coords">
+                <b>{pin.lat.toFixed(5)}, {pin.lng.toFixed(5)}</b>
+                <small>Exact GPS pin — rider will navigate here</small>
+              </div>
+            </div>
+            <button className="place-order-submit" onClick={savePin}>
+              ✅ Confirm & continue →
+            </button>
+            <button className="back-btn" onClick={() => setPin(null)}>
+              ✏️ Edit location
+            </button>
+          </div>
+        ) : (
+          <div className="step-card">
+            <h2>📍 Drop your location pin</h2>
+            <p className="muted">The rider will come straight to this pin. Tap the map or use GPS.</p>
+            <LocationPicker
+              value={pin ? [pin.lat, pin.lng] : null}
+              onChange={setPin}
+            />
+            <button className="place-order-submit" onClick={savePin}>
+              Save pin & continue →
+            </button>
+          </div>
+        )
       )}
 
       {(step === "details" || (step === "pin" && mode === "takeaway")) && (

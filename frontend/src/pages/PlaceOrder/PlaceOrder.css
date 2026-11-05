@@ -180,3 +180,44 @@ html[data-theme="dark"] .step-card .muted{color:#c9b896}
 html[data-theme="dark"] .stepper .step{background:#2e2015;color:#8a7a5f}
 html[data-theme="dark"] .checkout-steps .mode-toggle button{background:#2e2015;color:#c9b896;border-color:#5a4028}
 html[data-theme="dark"] .step-card input{background:#2e2015;color:#f3e7d3;border-color:#5a4028}
+.loc-confirm-card {
+  text-align: center;
+  max-width: 480px;
+  margin: 0 auto;
+}
+.loc-confirm-card h2 { margin-bottom: 6px; }
+.loc-confirm-pin {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #fff8ec;
+  border: 2px solid #FFD54F;
+  border-radius: 18px;
+  padding: 20px 24px;
+  margin: 18px 0;
+  text-align: left;
+}
+.loc-confirm-icon {
+  font-size: 40px;
+  line-height: 1;
+}
+.loc-confirm-coords b {
+  display: block;
+  font-size: 18px;
+  color: #4A0E0E;
+}
+.loc-confirm-coords small {
+  display: block;
+  color: #8A7A6C;
+  font-size: 12px;
+  margin-top: 4px;
+}
+.loc-confirm-card .back-btn {
+  margin-top: 12px;
+  width: 100%;
+}
+html[data-theme="dark"] .loc-confirm-pin {
+  background: #241a12;
+  border-color: #5a4028;
+}
+html[data-theme="dark"] .loc-confirm-coords b { color: #FFD54F; }

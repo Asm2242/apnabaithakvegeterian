@@ -175,4 +175,31 @@ html[data-theme="dark"] .cart-promocode-input{
     .cart-promocode{
         justify-content: start;
     }
+}.cart-deliver-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #fff8ec;
+  border: 1.5px solid #FFD54F;
+  border-radius: 14px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
 }
+.cart-deliver-info { flex: 1; min-width: 0; }
+.cart-deliver-label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #8A7A6C; font-weight: 800; }
+.cart-deliver-coords { margin: 4px 0 0 0; font-weight: 600; color: #4A0E0E; font-size: 14px; }
+.cart-deliver-coords small { color: #8A7A6C; font-weight: 400; font-size: 12px; }
+.cart-deliver-edit {
+  flex: none;
+  background: #FF6F00;
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  padding: 8px 18px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+html[data-theme="dark"] .cart-deliver-bar { background: #241a12; border-color: #5a4028; }
+html[data-theme="dark"] .cart-deliver-coords { color: #ffd54f; }
