@@ -70,7 +70,8 @@ const LiveMap = ({ rider, riderLabel, customer }) => {
   // real road route (turns & corners) instead of a straight line
   const [route, setRoute] = useState(null); // { coords, distance, duration }
   const lastReq = useRef("");
-  const destPos = custPos || shopPos;
+  // route ONLY to customer's pin — never to the shop
+  const destPos = custPos;
 
   useEffect(() => {
     if (!riderPos || !destPos) return;
@@ -88,7 +89,6 @@ const LiveMap = ({ rider, riderLabel, customer }) => {
   }, [riderPos, custPos]);
 
   const linePath = route?.coords?.length ? route.coords : (riderPos && destPos ? [riderPos, destPos] : null);
-
   return (
     <div className="live-map">
       <MapContainer
@@ -112,7 +112,7 @@ const LiveMap = ({ rider, riderLabel, customer }) => {
             <Popup>Your home 📍 (your dropped pin)</Popup>
           </Marker>
         )}
-        {riderPos && (
+        {riderPos && custPos && (
           <>
             <Marker position={riderPos} icon={riderIcon}>
               <Popup>
@@ -123,7 +123,7 @@ const LiveMap = ({ rider, riderLabel, customer }) => {
                   : ""}
               </Popup>
             </Marker>
-            {/* Road-following route: white casing + flowing blue line (turns like a real biker) */}
+            {/* Road-following route: white casing + flowing blue line */}
             {linePath && (
               <>
                 <Polyline
@@ -138,10 +138,28 @@ const LiveMap = ({ rider, riderLabel, customer }) => {
             )}
           </>
         )}
+
+        {/* rider shown even when customer didn't drop a pin */}
+        {riderPos && !custPos && (
+          <Marker position={riderPos} icon={riderIcon}>
+            <Popup>
+              {rider.name || "Rider"} is here 🛵
+              {rider.updatedAt ? <br /> : null}
+              {rider.updatedAt
+                ? new Date(rider.updatedAt).toLocaleTimeString("en-IN")
+                : ""}
+            </Popup>
+          </Marker>
+        )}
       </MapContainer>
       {riderPos && route && (
         <div className="route-eta">
           🛵 {(route.distance / 1000).toFixed(1)} km • ~{Math.max(1, Math.round(route.duration / 60))} min
+        </div>
+      )}
+      {!custPos && (
+        <div className="live-map-notice">
+          Customer didn't drop a pin — rider must call for exact address
         </div>
       )}
       {riderLabel && <p className="live-caption">{riderLabel}</p>}

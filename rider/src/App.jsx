@@ -108,6 +108,11 @@ const OrderMap = ({ order, livePos }) => {
           </Marker>
         )}
       </MapContainer>
+      {!cust && (
+        <div className="no-pin-banner">
+          Customer didn't drop a pin — call customer for exact address
+        </div>
+      )}
       {route && (
         <div className="route-eta">
           🛵 {(route.distance / 1000).toFixed(1)} km • ~{Math.max(1, Math.round(route.duration / 60))} min

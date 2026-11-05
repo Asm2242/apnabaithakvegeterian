@@ -34,6 +34,16 @@ body{margin:0;font-family:Arial,sans-serif;background:#f6f1e7;color:#3b1d0c}
 .qr-box .check-btn{background:#0f8a0f !important;width:100%}
 .rider-minimap{margin:10px 0; position:relative}
 .rider-minimap .leaflet-container{height:180px;width:100%;border-radius:10px;border:1px solid #d4a017;z-index:1}
+.no-pin-banner {
+  margin-top: 8px;
+  background: rgba(220, 38, 38, 0.92);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+  padding: 7px 10px;
+  border-radius: 8px;
+}
 .route-eta {
   position: absolute;
   top: 12px;
