@@ -19,12 +19,27 @@ const port = process.env.PORT || 4000;
 // middlewares
 app.use(express.json());
 
-// CORS: allow only known origins. Set CORS_ORIGINS (comma separated) in prod.
+// CORS: known origins only. Production domains are always allowed so a
+// missing CORS_ORIGINS env var can never take the live site offline.
 // Requests without an Origin header (curl, server-to-server, mobile apps) pass.
-const allowedOrigins = (process.env.CORS_ORIGINS || "")
-  .split(",")
-  .map((o) => o.trim())
-  .filter(Boolean);
+const DEFAULT_ORIGINS = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://localhost:3000",
+  "https://apnabaithak.com",
+  "https://www.apnabaithak.com",
+  "https://admin.apnabaithak.com",
+  "https://rider.apnabaithak.com",
+  "https://apnabaithakvegeterian.vercel.app",
+  "https://apna-baithak-veg-restaurant.vercel.app",
+];
+const allowedOrigins = [
+  ...DEFAULT_ORIGINS,
+  ...(process.env.CORS_ORIGINS || "")
+    .split(",")
+    .map((o) => o.trim())
+    .filter(Boolean),
+];
 const isLocalOrigin = (origin) =>
   /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin);
 
@@ -32,10 +47,7 @@ app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin) return callback(null, true);
-      if (
-        allowedOrigins.includes(origin) ||
-        (allowedOrigins.length === 0 && isLocalOrigin(origin))
-      ) {
+      if (allowedOrigins.includes(origin) || isLocalOrigin(origin)) {
         return callback(null, true);
       }
       return callback(new Error("Not allowed by CORS"));
