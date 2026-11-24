@@ -20,6 +20,7 @@ import "react-toastify/dist/ReactToastify.css";
 import Verify from "./pages/Verify/Verify";
 import { StoreContext } from "./Context/StoreContext";
 import Splash from "./components/Splash/Splash";
+import ScrollTop from "./components/ScrollTop/ScrollTop";
 
 const App = () => {
   const { token, showLogin, setShowLogin, theme } = useContext(StoreContext);
@@ -92,6 +93,7 @@ const App = () => {
           <Route path="/success/:id" element={<OrderSuccess />} />
         </Routes>
       </main>
+      <ScrollTop />
       <Feedback />
       <Footer />
     </>
