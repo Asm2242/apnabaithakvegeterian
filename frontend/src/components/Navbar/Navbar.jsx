@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { assets } from "../../assets/assets";
 import { StoreContext } from "../../Context/StoreContext";
@@ -14,6 +14,17 @@ const Navbar = ({ setShowLogin }) => {
   const navigate = useNavigate();
 
   const close = () => setOpen(false);
+
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === "Escape") {
+        setSearchOpen(false);
+        setOpen(false);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
   const cartCount = Object.values(cartItems || {}).reduce((a, b) => a + (b || 0), 0);
   const wishCount = (wishlist || []).length;
 

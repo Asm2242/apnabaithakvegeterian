@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import "./LoginPopup.css";
 import { assets } from "../../assets/assets";
 import { StoreContext } from "../../Context/StoreContext";
@@ -15,6 +15,12 @@ const LoginPopup = ({ setShowLogin }) => {
   const [busy, setBusy] = useState(false);
 
   const onChange = (e) => setData((d) => ({ ...d, [e.target.name]: e.target.value }));
+
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === "Escape") setShowLogin(false); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [setShowLogin]);
 
   const switchMode = (next) => {
     setMode(next);
