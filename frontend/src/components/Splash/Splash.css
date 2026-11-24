@@ -19,20 +19,35 @@
   animation: splashOut 0.5s ease forwards;
 }
 
-/* soft breathing glow behind the logo */
+/* logo + orbit + glow live in one fixed-size box so they always align */
+.splash-mark {
+  position: relative;
+  width: 190px;
+  height: 190px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .splash-glow {
   position: absolute;
+  left: 50%;
+  top: 50%;
   width: 420px;
   height: 420px;
   border-radius: 50%;
   background: radial-gradient(circle, rgba(255, 179, 0, 0.35), rgba(255, 111, 0, 0.12) 45%, transparent 70%);
   filter: blur(12px);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
   animation: glowBreathe 2.2s ease-in-out infinite;
 }
 
-/* rotating golden orbit */
 .splash-ring {
   position: absolute;
+  left: 50%;
+  top: 50%;
   width: 190px;
   height: 190px;
   border-radius: 50%;
@@ -40,11 +55,14 @@
   border-top-color: transparent;
   border-right-color: rgba(255, 111, 0, 0.9);
   box-shadow: 0 0 40px rgba(255, 179, 0, 0.4), inset 0 0 30px rgba(255, 111, 0, 0.2);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
   animation: spin 1.6s linear infinite;
 }
 
 .splash-logo {
   position: relative;
+  z-index: 2;
   width: 104px;
   height: 104px;
   border-radius: 28px;
@@ -111,10 +129,13 @@
 @keyframes splashOut {
   to { opacity: 0; transform: scale(1.06); filter: blur(6px); visibility: hidden; }
 }
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
 @keyframes glowBreathe {
-  0%, 100% { transform: scale(0.92); opacity: 0.75; }
-  50% { transform: scale(1.12); opacity: 1; }
+  0%, 100% { transform: translate(-50%, -50%) scale(0.92); opacity: 0.75; }
+  50% { transform: translate(-50%, -50%) scale(1.12); opacity: 1; }
 }
 @keyframes logoPop {
   0% { opacity: 0; transform: scale(0.4) rotate(-12deg); }
