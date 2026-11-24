@@ -167,6 +167,9 @@ const loginWithOtp = async (req, res) => {
         if (!isIndianMobile(phone)) {
             return res.json({ success: false, message: "Enter a valid 10-digit Indian mobile number" });
         }
+        // OTP must actually be verified before issuing a JWT
+        const { ok, message } = await checkOtp(phone, req.body.otp);
+        if (!ok) return res.json({ success: false, message });
         let user = await userModel.findOne({ phone });
         if (!user) {
             user = await new userModel({
