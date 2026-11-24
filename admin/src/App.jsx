@@ -1,5 +1,7 @@
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:4000";
@@ -41,7 +43,7 @@ function Settings({ token }) {
       value,
     });
     if (res.data.success) setSettings(res.data.data);
-    else alert(res.data.message || "Update fail");
+    else toast.error(res.data.message || "Update fail");
     setBusy(false);
   };
 
@@ -219,7 +221,7 @@ function Foods({ token, imgBase }) {
         fd.append("id", editing);
         await api(token).post("/api/food/update", fd);
       } else {
-        if (!file) { alert("Photo required for new dish"); return; }
+        if (!file) { toast.error("Photo required for new dish"); return; }
         await api(token).post("/api/food/add", fd);
       }
       setForm({ name: "", description: "", price: "", halfPrice: "", fullPrice: "", category: "Snacks", isPizza: false, bestSeller: false });
@@ -359,7 +361,8 @@ function Riders({ token }) {
   const create = async (e) => {
     e.preventDefault();
     const res = await api(token).post("/api/rider/create", form);
-    alert(res.data.message);
+    if (res.data.success) toast.success("Rider created");
+    else toast.error(res.data.message || "Could not create rider");
     if (res.data.success) {
       setForm({ name: "", email: "", password: "", phone: "", vehicle: "Bike" });
       load();
@@ -430,7 +433,7 @@ function Coupons({ token }) {
     if (res.data.success) {
       setForm({ code: "", description: "", type: "flat", value: "", minOrder: 0, maxDiscount: "", firstOrderOnly: false });
       load();
-    } else alert(res.data.message);
+    } else toast.error(res.data.message || "Could not save coupon");
   };
   const toggle = async (id, active) => {
     await api(token).post("/api/coupon/admin/toggle", { id, active: !active });
@@ -735,6 +738,7 @@ function App() {
   if (!token) return <Login onLogin={login} />;
   return (
     <div className="admin">
+      <ToastContainer theme={theme} position="top-right" />
       <header>
         <b>Apna Baithak Admin</b>
         <nav>
