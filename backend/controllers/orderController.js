@@ -271,17 +271,24 @@ const updateStatus = async (req, res) => {
     if (!ORDER_FLOW.includes(req.body.status)) {
       return res.json({ success: false, message: "Invalid status" });
     }
-    const patch = { status: req.body.status };
-    if (req.body.riderId) patch.riderId = req.body.riderId;
-    const order = await orderModel.findByIdAndUpdate(req.body.orderId, patch, { new: true });
+    const order = await orderModel.findById(req.body.orderId);
+    if (!order) return res.json({ success: false, message: "Order not found" });
+    const prevStatus = order.status;
+    // terminal orders cannot be moved backwards; prevents accidental reopening
+    if (["DELIVERED", "CANCELLED"].includes(prevStatus) && prevStatus !== req.body.status) {
+      return res.json({ success: false, message: "Order already closed" });
+    }
+    order.status = req.body.status;
+    if (req.body.riderId) order.riderId = req.body.riderId;
+    await order.save();
     // rider journey starts AT the shop on pickup
-    if (order && req.body.status === "OUT_FOR_DELIVERY" && order.riderId) {
+    if (req.body.status === "OUT_FOR_DELIVERY" && order.riderId) {
       await riderModel.findOneAndUpdate(
         { userId: order.riderId, $or: [{ lat: null }, { lng: null }] },
         { lat: SHOP_LAT, lng: SHOP_LNG, locationUpdatedAt: new Date() }
       );
     }
-    if (order) {
+    if (prevStatus !== req.body.status) {
       const u = await userModel.findById(order.userId).select("phone");
       const stepMsg = {
         CONFIRMED: "confirmed! Cooking will start soon.",

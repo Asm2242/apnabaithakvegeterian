@@ -62,11 +62,18 @@ const StoreContextProvider = (props) => {
     const key = cartKey(itemId, size);
     setCartItems((prev) => ({ ...prev, [key]: (prev[key] || 0) + 1 }));
     if (token) {
-      await axios.post(
-        url + "/api/cart/add",
-        { itemId: key },
-        { headers: { token } }
-      );
+      try {
+        await axios.post(url + "/api/cart/add", { itemId: key }, { headers: { token } });
+      } catch (error) {
+        // server rejected it — undo the optimistic update
+        setCartItems((prev) => {
+          const next = { ...prev };
+          if (next[key] > 1) next[key] -= 1;
+          else delete next[key];
+          return next;
+        });
+        console.error("Could not sync cart:", error.message);
+      }
     }
   };
 
@@ -79,11 +86,13 @@ const StoreContextProvider = (props) => {
       return next;
     });
     if (token) {
-      await axios.post(
-        url + "/api/cart/remove",
-        { itemId: key },
-        { headers: { token } }
-      );
+      try {
+        await axios.post(url + "/api/cart/remove", { itemId: key }, { headers: { token } });
+      } catch (error) {
+        // server rejected it — undo the optimistic update
+        setCartItems((prev) => ({ ...prev, [key]: (prev[key] || 0) + 1 }));
+        console.error("Could not sync cart:", error.message);
+      }
     }
   };
 
@@ -119,18 +128,37 @@ const StoreContextProvider = (props) => {
     });
   };
 
+  // expired / invalid token → drop it so the login gate comes back cleanly
+  const handleApiData = (data) => {
+    if (data && !data.success && /expired|not authorized|login again/i.test(data.message || "")) {
+      localStorage.removeItem("token");
+      setToken("");
+    }
+    return data;
+  };
+
   const fetchFoodList = async () => {
-    const response = await axios.get(url + "/api/food/list");
-    setFoodList(response.data.data);
+    try {
+      const response = await axios.get(url + "/api/food/list");
+      setFoodList(Array.isArray(response.data?.data) ? response.data.data : []);
+    } catch (error) {
+      console.error("Could not load menu:", error.message);
+      setFoodList([]);
+    }
   };
 
   const loadCartData = async (tok) => {
-    const response = await axios.post(
-      url + "/api/cart/get",
-      {},
-      { headers: { token: tok } }
-    );
-    setCartItems(response.data.cartData || {});
+    try {
+      const response = await axios.post(
+        url + "/api/cart/get",
+        {},
+        { headers: { token: tok } }
+      );
+      handleApiData(response.data);
+      setCartItems(response.data?.cartData || {});
+    } catch (error) {
+      console.error("Could not load cart:", error.message);
+    }
   };
 
   // ---- OTP (Indian mobiles, +91) ----
@@ -140,7 +168,7 @@ const StoreContextProvider = (props) => {
       { phone: mobile },
       { headers: { token } }
     );
-    return response.data;
+    return handleApiData(response.data);
   };
 
   const verifyOtp = async (mobile, otp) => {
@@ -149,13 +177,14 @@ const StoreContextProvider = (props) => {
       { phone: mobile, otp },
       { headers: { token } }
     );
-    if (response.data.success) {
+    const data = handleApiData(response.data);
+    if (data.success) {
       setPhone(mobile);
       setPhoneVerified(true);
       localStorage.setItem("ab_phone", mobile);
       localStorage.setItem("ab_phone_verified", "1");
     }
-    return response.data;
+    return data;
   };
 
   const clearPhone = () => {

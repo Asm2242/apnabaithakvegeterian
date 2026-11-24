@@ -29,7 +29,7 @@ const setCustomerActive = async (req, res) => {
 // GET /api/admin/stats — dashboard counters
 const stats = async (req, res) => {
     try {
-        const [customers, riders, pendingOrders, todayOrders, foods] = await Promise.all([
+        const [customers, riders, pendingOrders, todayOrders] = await Promise.all([
             userModel.countDocuments({ role: "customer" }),
             userModel.countDocuments({ role: "rider" }),
             orderModel.countDocuments({ status: { $nin: ["DELIVERED", "CANCELLED"] } }),

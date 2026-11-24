@@ -71,6 +71,16 @@ const updateDeliveryStatus = async (req, res) => {
         if (!["OUT_FOR_DELIVERY", "DELIVERED"].includes(status)) {
             return res.json({ success: false, message: "Invalid status" });
         }
+        // no reopening of closed orders, no duplicate delivery count
+        if (["DELIVERED", "CANCELLED"].includes(order.status)) {
+            return res.json({ success: false, message: "Order already closed" });
+        }
+        if (status === "DELIVERED" && order.status !== "OUT_FOR_DELIVERY") {
+            return res.json({ success: false, message: "Order is not out for delivery yet" });
+        }
+        if (status === "OUT_FOR_DELIVERY" && !["READY", "OUT_FOR_DELIVERY"].includes(order.status)) {
+            return res.json({ success: false, message: "Order is not ready for pickup" });
+        }
         order.status = status;
         await order.save();
         // pickup = journey starts AT shop; live GPS overwrites after

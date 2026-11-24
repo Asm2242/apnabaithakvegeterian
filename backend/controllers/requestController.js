@@ -70,6 +70,9 @@ const resolveRequest = async (req, res) => {
         }
         const r = await orderRequestModel.findById(id);
         if (!r) return res.json({ success: false, message: "Not found" });
+        if (r.status !== "pending") {
+            return res.json({ success: false, message: "Request already handled" });
+        }
         r.status = action;
         r.adminNote = String(adminNote || "").slice(0, 300);
         await r.save();
