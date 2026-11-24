@@ -1,7 +1,6 @@
 //import React from 'react'
 import "./Header.css";
 import { useNavigate } from "react-router-dom";
-import { FireworkBursts } from "../DiwaliSky/DiwaliSky";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -9,24 +8,12 @@ const Header = () => {
 
   return (
     <div className="header">
-      <div className="toran">
-        <div className="thread"></div>
-        <div className="flowers">
-          {Array.from({ length: 14 }).map((_, i) => (
-            <div className="flower-wrap" key={i}>
-              <div className="flower"></div>
-              <div className="leaf"></div>
-            </div>
-          ))}
-        </div>
-      </div>
       <div className="header-overlay" />
-      <FireworkBursts field="fw-field fw-hero" />
       <div className="header-contents">
-        <span className="hero-badge">🪔 दिवाली स्पेशल 2026 • 100% Pure Veg</span>
+        <span className="hero-badge">100% Pure Veg • Fresh &amp; Hot</span>
         <h2>
-          इस दिवाली, अपने परिवार के साथ
-          <span className="hero-line">मनाएं रोशनी का उत्सव!</span>
+          गरमागरम खाना,
+          <span className="hero-line">घर जैसा स्वाद!</span>
         </h2>
         <p>
           81 dishes across 14 categories — thali, maggi, pizza, momos, Chinese
@@ -38,16 +25,10 @@ const Header = () => {
           <div><b>7:30–10</b><span>Open daily</span></div>
         </div>
         <div className="hero-btns">
-          <button className="btn-gold" onClick={goToMenu}>Explore Festive Feast</button>
+          <button className="btn-gold" onClick={goToMenu}>Explore Menu</button>
           <a className="btn-ghost" href="tel:+919454999442">📞 Call to Order</a>
         </div>
       </div>
-      <div className="diya-row" aria-hidden="true">
-        {Array.from({ length: 7 }).map((_, i) => (
-          <span key={i} className="diya" style={{ animationDelay: `${i * 0.3}s` }}>🪔</span>
-        ))}
-      </div>
-      <div className="rangoli-strip" aria-hidden="true" />
     </div>
   );
 };

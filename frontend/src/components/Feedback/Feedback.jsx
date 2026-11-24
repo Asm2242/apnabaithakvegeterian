@@ -35,7 +35,6 @@ const Feedback = () => {
   return (
     <section className="feedback-section" id="feedback">
       <div className="feedback-card">
-        <span className="fb-diya">🪔</span>
         <h2>We'd love your feedback!</h2>
         <p className="fb-sub">
           How was your Apna Baithak experience? Your words help our kitchen get better.

@@ -59,7 +59,6 @@ html[data-theme="dark"] body {
     linear-gradient(180deg, #150521 0%, #2a0a33 38%, #4a0e1e 72%, #6e1b0a 100%);
   color: var(--text);
 }
-html[data-theme="light"] .diwali-sky { display: none; }
 html[data-theme="dark"] .food-item,
 html[data-theme="dark"] .cart-total,
 html[data-theme="dark"] .login-popup-container,
@@ -142,16 +141,6 @@ a {
 @keyframes glowPulse {
   0%, 100% { box-shadow: var(--gold-glow); }
   50% { box-shadow: var(--gold-glow-strong); }
-}
-
-@keyframes sway {
-  0%, 100% { transform: rotate(-4deg); }
-  50% { transform: rotate(4deg); }
-}
-
-@keyframes twinkle {
-  0%, 100% { opacity: 0.15; transform: scale(0.7); }
-  50% { opacity: 1; transform: scale(1.25); }
 }
 
 @media (max-width:1050px) {

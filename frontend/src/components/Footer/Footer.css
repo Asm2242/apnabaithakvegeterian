@@ -87,13 +87,6 @@
     background: linear-gradient(90deg, transparent, var(--marigold), var(--saffron), var(--marigold), transparent);
     border: none;
 }
-.footer-greeting{
-    color: var(--marigold);
-    font-weight: 600;
-    font-size: 15px;
-    letter-spacing: 0.5px;
-    position: relative;
-}
 .footer-copyright{
     color: #C9B896;
     font-size: 13px;

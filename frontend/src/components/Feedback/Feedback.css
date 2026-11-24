@@ -23,15 +23,6 @@
   background-size: 24px 24px;
   pointer-events: none;
 }
-.fb-diya {
-  font-size: 34px;
-  display: inline-block;
-  animation: fbGlow 2s ease-in-out infinite;
-}
-@keyframes fbGlow {
-  0%, 100% { filter: drop-shadow(0 0 8px rgba(255, 170, 60, 0.7)); transform: scale(1); }
-  50% { filter: drop-shadow(0 0 18px rgba(255, 200, 90, 1)); transform: scale(1.12); }
-}
 .feedback-card h2 {
   font-size: 24px;
   margin: 8px 0 6px;

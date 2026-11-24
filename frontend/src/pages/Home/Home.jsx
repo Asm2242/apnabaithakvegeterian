@@ -7,9 +7,9 @@ import { StoreContext } from "../../Context/StoreContext";
 import "./Home.css";
 
 const TESTIMONIALS = [
-  { name: "Rahul Verma", area: "Eldeco City", text: "Diwali thali was amazing — pure home-style taste. The whole family loved it!", stars: 5 },
+  { name: "Rahul Verma", area: "Eldeco City", text: "Thali was amazing — pure home-style taste. The whole family loved it!", stars: 5 },
   { name: "Priya Singh", area: "IIM Road", text: "Best pure veg food in Lucknow. Hot delivery, great packaging.", stars: 5 },
-  { name: "Amit Kumar", area: "Gomti Nagar", text: "Ordered the Utsav combo for 6 people. Value for money and tasty.", stars: 4 },
+  { name: "Amit Kumar", area: "Gomti Nagar", text: "Ordered a combo for 6 people. Value for money and tasty.", stars: 4 },
   { name: "Sneha Gupta", area: "Hazratganj", text: "Momos and maggi taste like street style but hygienic. Highly recommended!", stars: 5 },
 ];
 
@@ -17,7 +17,7 @@ const Home = () => {
   const { food_list, menu_list } = useContext(StoreContext);
   const best = food_list.filter((f) => f.bestSeller).slice(0, 8);
   const combos = food_list.filter((f) => f.category === "Combo").slice(0, 4);
-  const festive = food_list.slice(0, 6);
+  const popular = food_list.slice(0, 6);
 
   return (
     <>
@@ -27,20 +27,18 @@ const Home = () => {
         <span>First order? Get <b>₹50 OFF</b> above ₹149 • Free delivery above ₹399 • Open 7:30 AM – 10 PM</span>
       </div>
 
-      <section className="home-section" id="utsav">
+      <section className="home-section" id="popular">
         <div className="home-section-head">
-          <h2>🪔 Diwali Special</h2>
+          <h2>🔥 Popular Picks</h2>
           <Link to="/menu">Full menu →</Link>
         </div>
-        <div className="festive-tag-row">
-          <span className="festive-pill">🪔 Diwali Special</span>
-          <span className="festive-pill">✨ Festival of Lights</span>
-          <span className="festive-pill">🍽️ Pure Veg</span>
+        <div className="popular-tag-row">
+          <span className="popular-pill">⭐ Customer Favourites</span>
+          <span className="popular-pill">🍽️ Pure Veg</span>
         </div>
         <div className="home-grid">
-          {festive.map((item) => (
-            <div key={item._id} className="festive-card">
-              <span className="festive-badge">Utsav Special</span>
+          {popular.map((item) => (
+            <div key={item._id} className="popular-card">
               <FoodItem
                 image={item.image}
                 name={item.name}
@@ -105,9 +103,8 @@ const Home = () => {
               every dish is cooked fresh, hot and hygienic.
             </p>
             <p>
-              We believe festivals are best celebrated with family and food.
-              That's why our festive specials bring the warmth of home cooking
-              to your doorstep — 100% pure veg, always.
+              We bring the warmth of home cooking to your doorstep —
+              fresh, hygienic and 100% pure veg, always.
             </p>
             <div className="about-stats">
               <div><b>81+</b><span>Dishes</span></div>

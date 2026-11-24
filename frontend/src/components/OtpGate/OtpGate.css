@@ -6,7 +6,6 @@
     align-items: center;
     justify-content: center;
     background:
-      url('/diwali-bg.jpg') center/cover no-repeat,
       url('/header_img.png') center/cover no-repeat,
       radial-gradient(900px 400px at 50% 110%, rgba(255, 111, 0, 0.35), transparent 60%),
       radial-gradient(600px 300px at 15% 100%, rgba(255, 79, 160, 0.2), transparent 60%),
