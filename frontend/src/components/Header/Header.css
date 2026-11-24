@@ -2,7 +2,7 @@
     min-height: 520px;
     margin: 24px auto;
     background:
-      url('/header_img.png') center/cover no-repeat,
+      url('/eldeco-city.jpg') center/cover no-repeat,
       linear-gradient(120deg, #2E0808, #4A0E0E 55%, #FF6F00 160%);
     background-color: var(--maroon-deep);
     border-radius: 28px;
