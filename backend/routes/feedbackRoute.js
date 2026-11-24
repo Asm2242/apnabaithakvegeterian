@@ -17,7 +17,7 @@ feedbackRouter.post('/', async (req, res) => {
             rating: Math.min(5, Math.max(1, Number(rating) || 5)),
             message: String(message).trim().slice(0, 600)
         }).save();
-        res.json({ success: true, message: 'Thank you! Your feedback reached the kitchen. 🪔' });
+        res.json({ success: true, message: 'Thank you! Your feedback reached the kitchen.' });
     } catch (error) {
         console.log(error);
         res.json({ success: false, message: 'Could not send feedback' });
