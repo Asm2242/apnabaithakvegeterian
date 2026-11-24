@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import "./MyOrders.css";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -11,20 +11,22 @@ const MyOrders = () => {
   const { url, token, food_list, addToCart } = useContext(StoreContext);
   const navigate = useNavigate();
 
-  const fetchOrders = async () => {
-    const response = await axios.post(
-      url + "/api/order/userorders",
-      {},
-      { headers: { token } }
-    );
-    setData(response.data.data);
-  };
+  const fetchOrders = useCallback(async () => {
+    try {
+      const response = await axios.post(
+        url + "/api/order/userorders",
+        {},
+        { headers: { token } }
+      );
+      setData(response.data?.data || []);
+    } catch (error) {
+      console.error("Could not load orders:", error.message);
+    }
+  }, [url, token]);
 
   useEffect(() => {
-    if (token) {
-      fetchOrders();
-    }
-  }, [token]);
+    if (token) fetchOrders();
+  }, [token, fetchOrders]);
 
   // idea #2: one-tap reorder — same items back to cart
   const reorder = (order) => {

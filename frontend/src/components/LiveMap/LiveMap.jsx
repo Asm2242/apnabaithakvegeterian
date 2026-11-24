@@ -7,6 +7,7 @@ import { voyagerUrl, cartoAttribution, CARTO_SUBDOMAINS } from "../../lib/mapTil
 import { getRoadRoute } from "../../lib/route";
 import PropTypes from "prop-types";
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const SHOP = { lat: 26.9381402, lng: 80.9129123, name: "Apna Baithak, Eldeco City" };
 
 // Google-Maps-style teardrop pins (no image assets needed)
@@ -53,6 +54,11 @@ const FitBoth = ({ riderPos, custPos }) => {
     } catch { /* ignore */ }
   }, [riderPos, custPos, map]);
   return null;
+};
+
+FitBoth.propTypes = {
+  riderPos: PropTypes.array,
+  custPos: PropTypes.array,
 };
 
 // (removed: replaced by FitBoth)
@@ -159,7 +165,7 @@ const LiveMap = ({ rider, riderLabel, customer }) => {
       )}
       {!custPos && (
         <div className="live-map-notice">
-          Customer didn't drop a pin — rider must call for exact address
+          Customer&apos;s pin is missing — rider must call for the exact address
         </div>
       )}
       {riderLabel && <p className="live-caption">{riderLabel}</p>}

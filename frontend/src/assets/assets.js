@@ -8,9 +8,6 @@ import search_icon from "./search_icon.png";
 //my image start
 
 import cakelogo from "./cakelogo.jpg";
-import chickenlogo from "./chickenlogo.jpg";
-import fishlogo from "./fishlogo.jpg";
-import muttonlogo from "./muttonlogo.jpg";
 import pureveglogo from "./pureveglogo.jpg";
 import rollslogo from "./rollslogo.jpg";
 

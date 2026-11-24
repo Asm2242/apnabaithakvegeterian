@@ -1,6 +1,7 @@
 import axios from "axios";
-import { createContext, useEffect, useState } from "react";
+import { createContext, useCallback, useEffect, useState } from "react";
 import { menu_list } from "../assets/assets";
+// eslint-disable-next-line react-refresh/only-export-components
 export const StoreContext = createContext(null);
 import PropTypes from "prop-types";
 
@@ -129,15 +130,15 @@ const StoreContextProvider = (props) => {
   };
 
   // expired / invalid token → drop it so the login gate comes back cleanly
-  const handleApiData = (data) => {
+  const handleApiData = useCallback((data) => {
     if (data && !data.success && /expired|not authorized|login again/i.test(data.message || "")) {
       localStorage.removeItem("token");
       setToken("");
     }
     return data;
-  };
+  }, []);
 
-  const fetchFoodList = async () => {
+  const fetchFoodList = useCallback(async () => {
     try {
       const response = await axios.get(url + "/api/food/list");
       setFoodList(Array.isArray(response.data?.data) ? response.data.data : []);
@@ -145,9 +146,9 @@ const StoreContextProvider = (props) => {
       console.error("Could not load menu:", error.message);
       setFoodList([]);
     }
-  };
+  }, [url]);
 
-  const loadCartData = async (tok) => {
+  const loadCartData = useCallback(async (tok) => {
     try {
       const response = await axios.post(
         url + "/api/cart/get",
@@ -159,7 +160,7 @@ const StoreContextProvider = (props) => {
     } catch (error) {
       console.error("Could not load cart:", error.message);
     }
-  };
+  }, [url, handleApiData]);
 
   // ---- OTP (Indian mobiles, +91) ----
   const requestOtp = async (mobile) => {
@@ -225,7 +226,7 @@ const StoreContextProvider = (props) => {
       }
     }
     loadData();
-  }, []);
+  }, [fetchFoodList, loadCartData]);
 
   const contextValue = {
     url,

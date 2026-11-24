@@ -113,6 +113,7 @@ FoodItem.propTypes = {
   desc: PropTypes.string.isRequired,
   id: PropTypes.string.isRequired,
   food: PropTypes.object,
+  index: PropTypes.number,
 };
 
 export default FoodItem;

@@ -1,5 +1,5 @@
 import { voyagerUrl, cartoAttribution, CARTO_SUBDOMAINS } from "../../lib/mapTiles";
-﻿import axios from "axios";
+import axios from "axios";
 import { useContext, useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
@@ -36,6 +36,10 @@ const Recenter = ({ pos }) => {
     if (pos) map.flyTo(pos, 16, { duration: 1 });
   }, [pos, map]);
   return null;
+};
+
+Recenter.propTypes = {
+  pos: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
 };
 
 // Checkout address popup: last pin confirm / edit / add new / switch / GPS

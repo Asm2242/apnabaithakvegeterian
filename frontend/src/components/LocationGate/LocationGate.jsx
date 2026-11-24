@@ -1,5 +1,5 @@
 import { voyagerUrl, cartoAttribution, CARTO_SUBDOMAINS } from "../../lib/mapTiles";
-﻿import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -30,12 +30,16 @@ TapToSet.propTypes = {
 // GPS/pin badalte hi map khud focus kare
 const Recenter = ({ pos }) => {
   const map = useMap();
-  const [first, setFirst] = useState(true);
+  const first = useRef(true);
   useEffect(() => {
-    if (pos && !first) map.flyTo(pos, 15, { duration: 1 });
-    if (first) setFirst(false);
+    if (pos && !first.current) map.flyTo(pos, 15, { duration: 1 });
+    if (first.current) first.current = false;
   }, [pos, map]);
   return null;
+};
+
+Recenter.propTypes = {
+  pos: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
 };
 
 // First-open gate: current location OR manual pin -> Confirm / Skip

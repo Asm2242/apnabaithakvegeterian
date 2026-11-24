@@ -19,6 +19,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Verify from "./pages/Verify/Verify";
 import { StoreContext } from "./Context/StoreContext";
+import Splash from "./components/Splash/Splash";
 
 const App = () => {
   const { token, showLogin, setShowLogin, theme } = useContext(StoreContext);
@@ -36,6 +37,23 @@ const App = () => {
     }
   };
   const [locGate, setLocGate] = useState(false);
+  // branded intro — once per browser session
+  const [showSplash, setShowSplash] = useState(
+    () => !sessionStorage.getItem("ab_intro")
+  );
+  const finishSplash = () => {
+    sessionStorage.setItem("ab_intro", "1");
+    setShowSplash(false);
+  };
+
+  if (showSplash) {
+    return (
+      <>
+        <ToastContainer theme={theme} />
+        <Splash onDone={finishSplash} />
+      </>
+    );
+  }
 
   if (gateOpen && !token) {
     return (

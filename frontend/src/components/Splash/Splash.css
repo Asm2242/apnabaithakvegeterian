@@ -1,0 +1,134 @@
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  overflow: hidden;
+  background:
+    radial-gradient(700px 400px at 50% 120%, rgba(255, 111, 0, 0.5), transparent 62%),
+    radial-gradient(600px 360px at 50% -10%, rgba(255, 213, 79, 0.22), transparent 60%),
+    linear-gradient(160deg, #1c0a05 0%, #3b1d0c 45%, #7c2d12 100%);
+  color: #fff7ea;
+  animation: splashIn 0.35s ease both;
+}
+.splash-leave {
+  animation: splashOut 0.5s ease forwards;
+}
+
+/* soft breathing glow behind the logo */
+.splash-glow {
+  position: absolute;
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 179, 0, 0.35), rgba(255, 111, 0, 0.12) 45%, transparent 70%);
+  filter: blur(12px);
+  animation: glowBreathe 2.2s ease-in-out infinite;
+}
+
+/* rotating golden orbit */
+.splash-ring {
+  position: absolute;
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 213, 79, 0.55);
+  border-top-color: transparent;
+  border-right-color: rgba(255, 111, 0, 0.9);
+  box-shadow: 0 0 40px rgba(255, 179, 0, 0.4), inset 0 0 30px rgba(255, 111, 0, 0.2);
+  animation: spin 1.6s linear infinite;
+}
+
+.splash-logo {
+  position: relative;
+  width: 104px;
+  height: 104px;
+  border-radius: 28px;
+  background: linear-gradient(145deg, #fffaf0, #ffe9c2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 18px 44px -12px rgba(0, 0, 0, 0.65), 0 0 34px rgba(255, 213, 79, 0.5);
+  animation: logoPop 0.75s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.splash-logo img { width: 74px; height: 74px; }
+
+.splash h1 {
+  position: relative;
+  font-family: "Baloo 2", "Outfit", sans-serif;
+  font-size: clamp(30px, 6vw, 46px);
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  margin: 14px 0 0;
+  background: linear-gradient(90deg, #FFF3C4, #FFD54F, #FF6F00);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 4px 14px rgba(255, 111, 0, 0.45));
+  animation: riseIn 0.6s 0.15s ease both;
+}
+.splash p {
+  position: relative;
+  font-size: 14px;
+  letter-spacing: 2px;
+  color: #f3d9b5;
+  text-transform: uppercase;
+  animation: riseIn 0.6s 0.3s ease both;
+}
+.splash small {
+  position: relative;
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: #c9ab88;
+  animation: riseIn 0.6s 0.55s ease both;
+}
+
+.splash-bar {
+  position: relative;
+  width: min(240px, 62vw);
+  height: 5px;
+  margin-top: 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  overflow: hidden;
+  animation: riseIn 0.6s 0.42s ease both;
+}
+.splash-bar span {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #FFD54F, #FF6F00);
+  box-shadow: 0 0 14px rgba(255, 179, 0, 0.9);
+  animation: fillBar 1.5s 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes splashIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes splashOut {
+  to { opacity: 0; transform: scale(1.06); filter: blur(6px); visibility: hidden; }
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes glowBreathe {
+  0%, 100% { transform: scale(0.92); opacity: 0.75; }
+  50% { transform: scale(1.12); opacity: 1; }
+}
+@keyframes logoPop {
+  0% { opacity: 0; transform: scale(0.4) rotate(-12deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fillBar { to { width: 100%; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .splash, .splash *, .splash-glow, .splash-ring, .splash-logo, .splash h1, .splash p, .splash small, .splash-bar, .splash-bar span {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

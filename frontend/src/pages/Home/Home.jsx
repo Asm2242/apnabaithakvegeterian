@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useContext } from "react";
 import Header from "../../components/Header/Header";
@@ -129,7 +128,7 @@ const Home = () => {
           {TESTIMONIALS.map((t, i) => (
             <div key={i} className="testimonial-card">
               <div className="testimonial-stars">{"⭐".repeat(t.stars)}</div>
-              <p className="testimonial-text">"{t.text}"</p>
+              <p className="testimonial-text">&ldquo;{t.text}&rdquo;</p>
               <div className="testimonial-author">
                 <b>{t.name}</b>
                 <span>{t.area}</span>
