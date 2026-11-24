@@ -100,7 +100,7 @@ function Login({ onLogin }) {
     }
   };
   return (
-    <div className="login-wrap">
+    <main className="login-wrap">
       <form onSubmit={submit} className="card login-card">
         <h1>Apna Baithak <span>Admin</span></h1>
         <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Admin email" type="email" required />
@@ -108,7 +108,7 @@ function Login({ onLogin }) {
         {err && <p className="err">{err}</p>}
         <button type="submit">Login</button>
       </form>
-    </div>
+    </main>
   );
 }
 

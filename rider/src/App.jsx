@@ -339,7 +339,7 @@ const App = () => {
 
   if (!token) {
     return (
-      <div className="rider-wrap">
+      <main className="rider-wrap">
         <ToastContainer />
         <form onSubmit={login} className="rider-card">
           <h1>Apna Baithak <span>Rider</span></h1>
@@ -349,7 +349,7 @@ const App = () => {
           <button type="submit">Login</button>
           <small>Account admin banayega (Admin panel â†’ Riders)</small>
         </form>
-      </div>
+      </main>
     );
   }
 
