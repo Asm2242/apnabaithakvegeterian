@@ -42,6 +42,8 @@ const FoodItem = ({ image, name, price, desc, id, food, index }) => {
           className="food-item-image"
           src={imgUrl(image)}
           alt={name}
+          loading="lazy"
+          decoding="async"
         />
         {qty > 0 && (
           <div className="food-item-qty-badge">{qty} in cart</div>
