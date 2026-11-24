@@ -21,7 +21,7 @@ import Verify from "./pages/Verify/Verify";
 import { StoreContext } from "./Context/StoreContext";
 
 const App = () => {
-  const { token, showLogin, setShowLogin } = useContext(StoreContext);
+  const { token, showLogin, setShowLogin, theme } = useContext(StoreContext);
   // start gate: shown until logged in via OTP or skipped once
   const [gateOpen, setGateOpen] = useState(
     () => !localStorage.getItem("token") && !sessionStorage.getItem("ab_skipped")
@@ -40,7 +40,7 @@ const App = () => {
   if (gateOpen && !token) {
     return (
       <>
-        <ToastContainer />
+        <ToastContainer theme={theme} />
         <OtpGate onDone={gateDone} />
       </>
     );
@@ -49,7 +49,7 @@ const App = () => {
   if (locGate) {
     return (
       <>
-        <ToastContainer />
+        <ToastContainer theme={theme} />
         <LocationGate onDone={() => setLocGate(false)} />
       </>
     );
@@ -57,7 +57,7 @@ const App = () => {
 
   return (
     <>
-      <ToastContainer />
+      <ToastContainer theme={theme} />
       {showLogin ? <LoginPopup setShowLogin={setShowLogin} /> : <></>}
       <div className="app">
         <Navbar setShowLogin={setShowLogin} />
