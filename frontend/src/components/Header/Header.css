@@ -1,16 +1,29 @@
 .header{
     min-height: 520px;
     margin: 24px auto;
-    background:
-      url('/eldeco-city.jpg') center/cover no-repeat,
-      linear-gradient(120deg, #2E0808, #4A0E0E 55%, #FF6F00 160%);
+    background: linear-gradient(120deg, #2E0808, #4A0E0E 55%, #FF6F00 160%);
     background-color: var(--maroon-deep);
     border-radius: 28px;
     position: relative;
     overflow: hidden;
+    isolation: isolate;
     border: 1px solid rgba(255, 213, 79, 0.35);
     box-shadow: 0 24px 60px -24px rgba(74, 14, 14, 0.55), 0 0 60px rgba(255, 111, 0, 0.18);
 }
+.header-bg{
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: url('/eldeco-city.jpg') center/cover no-repeat;
+    animation: heroZoom 24s ease-in-out infinite alternate;
+    will-change: transform;
+}
+@keyframes heroZoom {
+    from { transform: scale(1); }
+    to { transform: scale(1.14); }
+}
+.header .header-overlay{ z-index: 1; }
+.header .header-contents{ z-index: 2; }
 .header-overlay{
     position: absolute;
     inset: 0;
@@ -146,3 +159,8 @@
         gap: 18px;
     }
 }
+
+@media (prefers-reduced-motion: reduce) {
+    .header-bg { animation: none; }
+}
+

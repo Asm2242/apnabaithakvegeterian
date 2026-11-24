@@ -8,6 +8,7 @@ const Header = () => {
 
   return (
     <div className="header">
+      <div className="header-bg" />
       <div className="header-overlay" />
       <div className="header-contents">
         <span className="hero-badge">100% Pure Veg • Fresh &amp; Hot</span>
