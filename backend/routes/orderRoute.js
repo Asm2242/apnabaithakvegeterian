@@ -11,7 +11,7 @@ orderRouter.get("/config",getConfig);
 orderRouter.post("/userorders",authMiddleware,userOrders);
 orderRouter.post("/place",authMiddleware,placeOrder);
 orderRouter.post("/status",adminAuth,updateStatus);
-orderRouter.post("/verify",verifyOrder);
+orderRouter.post("/verify",authMiddleware,verifyOrder);
 orderRouter.post("/failed",authMiddleware,markFailed);
 orderRouter.get("/track/:id",authMiddleware,trackOrder);
 // customer requests (cancel / change / remove) + admin handling

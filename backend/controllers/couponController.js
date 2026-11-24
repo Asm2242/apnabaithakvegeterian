@@ -13,7 +13,13 @@ const couponDiscount = async (code, subtotal, userId) => {
         return { discount: 0, coupon: null, error: `Needs minimum order Rs.${coupon.minOrder}` };
     }
     if (coupon.firstOrderOnly && userId) {
-        const prev = await orderModel.countDocuments({ userId: String(userId) });
+        // only completed orders count — PENDING/FAILED/CANCELLED must not
+        // burn a customer's first-order discount
+        const prev = await orderModel.countDocuments({
+            userId: String(userId),
+            status: { $ne: "CANCELLED" },
+            paymentStatus: { $in: ["PAID", "COD"] }
+        });
         if (prev > 0) {
             return { discount: 0, coupon: null, error: "First order only" };
         }

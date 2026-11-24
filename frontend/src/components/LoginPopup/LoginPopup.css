@@ -155,6 +155,21 @@
 .phone-row input{
     border-radius: 0 4px 4px 0 !important;
 }
+.auth-switch{
+    text-align: center;
+    font-size: 14px;
+    margin-top: 12px;
+    line-height: 1.7;
+}
+.auth-switch span{
+    color: #FF6F00;
+    cursor: pointer;
+    font-weight: 600;
+}
+.auth-switch .auth-forgot{
+    font-size: 13px;
+    text-decoration: underline;
+}
 .login-popup-condition{
     display: flex;
     align-items: start;

@@ -81,23 +81,24 @@ Food-Delivery-App/
  🖥️ Setup Instructions
 
 🧪 Prerequisites
-- Node.js (v14+)
+- Node.js (v18+)
 - MongoDB (local or Atlas)
 - Razorpay account (for payments)
 
 📥 Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/Food-Delivery-App.git
-cd khana-khazana
-````
+git clone https://github.com/Asm2242/apnabaithakvegeterian.git
+cd apnabaithakvegeterian
+```
 
  🚀 Backend Setup
 
 ```bash
 cd backend
 npm install
-# Add .env file with MONGO_URI and JWT_SECRET
+cp .envtemplate .env   # Windows: Copy-Item .envtemplate .env
+# Edit .env: MONGO_URI, JWT_SECRET, OTP_PEPPER, Razorpay keys, CORS_ORIGINS
 npm start
 ```
 
@@ -106,7 +107,9 @@ npm start
 ```bash
 cd frontend
 npm install
-npm start
+cp .envtemplate .env   # Windows: Copy-Item .envtemplate .env
+# Edit .env: VITE_API_URL, VITE_RAZORPAY_KEY_ID, VITE_FIREBASE_*
+npm run dev
 ```
 
 🛠️ Admin Panel Setup
@@ -114,8 +117,20 @@ npm start
 ```bash
 cd admin
 npm install
-npm start
+# Set VITE_API_URL (same as frontend) then:
+npm run dev
 ```
+
+🚴 Rider Panel Setup
+
+```bash
+cd rider
+npm install
+npm run dev
+```
+
+> Never commit `.env` files. On Vercel, add the same variables in
+> **Project Settings → Environment Variables** for each app.
 
 ---
 

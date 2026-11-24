@@ -44,11 +44,8 @@ const roleMiddleware = (roles) => {
 const adminAuth = roleMiddleware(['admin']);
 const riderAuth = roleMiddleware(['rider', 'admin']);
 
-// admin only, but token may come from ?token= (for browser links / diagnostics)
-const adminAuthQuery = async (req, res, next) => {
-    if (!req.headers.token && req.query?.token) req.headers.token = req.query.token;
-    return adminAuth(req, res, next);
-};
+// Tokens are accepted via the `token` header only. Never via ?token= in a URL:
+// URLs leak through browser history, server logs and Referer headers.
 
 export default authMiddleware;
-export { adminAuth, riderAuth, roleMiddleware, adminAuthQuery };
+export { adminAuth, riderAuth, roleMiddleware };

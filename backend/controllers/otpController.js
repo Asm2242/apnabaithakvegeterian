@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import otpModel from "../models/otpModel.js";
 import userModel from "../models/userModel.js";
@@ -73,32 +74,40 @@ const requestOtp = async (req, res) => {
     }
 }
 
+// Shared OTP check — used by phone verification and password reset.
+// Marks the row verified on success so a code can only be used once.
+const checkOtp = async (phone, otp) => {
+    if (!isIndianMobile(phone) || !/^\d{6}$/.test(otp || "")) {
+        return { ok: false, message: "Invalid or expired OTP" };
+    }
+    const row = await otpModel.findOne({ phone }).sort({ createdAt: -1 });
+    if (!row || row.verified || row.expiresAt.getTime() < Date.now()) {
+        return { ok: false, message: "Invalid or expired OTP. Request a new one" };
+    }
+    if (row.attempts >= MAX_ATTEMPTS) {
+        return { ok: false, message: "Too many attempts. Request a new OTP" };
+    }
+    const a = Buffer.from(hashOtp(otp));
+    const b = Buffer.from(row.otpHash);
+    if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
+        row.attempts += 1;
+        await row.save();
+        return { ok: false, message: "Invalid or expired OTP" };
+    }
+    row.verified = true;
+    await row.save();
+    return { ok: true, row };
+};
+
 // POST /api/otp/verify  { phone, otp }
 const verifyOtp = async (req, res) => {
     try {
-        const { phone, otp } = req.body;
-        if (!isIndianMobile(phone) || !/^\d{6}$/.test(otp || "")) {
-            return res.json({ success: false, message: "Invalid or expired OTP" });
-        }
-        const row = await otpModel.findOne({ phone }).sort({ createdAt: -1 });
-        if (!row || row.verified || row.expiresAt.getTime() < Date.now()) {
-            return res.json({ success: false, message: "Invalid or expired OTP. Request a new one" });
-        }
-        if (row.attempts >= MAX_ATTEMPTS) {
-            return res.json({ success: false, message: "Too many attempts. Request a new OTP" });
-        }
-        const a = Buffer.from(hashOtp(otp));
-        const b = Buffer.from(row.otpHash);
-        if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
-            row.attempts += 1;
-            await row.save();
-            return res.json({ success: false, message: "Invalid or expired OTP" });
-        }
-        row.verified = true;
-        await row.save();
+        const { phone, userId } = req.body;
+        const { ok, message } = await checkOtp(phone, req.body.otp);
+        if (!ok) return res.json({ success: false, message });
         // link phone to this account
-        if (req.body.userId) {
-            await userModel.findByIdAndUpdate(req.body.userId, { phone, phoneVerified: true });
+        if (userId) {
+            await userModel.findByIdAndUpdate(userId, { phone, phoneVerified: true });
         }
         res.json({ success: true, message: "Phone verified" });
     } catch (error) {
@@ -107,7 +116,7 @@ const verifyOtp = async (req, res) => {
     }
 }
 
-export { requestOtp, verifyOtp };
+export { requestOtp, verifyOtp, checkOtp };
 
 // ---- Public start-page OTP: no login needed (like every food app) ----
 // POST /api/otp/start  { phone } — same limits, no auth
@@ -176,7 +185,7 @@ const loginWithOtp = async (req, res) => {
             }
             await user.save();
         }
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
         res.json({ success: true, token, name: user.name, phone });
     } catch (error) {
         console.log(error);
@@ -240,7 +249,7 @@ const fireLogin = async (req, res) => {
             }
             await user.save();
         }
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
         res.json({ success: true, token, name: user.name, phone: m });
     } catch (error) {
         console.log("[firelogin]", error.message);
@@ -341,3 +350,73 @@ const testSend = async (req, res) => {
 };
 
 export { testSend };
+
+// ---- Forgot password via phone OTP ----
+
+// POST /api/user/forgot-password/request { phone }
+// Generic response avoids revealing whether a number is registered.
+const requestPasswordReset = async (req, res) => {
+    try {
+        const { phone } = req.body;
+        if (!isIndianMobile(phone)) {
+            return res.json({ success: false, message: "Enter a valid 10-digit Indian mobile number" });
+        }
+        const user = await userModel.findOne({ phone }).select("_id");
+
+        const since = new Date(Date.now() - 10 * 60 * 1000);
+        const recent = await otpModel.find({ phone, createdAt: { $gte: since } })
+            .sort({ createdAt: -1 }).limit(MAX_REQUESTS_PER_10MIN + 1);
+        if (recent.length >= MAX_REQUESTS_PER_10MIN) {
+            return res.json({ success: false, message: "Too many OTP requests. Try again later" });
+        }
+        if (recent[0] && Date.now() - new Date(recent[0].createdAt).getTime() < RESEND_COOLDOWN_MS) {
+            return res.json({ success: false, message: "Please wait before resending OTP" });
+        }
+
+        const otp = newOtp();
+        await otpModel.deleteMany({ phone });
+        await new otpModel({
+            phone,
+            otpHash: hashOtp(otp),
+            expiresAt: new Date(Date.now() + OTP_TTL_MS)
+        }).save();
+
+        // Only send an SMS to numbers that actually have an account.
+        if (user) await sendOtpSms(phone, otp);
+        res.json({
+            success: true,
+            message: "If this number is registered, an OTP has been sent",
+            ...(devOtpEnabled() && user ? { devOtp: otp } : {})
+        });
+    } catch (error) {
+        console.log("[reset] send fail:", error.message);
+        res.json({ success: false, message: "Could not send OTP" });
+    }
+};
+
+// POST /api/user/forgot-password/reset { phone, otp, newPassword }
+const resetPassword = async (req, res) => {
+    try {
+        const { phone, newPassword } = req.body;
+        if (!isIndianMobile(phone)) {
+            return res.json({ success: false, message: "Invalid mobile number" });
+        }
+        if (typeof newPassword !== "string" || newPassword.length < 8) {
+            return res.json({ success: false, message: "Password must be at least 8 characters" });
+        }
+        const { ok, message } = await checkOtp(phone, req.body.otp);
+        if (!ok) return res.json({ success: false, message });
+
+        const user = await userModel.findOne({ phone });
+        if (!user) return res.json({ success: false, message: "No account linked to this number" });
+
+        user.password = await bcrypt.hash(newPassword, await bcrypt.genSalt(10));
+        await user.save();
+        res.json({ success: true, message: "Password reset. Please login with your new password." });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: "Could not reset password" });
+    }
+};
+
+export { requestPasswordReset, resetPassword };

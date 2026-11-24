@@ -19,7 +19,30 @@ const port = process.env.PORT || 4000;
 // middlewares
 app.use(express.json());
 
-app.use(cors({ origin: true, credentials: true }));
+// CORS: allow only known origins. Set CORS_ORIGINS (comma separated) in prod.
+// Requests without an Origin header (curl, server-to-server, mobile apps) pass.
+const allowedOrigins = (process.env.CORS_ORIGINS || "")
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean);
+const isLocalOrigin = (origin) =>
+  /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin);
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (
+        allowedOrigins.includes(origin) ||
+        (allowedOrigins.length === 0 && isLocalOrigin(origin))
+      ) {
+        return callback(null, true);
+      }
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+  })
+);
 
 // db connection
 connectDB();

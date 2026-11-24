@@ -174,30 +174,51 @@ const placeOrder = async (req, res) => {
 };
 
 // POST /api/order/verify — HMAC check, mark PAID (never trust frontend)
+// Security: signed-in user only, order must match both the user and the
+// Razorpay order id, signature compared in constant time, replay blocked.
 const verifyOrder = async (req, res) => {
   const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId } = req.body;
+  const userId = req.body.userId; // injected by authMiddleware
   try {
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !orderId) {
+      return res.json({ success: false, message: "Missing payment details" });
+    }
+
+    const order = await orderModel.findOne({
+      _id: orderId,
+      userId,
+      razorpayOrderId: razorpay_order_id
+    });
+    if (!order) return res.json({ success: false, message: "Order not found" });
+    if (order.paymentStatus === "PAID") {
+      return res.json({ success: true, message: "Payment already verified" });
+    }
+
     const generatedSignature = crypto
-      .createHmac("sha256", process.env.RAZORPAY_SECRET)
+      .createHmac("sha256", process.env.RAZORPAY_SECRET || "")
       .update(razorpay_order_id + "|" + razorpay_payment_id)
       .digest("hex");
+    const a = Buffer.from(generatedSignature, "utf8");
+    const b = Buffer.from(String(razorpay_signature), "utf8");
+    const signatureOk = a.length === b.length && crypto.timingSafeEqual(a, b);
 
-    if (generatedSignature === razorpay_signature) {
-      const order = await orderModel.findByIdAndUpdate(orderId, {
-        payment: true,
-        paymentStatus: "PAID",
-        razorpayPaymentId: razorpay_payment_id
-      }, { new: true });
-      if (order) {
-        notifyOwnerNewOrder(order);
-        const u = await userModel.findById(order.userId).select("phone");
-        notifyCustomer(u?.phone, `Apna Baithak: payment Rs.${order.amount} received. Cooking started!`);
+    if (!signatureOk) {
+      if (order.paymentStatus === "PENDING") {
+        order.paymentStatus = "FAILED";
+        await order.save();
       }
-      res.json({ success: true, message: "Payment verified" });
-    } else {
-      await orderModel.findByIdAndUpdate(orderId, { paymentStatus: "FAILED" });
-      res.json({ success: false, message: "Payment verification failed" });
+      return res.json({ success: false, message: "Payment verification failed" });
     }
+
+    order.payment = true;
+    order.paymentStatus = "PAID";
+    order.razorpayPaymentId = razorpay_payment_id;
+    await order.save();
+
+    notifyOwnerNewOrder(order);
+    const u = await userModel.findById(order.userId).select("phone");
+    notifyCustomer(u?.phone, `Apna Baithak: payment Rs.${order.amount} received. Cooking started!`);
+    res.json({ success: true, message: "Payment verified" });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: "Verification error" });

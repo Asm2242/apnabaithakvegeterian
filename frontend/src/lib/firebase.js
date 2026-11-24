@@ -2,12 +2,16 @@ import { initializeApp, getApps } from "firebase/app";
 import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 
 // Free 10k SMS/month Firebase Phone Auth.
-// Web config is public by design; override via Vercel env if needed.
+// NOTE: Firebase *web* config (apiKey/authDomain/projectId) is public by
+// design — it is shipped to the browser and is not a secret. Secrets stay
+// on the backend. Env vars override these defaults for other deployments.
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyBHKiCCYg6sLdGH2_tkmhYi6YAClP1BzGY",
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "apnabaithak-a89e8.firebaseapp.com",
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "apnabaithak-a89e8",
 };
+
+export const firebaseConfigured = !!firebaseConfig.apiKey;
 
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const auth = getAuth(app);

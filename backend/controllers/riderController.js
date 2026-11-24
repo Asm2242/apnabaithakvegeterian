@@ -11,7 +11,7 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_SECRET,
 });
 
-const createToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET);
+const createToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
 // Admin creates a rider account (name, email, password, phone, vehicle)
 const createRider = async (req, res) => {

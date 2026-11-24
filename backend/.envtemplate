@@ -1,14 +1,29 @@
-change filename from .envtemplate to .env
+# Copy this file to .env and fill in real values. NEVER commit .env.
 
-JWT_SECRET="random#secret"
+# ---- Database (required) ----
+MONGO_URI="mongodb://127.0.0.1:27017/apna_baithak"
+# Production example:
+# MONGO_URI="mongodb+srv://user:password@cluster.mongodb.net/apna_baithak"
 
+# ---- Auth (required) ----
+JWT_SECRET="replace-with-a-long-random-secret"
+# Used to hash OTPs — change in production
+OTP_PEPPER="replace-with-another-long-random-secret"
 
-RAZORPAY_KEY_ID="#razorpay Key_id"
-RAZORPAY_SECRET="#Razorpay secret"
+# ---- Server ----
+PORT=4000
+# Comma-separated allowed browser origins. Requests without Origin
+# (curl, server-to-server, mobile apps) are always allowed.
+# Example: CORS_ORIGINS="https://apnabaithak.vercel.app,https://admin.example.com"
+CORS_ORIGINS="http://localhost:5173,http://localhost:5174"
+
+# ---- Payments ----
+RAZORPAY_KEY_ID="rzp_test_xxx"
+RAZORPAY_SECRET="replace-with-razorpay-secret"
 
 # ---- OTP / SMS provider ----
 # switch provider with OTP_PROVIDER: msg91 | twofactor | textlocal | fast2sms | console
-OTP_PROVIDER="msg91"
+OTP_PROVIDER="twofactor"
 
 # 1) MSG91 (2,000 free SMS on signup, needs DLT + approved sender/template)
 MSG91_API_KEY=""
