@@ -17,7 +17,7 @@ const orderSchema = new mongoose.Schema({
     // PLACED -> CONFIRMED -> PREPARING -> READY -> OUT_FOR_DELIVERY -> DELIVERED
     // CANCELLED anytime
     status: { type: String, default: "PLACED" },
-    date: { type: Date, default: Date.now() },
+    date: { type: Date, default: Date.now },
     // online (Razorpay) or COD
     paymentMethod: { type: String, enum: ["online", "cod"], default: "online" },
     // PENDING / PAID / COD / FAILED / REFUNDED
