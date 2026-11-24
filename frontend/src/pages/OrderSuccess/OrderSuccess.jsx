@@ -21,6 +21,8 @@ const OrderSuccess = () => {
       return;
     }
     if (failed) {
+      // server already cleared the cart when the order was created
+      setCartItems({});
       setPhase("fail");
       return;
     }
