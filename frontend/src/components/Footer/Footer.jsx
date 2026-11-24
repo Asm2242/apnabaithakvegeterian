@@ -21,14 +21,14 @@ const Footer = () => {
             the Comfort.
           </p>
           <div className="footer-social-icons">
-            <a href="">
-              <img src={assets.facebook_icon} alt="" />
+            <a href="#footer" aria-label="Facebook" title="Facebook">
+              <img src={assets.facebook_icon} alt="Facebook" />
             </a>
-            <a href="">
-              <img src={assets.twitter_icon} alt="" />
+            <a href="#footer" aria-label="Twitter" title="Twitter">
+              <img src={assets.twitter_icon} alt="Twitter" />
             </a>
-            <a href="">
-              <img src={assets.linkedin_icon} alt="" />
+            <a href="#footer" aria-label="LinkedIn" title="LinkedIn">
+              <img src={assets.linkedin_icon} alt="LinkedIn" />
             </a>
           </div>
         </div>

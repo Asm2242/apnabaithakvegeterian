@@ -77,7 +77,7 @@ const App = () => {
     <>
       <ToastContainer theme={theme} />
       {showLogin ? <LoginPopup setShowLogin={setShowLogin} /> : <></>}
-      <div className="app">
+      <main className="app">
         <Navbar setShowLogin={setShowLogin} />
         <Routes>
           <Route path="/" element={<Home />} />
@@ -91,7 +91,7 @@ const App = () => {
           <Route path="/menu" element={<Menu />} />
           <Route path="/success/:id" element={<OrderSuccess />} />
         </Routes>
-      </div>
+      </main>
       <Feedback />
       <Footer />
     </>

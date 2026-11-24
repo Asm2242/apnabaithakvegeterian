@@ -46,27 +46,33 @@ const Navbar = ({ setShowLogin }) => {
         </span>
       </Link>
       <ul className={`navbar-menu ${open ? "open" : ""}`}>
-        <Link
-          to="/"
-          onClick={() => { setMenu("home"); close(); }}
-          className={`${menu === "home" ? "active" : ""}`}
-        >
-          Home
-        </Link>
-        <Link
-          to="/menu"
-          onClick={() => { setMenu("menu"); close(); }}
-          className={`${menu === "menu" ? "active" : ""}`}
-        >
-          Menu
-        </Link>
-        <a
-          href="#footer"
-          onClick={() => { setMenu("contact"); close(); }}
-          className={`${menu === "contact" ? "active" : ""}`}
-        >
-          Contact us
-        </a>
+        <li>
+          <Link
+            to="/"
+            onClick={() => { setMenu("home"); close(); }}
+            className={`${menu === "home" ? "active" : ""}`}
+          >
+            Home
+          </Link>
+        </li>
+        <li>
+          <Link
+            to="/menu"
+            onClick={() => { setMenu("menu"); close(); }}
+            className={`${menu === "menu" ? "active" : ""}`}
+          >
+            Menu
+          </Link>
+        </li>
+        <li>
+          <a
+            href="#footer"
+            onClick={() => { setMenu("contact"); close(); }}
+            className={`${menu === "contact" ? "active" : ""}`}
+          >
+            Contact us
+          </a>
+        </li>
       </ul>
       <div className="navbar-right">
         <button className="theme-btn" onClick={toggleTheme} title="Dark / light">
@@ -80,7 +86,7 @@ const Navbar = ({ setShowLogin }) => {
         >
           <img src={assets.search_icon} alt="" />
         </button>
-        <Link to="/wishlist" className="nav-icon-btn wish-link" onClick={close} title="My wishlist">
+        <Link to="/wishlist" className="nav-icon-btn wish-link" onClick={close} title="My wishlist" aria-label="My wishlist">
           <span className="wish-heart">❤</span>
           {wishCount > 0 && <span className="icon-badge wish-badge">{wishCount}</span>}
         </Link>
@@ -106,7 +112,7 @@ const Navbar = ({ setShowLogin }) => {
                 {" "}
                 <img src={assets.bag_icon} alt="" /> <p>Orders</p>
               </li>
-              <hr />
+              <li className="nav-divider" aria-hidden="true"><hr /></li>
               <li onClick={logout}>
                 {" "}
                 <img src={assets.logout_icon} alt="" /> <p>Logout</p>
