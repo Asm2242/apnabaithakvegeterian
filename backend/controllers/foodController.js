@@ -83,7 +83,7 @@ const listFood = async (req, res) => {
 
 // add food
 const addFood = async (req, res) => {
-
+    try {
     let image_filename = await storeImage(req.file)
 
     const food = new foodModel({
@@ -100,12 +100,11 @@ const addFood = async (req, res) => {
         available: true,
         sortOrder: Number(req.body.sortOrder) || 0,
     })
-    try {
-        await food.save();
-        res.json({ success: true, message: "Food Added" })
+    await food.save();
+    res.json({ success: true, message: "Food Added" })
     } catch (error) {
         console.log(error);
-        res.json({ success: false, message: "Error" })
+        res.json({ success: false, message: "Error" });
     }
 }
 
