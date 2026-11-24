@@ -9,7 +9,15 @@ const StoreContextProvider = (props) => {
   const url = import.meta.env.VITE_API_URL || "http://localhost:4000";
   const [food_list, setFoodList] = useState([]);
   // cart key: "<foodId>__<Size>" so Half/Full/Small/Regular stay separate
-  const [cartItems, setCartItems] = useState({});
+  // guests keep their cart in localStorage so a refresh does not wipe it
+  const [cartItems, setCartItems] = useState(() => {
+    if (localStorage.getItem("token")) return {};
+    try {
+      return JSON.parse(localStorage.getItem("ab_guest_cart") || "{}");
+    } catch {
+      return {};
+    }
+  });
   const [token, setToken] = useState("");
   // global login popup (navbar + auto-open at checkout)
   const [showLogin, setShowLogin] = useState(false);
@@ -200,7 +208,19 @@ const StoreContextProvider = (props) => {
     localStorage.setItem("ab_theme", theme);
   }, [theme]);
 
+  // guests: persist cart locally; logged-in users keep it on the server
+  useEffect(() => {
+    if (!token) localStorage.setItem("ab_guest_cart", JSON.stringify(cartItems));
+  }, [cartItems, token]);
+
   const toggleTheme = () => setTheme((t) => (t === "light" ? "dark" : "light"));
+
+  // keep guest cart from leaking into a logged-in session (and vice versa)
+  const updateToken = (tok) => {
+    setToken(tok);
+    if (tok) localStorage.removeItem("ab_guest_cart");
+    else setCartItems({});
+  };
 
   const toggleWish = (id) => {
     setWishlist((prev) => {
@@ -245,7 +265,7 @@ const StoreContextProvider = (props) => {
     defaultSize,
     sizesFor,
     token,
-    setToken,
+    setToken: updateToken,
     showLogin,
     setShowLogin,
     theme,
