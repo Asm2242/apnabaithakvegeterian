@@ -22,6 +22,7 @@ import { StoreContext } from "./Context/StoreContext";
 import Splash from "./components/Splash/Splash";
 import ScrollTop from "./components/ScrollTop/ScrollTop";
 import NotFound from "./pages/NotFound/NotFound";
+import MobileCartBar from "./components/MobileCartBar/MobileCartBar";
 
 const App = () => {
   const { token, showLogin, setShowLogin, theme } = useContext(StoreContext);
@@ -96,6 +97,7 @@ const App = () => {
         </Routes>
       </main>
       <ScrollTop />
+      <MobileCartBar />
       <Feedback />
       <Footer />
     </>
