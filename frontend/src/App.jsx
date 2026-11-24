@@ -21,6 +21,7 @@ import Verify from "./pages/Verify/Verify";
 import { StoreContext } from "./Context/StoreContext";
 import Splash from "./components/Splash/Splash";
 import ScrollTop from "./components/ScrollTop/ScrollTop";
+import NotFound from "./pages/NotFound/NotFound";
 
 const App = () => {
   const { token, showLogin, setShowLogin, theme } = useContext(StoreContext);
@@ -91,6 +92,7 @@ const App = () => {
           <Route path="/track/:id" element={<Track />} />
           <Route path="/menu" element={<Menu />} />
           <Route path="/success/:id" element={<OrderSuccess />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
       <ScrollTop />
