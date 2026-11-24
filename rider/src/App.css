@@ -1,39 +1,223 @@
-body{margin:0;font-family:Arial,sans-serif;background:#f6f1e7;color:#3b1d0c}
-.rider-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#3b1d0c,#9a3412);padding:20px;box-sizing:border-box}
-.rider-card{background:#fff;border-radius:14px;padding:18px;margin-bottom:12px;box-shadow:0 1px 4px #0001}
-.rider-card h1{color:#9a3412;margin:0}
-.rider-card h1 span{color:#d4a017}
-.rider-card p{color:#676767}
-.rider-card input{width:100%;padding:12px;margin:8px 0;border:1px solid #ccc;border-radius:8px;box-sizing:border-box;font-size:15px}
-.rider-card button{background:#9a3412;color:#fff;border:none;border-radius:8px;padding:12px 20px;cursor:pointer;font-weight:600;width:100%;margin-top:6px}
-.rider-card small{color:#999}
-.rider-card ul{margin:8px 0;padding-left:18px;font-size:14px}
-.rider-card.done{opacity:0.75}
-.rider-app{background:#f6f1e7;min-height:100vh;color:#3b1d0c}
-.rider-app header{background:#3b1d0c;color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0}
-.rider-app header div{display:flex;gap:8px;align-items:center}
-.rider-app header .rider-title{flex-direction:column;align-items:flex-start;gap:0}
-.gps-line{font-size:11px !important;color:#f5c542 !important;margin:2px 0 0 0 !important}
-.rider-app header .duty{background:#555;color:#fff;border:none;border-radius:20px;padding:8px 16px;font-weight:700;cursor:pointer}
-.rider-app header .duty.on{background:#0f8a0f}
-.rider-app header .ghost{background:transparent;border:1px solid #d4a017;color:#fff;border-radius:20px;padding:8px 14px;cursor:pointer}
-.rider-app main{padding:16px;max-width:600px;margin:0 auto}
-.rider-app h2{color:#9a3412}
-.nav-btn{display:inline-block;background:#0f8a0f;color:#fff !important;border-radius:8px;padding:10px 18px;margin:6px 8px 6px 0;font-weight:600;text-decoration:none}
-.deliver-btn{background:#9a3412 !important;width:100%}
-.deliver-btn.pickup{background:#0f8a0f !important}
-.deliver-btn.cash{background:#b8860b !important}
-.deliver-btn.qr{background:#fff !important;color:#9a3412 !important;border:2px solid #9a3412 !important}
-.cash-done{color:#0f8a0f;font-weight:700}
-.qr-modal{position:fixed;inset:0;z-index:50;background:#000000aa;display:flex;align-items:center;justify-content:center;padding:20px}
-.qr-box{background:#fff;border-radius:16px;padding:24px;text-align:center;border-top:6px solid #d4a017}
-.qr-box h3{color:#9a3412;margin:0 0 12px 0}
-.qr-box p{color:#555;margin:10px 0 0 0}
-.qr-note{font-size:12px;color:#999 !important}
-.qr-box button{background:#9a3412;color:#fff;border:none;border-radius:8px;padding:10px 24px;font-weight:700;margin-top:12px;cursor:pointer}
-.qr-box .check-btn{background:#0f8a0f !important;width:100%}
-.rider-minimap{margin:10px 0; position:relative}
-.rider-minimap .leaflet-container{height:180px;width:100%;border-radius:10px;border:1px solid #d4a017;z-index:1}
+:root {
+  --brand: #FF6F00;
+  --brand-deep: #9a3412;
+  --gold: #FFD54F;
+  --ink: #3b1d0c;
+  --paper: #fffdf9;
+  --muted: #8a7a6c;
+  --line: #f0e2cc;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  font-family: "Outfit", "Segoe UI", system-ui, -apple-system, sans-serif;
+  background: linear-gradient(160deg, #f7efe1, #fffdf9 60%);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- login screen ---------- */
+.rider-wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(700px 360px at 12% 8%, rgba(255, 213, 79, 0.22), transparent 60%),
+    radial-gradient(700px 360px at 90% 92%, rgba(255, 111, 0, 0.28), transparent 60%),
+    linear-gradient(160deg, #3b1d0c, #7c2d12 55%, #9a3412);
+  padding: 20px;
+}
+
+.rider-card {
+  background: rgba(255, 253, 249, 0.97);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 213, 79, 0.55);
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 14px;
+  box-shadow: 0 24px 60px -24px rgba(30, 8, 4, 0.65), 0 0 0 1px rgba(255, 111, 0, 0.08);
+  animation: fadeUp 0.45s ease both;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.rider-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 30px 70px -24px rgba(30, 8, 4, 0.7);
+}
+.rider-card h1 {
+  color: var(--brand-deep);
+  margin: 0 0 4px;
+  font-size: 26px;
+  letter-spacing: 0.3px;
+}
+.rider-card h1 span { color: #d4a017; }
+.rider-card p { color: var(--muted); font-size: 14px; line-height: 1.55; }
+.rider-card input {
+  width: 100%;
+  padding: 13px 14px;
+  margin: 8px 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-sizing: border-box;
+  font-size: 15px;
+  background: #fff;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.rider-card input:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 4px rgba(255, 111, 0, 0.14);
+}
+.rider-card button {
+  background: linear-gradient(135deg, #FF6F00, #9a3412);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 13px 20px;
+  cursor: pointer;
+  font-weight: 800;
+  width: 100%;
+  margin-top: 6px;
+  box-shadow: 0 8px 20px -8px rgba(255, 111, 0, 0.8);
+  transition: transform 0.18s, filter 0.2s, box-shadow 0.2s;
+}
+.rider-card button:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+  box-shadow: 0 12px 26px -8px rgba(255, 111, 0, 0.95);
+}
+.rider-card button:active { transform: scale(0.98); }
+.rider-card small { color: var(--muted); }
+.rider-card ul { margin: 8px 0; padding-left: 18px; font-size: 14px; line-height: 1.6; }
+.rider-card.done { opacity: 0.8; }
+
+/* ---------- rider app ---------- */
+.rider-app {
+  background:
+    radial-gradient(900px 420px at 10% -6%, rgba(255, 111, 0, 0.09), transparent 60%),
+    radial-gradient(800px 380px at 95% 4%, rgba(255, 213, 79, 0.12), transparent 55%),
+    #f6f1e7;
+  min-height: 100vh;
+  color: var(--ink);
+}
+.rider-app header {
+  background: linear-gradient(115deg, #3b1d0c, #7c2d12 60%, #9a3412);
+  color: #fff;
+  padding: 12px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  box-shadow: 0 8px 26px -12px rgba(30, 8, 4, 0.8);
+  backdrop-filter: blur(12px);
+}
+.rider-app header div { display: flex; gap: 8px; align-items: center; }
+.rider-app header .rider-title { flex-direction: column; align-items: flex-start; gap: 0; }
+.gps-line { font-size: 11px !important; color: #f5c542 !important; margin: 2px 0 0 0 !important; }
+.rider-app header .duty {
+  background: #555;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.18s, filter 0.2s;
+}
+.rider-app header .duty:hover { transform: translateY(-1px); filter: brightness(1.1); }
+.rider-app header .duty.on { background: #0f8a0f; box-shadow: 0 0 18px rgba(34, 197, 94, 0.55); }
+.rider-app header .ghost {
+  background: transparent;
+  border: 1px solid #d4a017;
+  color: #fff;
+  border-radius: 20px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.rider-app header .ghost:hover { background: rgba(255, 213, 79, 0.16); }
+.rider-app main { padding: 18px; max-width: 640px; margin: 0 auto; }
+.rider-app h2 { color: var(--brand-deep); font-size: 22px; margin: 4px 0 12px; }
+.nav-btn {
+  display: inline-block;
+  background: linear-gradient(135deg, #2E7D32, #0f8a0f);
+  color: #fff !important;
+  border-radius: 9px;
+  padding: 10px 18px;
+  margin: 6px 8px 6px 0;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 6px 16px -8px rgba(15, 138, 15, 0.9);
+  transition: transform 0.18s, filter 0.2s;
+}
+.nav-btn:hover { transform: translateY(-2px); filter: brightness(1.08); }
+
+.deliver-btn { background: linear-gradient(135deg, #FF6F00, #9a3412) !important; width: 100%; color: #fff !important; border: none; border-radius: 10px; padding: 13px; font-weight: 800; cursor: pointer; }
+.deliver-btn.pickup { background: linear-gradient(135deg, #43a047, #0f8a0f) !important; }
+.deliver-btn.cash { background: linear-gradient(135deg, #FFB300, #b8860b) !important; }
+.deliver-btn.qr { background: #fff !important; color: #9a3412 !important; border: 2px solid #9a3412 !important; }
+.deliver-btn:hover { filter: brightness(1.07); transform: translateY(-1px); }
+.cash-done { color: #0f8a0f; font-weight: 700; }
+
+/* ---------- QR modal ---------- */
+.qr-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(20, 8, 4, 0.72);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeUp 0.25s ease;
+}
+.qr-box {
+  background: #fff;
+  border-radius: 20px;
+  padding: 26px;
+  text-align: center;
+  border-top: 6px solid var(--gold);
+  box-shadow: 0 30px 70px -20px rgba(0, 0, 0, 0.6);
+  max-width: 380px;
+  width: 100%;
+}
+.qr-box h3 { color: var(--brand-deep); margin: 0 0 12px; }
+.qr-box p { color: #555; margin: 10px 0 0; }
+.qr-note { font-size: 12px; color: #999 !important; }
+.qr-box button {
+  background: linear-gradient(135deg, #FF6F00, #9a3412);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 11px 24px;
+  font-weight: 700;
+  margin-top: 12px;
+  cursor: pointer;
+}
+.qr-box .check-btn { background: linear-gradient(135deg, #43a047, #0f8a0f) !important; width: 100%; }
+
+/* ---------- map + route ---------- */
+.rider-minimap { margin: 10px 0; position: relative; }
+.rider-minimap .leaflet-container {
+  height: 180px;
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid var(--gold);
+  z-index: 1;
+  box-shadow: 0 10px 26px -12px rgba(74, 14, 14, 0.5);
+}
 .no-pin-banner {
   margin-top: 8px;
   background: rgba(220, 38, 38, 0.92);
@@ -59,7 +243,18 @@ body{margin:0;font-family:Arial,sans-serif;background:#f6f1e7;color:#3b1d0c}
   pointer-events: none;
   white-space: nowrap;
 }
-.rm-shop div,.rm-home div,.rm-you div{font-size:28px;text-align:center;filter:drop-shadow(0 3px 5px #0006)}
-.dist-line{font-size:13px;color:#0f8a0f;font-weight:700;margin:6px 0 0 0}
-.no-pin{font-size:12px;color:#676767;margin:6px 0 0 0}
-form.rider-card{width:100%;max-width:340px}
+.rm-shop div, .rm-home div, .rm-you div { font-size: 28px; text-align: center; filter: drop-shadow(0 3px 5px #0006); }
+.dist-line { font-size: 13px; color: #0f8a0f; font-weight: 700; margin: 6px 0 0 0; }
+.no-pin { font-size: 12px; color: var(--muted); margin: 6px 0 0 0; }
+form.rider-card { width: 100%; max-width: 380px; }
+
+button:focus-visible, input:focus-visible, a:focus-visible {
+  outline: 3px solid rgba(255, 213, 79, 0.75);
+  outline-offset: 2px;
+}
+
+@media (max-width: 600px) {
+  .rider-app header { padding: 10px 12px; }
+  .rider-app main { padding: 12px; }
+  .rider-card { padding: 18px; }
+}

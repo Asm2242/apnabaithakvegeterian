@@ -53,7 +53,8 @@ const Cart = () => {
 
   const subtotal = getTotalCartAmount();
   const discount = coupon?.discount || 0;
-  const delivery = subtotal === 0 || subtotal - discount >= 399 ? 0 : 39;
+  // must match backend: free delivery is based on subtotal BEFORE coupon discount
+  const delivery = subtotal === 0 || subtotal >= 399 ? 0 : 39;
 
   return (
     <div className="cart">
@@ -83,6 +84,14 @@ const Cart = () => {
         </div>
         <br />
         <hr />
+        {lines.length === 0 && (
+          <div className="cart-empty">
+            <span>🍽️</span>
+            <h3>Your cart is feeling hungry!</h3>
+            <p>Add something delicious from the menu to get started.</p>
+            <button onClick={() => navigate("/menu")}>Browse Menu</button>
+          </div>
+        )}
         {lines.map(([key, qty], index) => {
           const { id, size } = parseKey(key);
           const item = food_list.find((f) => String(f._id) === id);
@@ -140,7 +149,7 @@ const Cart = () => {
               </b>
             </div>
           </div>
-          <button onClick={() => navigate("/order")}>
+          <button onClick={() => navigate("/order")} disabled={subtotal === 0}>
             PROCEED TO CHECKOUT
           </button>
         </div>

@@ -32,6 +32,14 @@
 }
 .food-item-img-container{
     position: relative;
+    overflow: hidden;
+    border-radius: 15px 15px 0 0;
+}
+.food-item-image{
+    transition: transform 0.55s cubic-bezier(.2,.8,.2,1);
+}
+.food-item:hover .food-item-image{
+    transform: scale(1.08);
 }
 .food-item-qty-badge{
     position: absolute;

@@ -53,10 +53,10 @@ html[data-theme="dark"] {
 }
 html[data-theme="dark"] body {
   background:
-    radial-gradient(1100px 480px at 50% 112%, rgba(255, 111, 0, 0.4), transparent 62%),
-    radial-gradient(700px 360px at 12% 108%, rgba(255, 79, 160, 0.18), transparent 60%),
-    radial-gradient(700px 360px at 88% 108%, rgba(255, 213, 79, 0.16), transparent 60%),
-    linear-gradient(180deg, #150521 0%, #2a0a33 38%, #4a0e1e 72%, #6e1b0a 100%);
+    radial-gradient(1100px 480px at 50% 112%, rgba(255, 111, 0, 0.3), transparent 62%),
+    radial-gradient(700px 360px at 12% 108%, rgba(255, 213, 79, 0.14), transparent 60%),
+    radial-gradient(700px 360px at 88% 108%, rgba(255, 111, 0, 0.16), transparent 60%),
+    linear-gradient(180deg, #160b06 0%, #26110a 38%, #3b180c 72%, #4a0e0e 100%);
   color: var(--text);
 }
 html[data-theme="dark"] .food-item,
@@ -128,6 +128,20 @@ a {
   background: var(--marigold);
   color: var(--maroon);
 }
+
+/* keyboard focus: soft golden ring instead of the default outline */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 3px solid rgba(255, 213, 79, 0.75);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* nicer scroll behaviour on mobile too */
+html { -webkit-tap-highlight-color: transparent; }
 
 ::-webkit-scrollbar { width: 10px; }
 ::-webkit-scrollbar-track { background: var(--cream-2); }
