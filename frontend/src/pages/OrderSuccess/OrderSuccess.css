@@ -26,3 +26,18 @@
 html[data-theme="dark"] .plate-stage h2{color:#f3e7d3}
 html[data-theme="dark"] .plate-stage p{color:#c9b896}
 
+
+.order-again {
+  display: block;
+  margin: 14px auto 0;
+  background: transparent;
+  border: 1px solid var(--saffron);
+  color: var(--saffron);
+  border-radius: 50px;
+  padding: 10px 24px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background .2s, color .2s;
+}
+.order-again:hover { background: var(--saffron); color: #fff; }
+

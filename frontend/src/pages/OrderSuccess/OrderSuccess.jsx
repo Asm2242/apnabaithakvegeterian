@@ -8,7 +8,7 @@ import "./OrderSuccess.css";
 const OrderSuccess = () => {
   const { id } = useParams();
   const [params] = useSearchParams();
-  const { url, token, setCartItems } = useContext(StoreContext);
+  const { url, token, setCartItems, addToCart } = useContext(StoreContext);
   const navigate = useNavigate();
   const [phase, setPhase] = useState("loading"); // loading | ok | fail
   const [order, setOrder] = useState(null);
@@ -38,6 +38,14 @@ const OrderSuccess = () => {
       .catch(() => setPhase("fail"));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, id]);
+
+  const orderAgain = async () => {
+    for (const it of order?.items || []) {
+      const qty = Math.min(it.qty || 1, 10);
+      for (let i = 0; i < qty; i++) await addToCart(it.foodId, it.size || "Regular");
+    }
+    navigate("/cart");
+  };
 
   useEffect(() => {
     if (phase !== "ok") return;
@@ -71,6 +79,9 @@ const OrderSuccess = () => {
           <p className="redirect-note">Taking you to live tracking…</p>
           <div className="loadbar"><div /></div>
           <Link to={`/track/${id}`} className="track-link">Track now →</Link>
+          {order?.items?.length > 0 && (
+            <button type="button" className="order-again" onClick={orderAgain}>🔁 Order again</button>
+          )}
         </div>
       )}
       {phase === "fail" && (
