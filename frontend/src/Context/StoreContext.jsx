@@ -8,6 +8,7 @@ import PropTypes from "prop-types";
 const StoreContextProvider = (props) => {
   const url = import.meta.env.VITE_API_URL || "http://localhost:4000";
   const [food_list, setFoodList] = useState([]);
+  const [reviewSummary, setReviewSummary] = useState({});
   // cart key: "<foodId>__<Size>" so Half/Full/Small/Regular stay separate
   // guests keep their cart in localStorage so a refresh does not wipe it
   const [cartItems, setCartItems] = useState(() => {
@@ -157,6 +158,15 @@ const StoreContextProvider = (props) => {
     }
   }, [url]);
 
+  const fetchReviewSummary = useCallback(async () => {
+    try {
+      const res = await axios.get(url + "/api/review/summary");
+      if (res.data?.success) setReviewSummary(res.data.data || {});
+    } catch {
+      setReviewSummary({});
+    }
+  }, [url]);
+
   const loadCartData = useCallback(async (tok) => {
     try {
       const response = await axios.post(
@@ -240,6 +250,7 @@ const StoreContextProvider = (props) => {
   useEffect(() => {
     async function loadData() {
       await fetchFoodList();
+      fetchReviewSummary();
       if (localStorage.getItem("token")) {
         const tok = localStorage.getItem("token");
         setToken(tok);
@@ -247,13 +258,15 @@ const StoreContextProvider = (props) => {
       }
     }
     loadData();
-  }, [fetchFoodList, loadCartData]);
+  }, [fetchFoodList, loadCartData, fetchReviewSummary]);
 
   const contextValue = {
     url,
     imgUrl,
     food_list,
     menu_list,
+    reviewSummary,
+    refreshReviews: fetchReviewSummary,
     cartItems,
     addToCart,
     removeFromCart,

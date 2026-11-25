@@ -1,6 +1,7 @@
 import { useContext, useState } from "react";
 import { assets } from "../../assets/assets";
 import { StoreContext } from "../../Context/StoreContext";
+import ReviewBox from "../ReviewBox/ReviewBox";
 import "./FoodItem.css";
 import PropTypes from "prop-types";
 
@@ -16,6 +17,8 @@ const FoodItem = ({ image, name, price, desc, id, food, index }) => {
     defaultSize,
     wishlist,
     toggleWish,
+    reviewSummary,
+    refreshReviews,
   } = useContext(StoreContext);
 
   const item = food || { _id: id, price };
@@ -26,6 +29,7 @@ const FoodItem = ({ image, name, price, desc, id, food, index }) => {
   const [size, setSize] = useState(defaultSize(item));
   const key = `${itemId}__${size}`;
   const qty = cartItems[key] || 0;
+  const rating = reviewSummary[String(itemId)];
 
   return (
     <div className="food-item" style={{ animationDelay: `${(index || 0) * 60}ms` }}>
@@ -54,7 +58,11 @@ const FoodItem = ({ image, name, price, desc, id, food, index }) => {
           <p>
             <span className="veg-dot" title="Pure vegetarian" /> {name}
           </p>
-          <img src={assets.rating_starts} alt="" />
+          {rating?.count > 0 ? (
+            <span className="food-rating">★ {rating.avg} <small>({rating.count})</small></span>
+          ) : (
+            <img src={assets.rating_starts} alt="" />
+          )}
         </div>
         <p className="food-item-desc">{desc}</p>
         {dual && (
@@ -102,6 +110,9 @@ const FoodItem = ({ image, name, price, desc, id, food, index }) => {
               </button>
             </div>
           )}
+        </div>
+        <div className="food-item-review">
+          <ReviewBox foodId={String(itemId)} onRated={refreshReviews} />
         </div>
       </div>
     </div>

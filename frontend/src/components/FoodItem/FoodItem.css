@@ -184,6 +184,19 @@ html[data-theme="dark"] .step-qty{ color: #FFD54F; }
     color: #676767;
     font-size: 12px;
 }
+.food-rating{
+    color: #E65100;
+    font-size: 14px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+.food-rating small{ color: var(--text-soft); font-weight: 600; font-size: 11px; }
+html[data-theme="dark"] .food-rating{ color: var(--marigold); }
+.food-item-review{
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--line);
+}
 .food-item-price{
     color: #9a3412;
     font-size: 22px;
