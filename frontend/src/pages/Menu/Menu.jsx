@@ -14,12 +14,13 @@ const SORTS = [
 
 // Separate full menu page: search + category pills + sort + all dishes
 const Menu = () => {
-  const { food_list, menu_list, reviewSummary } = useContext(StoreContext);
+  const { food_list, menu_list, reviewSummary, wishlist } = useContext(StoreContext);
   const [params, setParams] = useSearchParams();
   const [query, setQuery] = useState(params.get("q") || "");
   const [sort, setSort] = useState(
     SORTS.some((s) => s.key === params.get("sort")) ? params.get("sort") : "popular"
   );
+  const [favOnly, setFavOnly] = useState(false);
 
   // navbar search se aayi query bhi uthao
   useEffect(() => {
@@ -41,6 +42,7 @@ const Menu = () => {
     const q = query.trim().toLowerCase();
     let list = food_list.filter((f) => {
       if (active !== "All" && f.category !== active) return false;
+      if (favOnly && !wishlist.includes(String(f._id))) return false;
       if (q && !`${f.name} ${f.description || ""}`.toLowerCase().includes(q)) return false;
       return true;
     });
@@ -63,7 +65,7 @@ const Menu = () => {
         list = [...list].sort((a, b) => (b.bestSeller ? 1 : 0) - (a.bestSeller ? 1 : 0));
     }
     return list;
-  }, [food_list, active, query, sort, reviewSummary]);
+  }, [food_list, active, query, sort, reviewSummary, favOnly, wishlist]);
 
   return (
     <div className="menu-page">
@@ -81,6 +83,14 @@ const Menu = () => {
           placeholder="Search… e.g. paneer, momos, thali"
           className="menu-search"
         />
+        <button
+          type="button"
+          className={`fav-chip ${favOnly ? "active" : ""}`}
+          onClick={() => setFavOnly((v) => !v)}
+          title="Show only your wishlisted dishes"
+        >
+          ♥ Favourites ({wishlist.length})
+        </button>
         <div className="sort-box">
           <span className="sort-label">Sort by</span>
           <div className="sort-chips">
