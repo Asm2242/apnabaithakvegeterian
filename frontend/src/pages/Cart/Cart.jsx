@@ -6,7 +6,7 @@ import { StoreContext } from "../../Context/StoreContext";
 import { useNavigate } from "react-router-dom";
 
 const Cart = () => {
-  const { cartItems, food_list, removeFromCart, getTotalCartAmount, url, imgUrl, parseKey, priceFor, token, coupon, applyCoupon } =
+  const { cartItems, food_list, addToCart, removeFromCart, getTotalCartAmount, url, imgUrl, parseKey, priceFor, token, coupon, applyCoupon } =
     useContext(StoreContext);
   const navigate = useNavigate();
   const [code, setCode] = useState(coupon?.code || "");
@@ -105,7 +105,11 @@ const Cart = () => {
                   {item.name} <span>({size})</span>
                 </p>
                 <p>₹{price}</p>
-                <div>{qty}</div>
+                <div className="cart-qty-stepper">
+                  <button type="button" aria-label="decrease" onClick={() => removeFromCart(id, size)}>−</button>
+                  <b>{qty}</b>
+                  <button type="button" aria-label="increase" onClick={() => addToCart(id, size)}>+</button>
+                </div>
                 <p>₹{price * qty}</p>
                 <p
                   className="cart-items-remove-icon"

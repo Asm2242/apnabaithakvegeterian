@@ -237,3 +237,22 @@ html[data-theme="dark"] .cart-empty h3 { color: var(--marigold); }
   transform: none !important;
   box-shadow: none !important;
 }
+
+.cart-qty-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 3px;
+  background: var(--cream-2);
+}
+.cart-qty-stepper button {
+  width: 24px; height: 24px;
+  border: none; border-radius: 50%;
+  background: var(--saffron); color: #fff;
+  font-weight: 900; cursor: pointer; line-height: 1;
+}
+.cart-qty-stepper button:hover { filter: brightness(1.1); }
+.cart-qty-stepper b { min-width: 18px; text-align: center; font-size: 13px; }
+
