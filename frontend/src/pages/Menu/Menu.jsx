@@ -21,6 +21,7 @@ const Menu = () => {
     SORTS.some((s) => s.key === params.get("sort")) ? params.get("sort") : "popular"
   );
   const [favOnly, setFavOnly] = useState(false);
+  const [priceBand, setPriceBand] = useState("all");
 
   // navbar search se aayi query bhi uthao
   useEffect(() => {
@@ -43,6 +44,10 @@ const Menu = () => {
     let list = food_list.filter((f) => {
       if (active !== "All" && f.category !== active) return false;
       if (favOnly && !wishlist.includes(String(f._id))) return false;
+      const p = f.halfPrice ?? f.price;
+      if (priceBand === "low" && p >= 50) return false;
+      if (priceBand === "mid" && (p < 50 || p > 150)) return false;
+      if (priceBand === "high" && p <= 150) return false;
       if (q && !`${f.name} ${f.description || ""}`.toLowerCase().includes(q)) return false;
       return true;
     });
@@ -65,7 +70,7 @@ const Menu = () => {
         list = [...list].sort((a, b) => (b.bestSeller ? 1 : 0) - (a.bestSeller ? 1 : 0));
     }
     return list;
-  }, [food_list, active, query, sort, reviewSummary, favOnly, wishlist]);
+  }, [food_list, active, query, sort, reviewSummary, favOnly, priceBand, wishlist]);
 
   return (
     <div className="menu-page">
@@ -91,6 +96,23 @@ const Menu = () => {
         >
           ♥ Favourites ({wishlist.length})
         </button>
+        <div className="price-chips" role="group" aria-label="Price range">
+          {[
+            ["all", "Any price"],
+            ["low", "Under ₹50"],
+            ["mid", "₹50–150"],
+            ["high", "₹150+"]
+          ].map(([k, label]) => (
+            <button
+              key={k}
+              type="button"
+              className={`price-chip ${priceBand === k ? "active" : ""}`}
+              onClick={() => setPriceBand(k)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
         <div className="sort-box">
           <span className="sort-label">Sort by</span>
           <div className="sort-chips">

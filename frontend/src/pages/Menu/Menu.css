@@ -70,6 +70,25 @@
 }
 html[data-theme="dark"] .fav-chip{ color: #ff8fa3; }
 html[data-theme="dark"] .fav-chip.active{ color: #fff; }
+.price-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.price-chip {
+  border: 1px solid var(--line);
+  background: var(--cream);
+  color: var(--text-soft);
+  border-radius: 50px;
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .2s, color .2s, transform .2s;
+}
+.price-chip:hover { transform: translateY(-1px); }
+.price-chip.active {
+  background: linear-gradient(135deg, #FFB300, #FF6F00);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 8px 18px -8px rgba(255,111,0,.8);
+}
 .sort-label{
     font-size: 12px;
     font-weight: 800;
