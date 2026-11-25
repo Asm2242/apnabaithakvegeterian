@@ -663,3 +663,12 @@ label input { width: auto; accent-color: var(--brand); }
 }
 .Toastify__toast { border-radius: 12px !important; font-family: inherit !important; box-shadow: var(--shadow-lg) !important; }
 
+
+.export-btn {
+  margin-left: auto;
+  background: linear-gradient(135deg,#2E7D32,#1B5E20) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+}
+.export-btn:disabled { opacity: .45; cursor: not-allowed; }
+

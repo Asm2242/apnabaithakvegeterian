@@ -135,6 +135,30 @@ function Orders({ token }) {
     load();
   };
   const shown = orders.filter((o) => filter === "all" || o.status === filter);
+  const exportCsv = () => {
+    const rows = [
+      ["Order ID", "Date", "Customer", "Phone", "Amount", "Payment", "Status", "Items"],
+      ...shown.map((o) => [
+        o._id,
+        new Date(o.date).toLocaleString("en-IN"),
+        o.customerName || "",
+        o.phone || "",
+        o.amount,
+        `${o.paymentMethod || ""} / ${o.paymentStatus || ""}`,
+        o.status,
+        (o.items || []).map((i) => `${i.name} x${i.qty}`).join("; ")
+      ])
+    ];
+    const csv = rows.map((r) => r.map((v) => `"${String(v ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const href = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = href;
+    a.download = `apna-baithak-orders-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(href);
+    toast.success(`${shown.length} orders exported`);
+  };
   return (
     <div>
       <div className="stats">
@@ -148,6 +172,9 @@ function Orders({ token }) {
         {["all", ...FLOW].map((s) => (
           <button key={s} className={filter === s ? "active" : ""} onClick={() => setFilter(s)}>{s}</button>
         ))}
+        <button className="export-btn" onClick={exportCsv} disabled={!shown.length} title="Download filtered orders as CSV">
+          ⬇️ Export CSV
+        </button>
       </div>
       {shown.map((o) => (
         <div key={o._id} className="card order-card">
