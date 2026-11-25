@@ -383,6 +383,14 @@ const App = () => {
           <div key={o._id} className="rider-card">
             <b>₹{o.amount}</b> • {o.paymentMethod === "cod" ? "COLLECT CASH" : o.paymentStatus} • {o.mode}
             <p>{o.customerName} • {o.phone}</p>
+            {o.phone && (
+              <a
+                className="nav-btn call-btn"
+                href={`tel:+91${String(o.phone).replace(/\D/g, "").replace(/^91(?=\d{10}$)/, "")}`}
+              >
+                📞 Call customer
+              </a>
+            )}
             <p>{typeof o.address === "string" ? o.address : o.address?.street}, {o.address?.city} {o.address?.zipcode}</p>
             {o.landmark && <p>Landmark: {o.landmark}</p>}
             <OrderMap order={o} livePos={onDuty && gps?.lat != null ? [gps.lat, gps.lng] : null} />

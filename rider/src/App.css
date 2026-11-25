@@ -162,6 +162,10 @@ body {
   transition: transform 0.18s, filter 0.2s;
 }
 .nav-btn:hover { transform: translateY(-2px); filter: brightness(1.08); }
+.call-btn {
+  background: linear-gradient(135deg, #1976D2, #0D47A1) !important;
+  box-shadow: 0 6px 16px -8px rgba(13, 71, 161, 0.9);
+}
 
 .deliver-btn { background: linear-gradient(135deg, #FF6F00, #9a3412) !important; width: 100%; color: #fff !important; border: none; border-radius: 10px; padding: 13px; font-weight: 800; cursor: pointer; }
 .deliver-btn.pickup { background: linear-gradient(135deg, #43a047, #0f8a0f) !important; }
