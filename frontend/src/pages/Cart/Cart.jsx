@@ -78,6 +78,21 @@ const Cart = () => {
         </div>
       )}
       <div className="cart-items">
+        {lines.length > 0 && (
+          <button
+            type="button"
+            className="clear-cart-btn"
+            onClick={() => {
+              lines.forEach(([key]) => {
+                const { id, size } = parseKey(key);
+                const qty = cartItems[key] || 0;
+                for (let i = 0; i < qty; i++) removeFromCart(id, size);
+              });
+            }}
+          >
+            🗑️ Clear cart
+          </button>
+        )}
         <div className="cart-items-title">
           <p>Items</p> <p>Title</p> <p>Price</p> <p>Quantity</p> <p>Total</p>{" "}
           <p>Remove</p>
