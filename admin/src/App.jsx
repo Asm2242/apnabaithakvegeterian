@@ -165,6 +165,7 @@ function Orders({ token }) {
         <div className="stat"><b>{stats.todayOrders ?? 0}</b><span>Today Orders</span></div>
         <div className="stat"><b>{stats.pendingOrders ?? 0}</b><span>Live / Pending</span></div>
         <div className="stat"><b>{stats.foods ?? 0}</b><span>Dishes</span></div>
+        <div className="stat"><b>{stats.soldOut ?? 0}</b><span>Sold Out</span></div>
         <div className="stat"><b>{stats.customers ?? 0}</b><span>Customers</span></div>
         <div className="stat"><b>{stats.riders ?? 0}</b><span>Riders</span></div>
         <div className="stat"><b>{stats.avgRating ? `${stats.avgRating} ★` : "—"}</b><span>Avg Rating ({stats.reviewCount ?? 0})</span></div>

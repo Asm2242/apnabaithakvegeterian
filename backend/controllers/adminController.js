@@ -34,12 +34,13 @@ const setCustomerActive = async (req, res) => {
 // GET /api/admin/stats — dashboard counters
 const stats = async (req, res) => {
     try {
-        const [customers, riders, pendingOrders, todayOrders, foods, ratings] = await Promise.all([
+        const [customers, riders, pendingOrders, todayOrders, foods, soldOut, ratings] = await Promise.all([
             userModel.countDocuments({ role: "customer" }),
             userModel.countDocuments({ role: "rider" }),
             orderModel.countDocuments({ status: { $nin: ["DELIVERED", "CANCELLED"] } }),
             orderModel.countDocuments({ date: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) } }),
             foodModel.countDocuments({}),
+            foodModel.countDocuments({ available: false }),
             reviewModel.aggregate([
                 { $group: { _id: null, avg: { $avg: "$rating" }, count: { $sum: 1 } } }
             ])
@@ -48,7 +49,7 @@ const stats = async (req, res) => {
         res.json({
             success: true,
             data: {
-                customers, riders, pendingOrders, todayOrders, foods,
+                customers, riders, pendingOrders, todayOrders, foods, soldOut,
                 avgRating: rating ? Math.round(rating.avg * 10) / 10 : 0,
                 reviewCount: rating?.count || 0
             }
