@@ -68,6 +68,22 @@ const listReviews = async (req, res) => {
     }
 };
 
+// GET /api/review/admin/all — all reviews with dish names (admin)
+const adminList = async (req, res) => {
+    try {
+        const rows = await reviewModel.find({}).sort({ createdAt: -1 }).limit(200).lean();
+        const foods = await foodModel.find({}).select("name").lean();
+        const names = Object.fromEntries(foods.map((f) => [String(f._id), f.name]));
+        res.json({
+            success: true,
+            data: rows.map((r) => ({ ...r, foodName: names[String(r.foodId)] || "Unknown dish" }))
+        });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: "Error" });
+    }
+};
+
 // DELETE /api/review/:id — admin moderation
 const deleteReview = async (req, res) => {
     try {
@@ -79,4 +95,4 @@ const deleteReview = async (req, res) => {
     }
 };
 
-export { addReview, listSummaries, listReviews, deleteReview };
+export { addReview, listSummaries, listReviews, deleteReview, adminList };

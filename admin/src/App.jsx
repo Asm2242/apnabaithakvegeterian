@@ -567,6 +567,43 @@ function Feedback({ token }) {
   );
 }
 
+function Reviews({ token }) {
+  const [list, setList] = useState([]);
+  const load = async () => {
+    const res = await api(token).get("/api/review/admin/all");
+    if (res.data.success) setList(res.data.data);
+  };
+  useEffect(() => { load(); }, []);
+  const del = async (id) => {
+    if (!window.confirm("Delete this review?")) return;
+    await api(token).delete("/api/review/" + id);
+    toast.success("Review deleted");
+    load();
+  };
+  return (
+    <div>
+      <h3 className="list-head">⭐ Dish reviews ({list.length})</h3>
+      {list.map((r) => (
+        <div key={r._id} className="card fb-row">
+          <div className="fb-row-main">
+            <div className="food-item-title">
+              <b>{r.foodName}</b>
+              <span className="fb-stars-sm">{"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}</span>
+              <span className="cat-chip">{r.userName}</span>
+              <span className="cat-chip">{new Date(r.createdAt).toLocaleDateString()}</span>
+            </div>
+            {r.comment ? <p className="food-item-desc">{r.comment}</p> : <p className="food-item-desc"><i>No comment</i></p>}
+          </div>
+          <div className="row">
+            <button className="danger" onClick={() => del(r._id)}>🗑️</button>
+          </div>
+        </div>
+      ))}
+      {list.length === 0 && <p className="empty">No reviews yet.</p>}
+    </div>
+  );
+}
+
 function Chat({ token }) {
   const [msgs, setMsgs] = useState([
     { from: "bot", text: "Hello! 🙏 I'm the Apna Baithak assistant. Tap a button below or type — like 'advance all', 'report', 'hide chai'." }
@@ -742,9 +779,9 @@ function App() {
       <header>
         <b>Apna Baithak Admin</b>
         <nav>
-          {["orders", "requests", "foods", "riders", "customers", "coupons", "settings", "feedback", "chat"].map((t) => (
+          {["orders", "requests", "foods", "riders", "customers", "coupons", "settings", "feedback", "reviews", "chat"].map((t) => (
             <button key={t} className={tab === t ? "active" : ""} onClick={() => setTab(t)}>
-              {t === "chat" ? "🤖 chat" : t === "settings" ? "⚙️ settings" : t}
+              {t === "chat" ? "🤖 chat" : t === "settings" ? "⚙️ settings" : t === "reviews" ? "⭐ reviews" : t}
             </button>
           ))}
           <button className="theme-btn" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
@@ -762,6 +799,7 @@ function App() {
         {tab === "coupons" && <Coupons token={token} />}
         {tab === "settings" && <Settings token={token} />}
         {tab === "feedback" && <Feedback token={token} />}
+        {tab === "reviews" && <Reviews token={token} />}
         {tab === "chat" && <Chat token={token} />}
       </main>
     </div>
