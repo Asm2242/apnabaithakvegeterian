@@ -1,5 +1,7 @@
 import userModel from "../models/userModel.js";
 import orderModel from "../models/orderModel.js";
+import reviewModel from "../models/reviewModel.js";
+import foodModel from "../models/foodModel.js";
 import { getAllSettings, setSetting } from "../utils/settings.js";
 
 // GET /api/admin/customers — all customer accounts (admin only)
@@ -32,14 +34,25 @@ const setCustomerActive = async (req, res) => {
 // GET /api/admin/stats — dashboard counters
 const stats = async (req, res) => {
     try {
-        const [customers, riders, pendingOrders, todayOrders] = await Promise.all([
+        const [customers, riders, pendingOrders, todayOrders, foods, ratings] = await Promise.all([
             userModel.countDocuments({ role: "customer" }),
             userModel.countDocuments({ role: "rider" }),
             orderModel.countDocuments({ status: { $nin: ["DELIVERED", "CANCELLED"] } }),
             orderModel.countDocuments({ date: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) } }),
+            foodModel.countDocuments({}),
+            reviewModel.aggregate([
+                { $group: { _id: null, avg: { $avg: "$rating" }, count: { $sum: 1 } } }
+            ])
         ]);
-        const foodsCount = await (await import("../models/foodModel.js")).default.countDocuments({});
-        res.json({ success: true, data: { customers, riders, pendingOrders, todayOrders, foods: foodsCount } });
+        const rating = ratings[0];
+        res.json({
+            success: true,
+            data: {
+                customers, riders, pendingOrders, todayOrders, foods,
+                avgRating: rating ? Math.round(rating.avg * 10) / 10 : 0,
+                reviewCount: rating?.count || 0
+            }
+        });
     } catch (error) {
         console.log(error);
         res.json({ success: false, message: "Error" });

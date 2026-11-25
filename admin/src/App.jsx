@@ -167,6 +167,7 @@ function Orders({ token }) {
         <div className="stat"><b>{stats.foods ?? 0}</b><span>Dishes</span></div>
         <div className="stat"><b>{stats.customers ?? 0}</b><span>Customers</span></div>
         <div className="stat"><b>{stats.riders ?? 0}</b><span>Riders</span></div>
+        <div className="stat"><b>{stats.avgRating ? `${stats.avgRating} ★` : "—"}</b><span>Avg Rating ({stats.reviewCount ?? 0})</span></div>
       </div>
       <div className="filters">
         {["all", ...FLOW].map((s) => (
