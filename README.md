@@ -8,21 +8,24 @@ Food-Delivery-App is a modern, full-stack food delivery web application built us
 📦 Features
 
 👤 Customer
-- User registration and login (JWT-based)
-- Browse food items by category
-- Add to cart and place orders
-- Razorpay integration for payments
-- Track order status in real-time
+- Email/password + phone OTP login, forgot password via OTP
+- Browse/search/filter dishes, sort by price, name and top rated
+- Wishlist with favourites-only filter, cart with quantity stepper
+- Coupons + first-order offer, one-click reorder, clear cart
+- Razorpay + Cash on Delivery, live order tracking with road route
+- Dish ratings and reviews, dark/light theme, mobile-friendly UI
 
 👨‍🍳 Admin
 - Secure login for admin panel
-- Add/update/delete food items
-- View all orders
-- Update order status
+- Add/update/delete food items, bulk photo upload by zip
+- View/filter orders, CSV export, update status and assign riders
+- Coupons, settings, customer management, feedback and review moderation
+- Built-in AI helper chat for quick actions
 
 🚚 Delivery Personnel
 - Login to view assigned orders
-- Update order delivery status
+- Call customer, turn-by-turn navigation, live GPS
+- Update delivery status, collect cash, Razorpay QR at doorstep
 
 ---
 
@@ -32,12 +35,13 @@ Food-Delivery-App is a modern, full-stack food delivery web application built us
 
 Food-Delivery-App/
 │
-├── admin/     # React-based Admin Panel
-├── backend/   # Node.js + Express backend
-├── frontend/  # React-based Customer Interface
-├── .gitignore
-├── README.md
-└── package.json
+├── admin/            # React admin dashboard
+├── backend/          # Node.js + Express API
+├── frontend/         # React customer app
+├── rider/            # React rider panel
+├── mobile-customer/  # Capacitor wrapper (customer)
+├── mobile-rider/     # Capacitor wrapper (rider)
+└── README.md
 
 ````
 
@@ -145,21 +149,18 @@ npm run dev
 
 🚧 Limitations
 
-* No live GPS tracking for delivery
-* No ratings/reviews system
 * Single admin role; no multi-role access
 * Only Razorpay supported as a payment gateway
+* In-memory rate limits reset on server restart
 
 ---
 
 🚀 Future Scope
 
-* Live map tracking using Google Maps API
-* Customer reviews and ratings
-* SMS/email notifications
+* Email notifications (order placed / delivered)
 * Multiple admin roles (Manager, Super Admin)
-* Coupons and discounts
 * Real-time chat with delivery personnel
+* Redis-backed rate limiting for multi-instance deployments
 
 ---
 
