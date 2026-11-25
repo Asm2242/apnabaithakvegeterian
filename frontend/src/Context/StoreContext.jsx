@@ -142,6 +142,7 @@ const StoreContextProvider = (props) => {
     if (data && !data.success && /expired|not authorized|login again/i.test(data.message || "")) {
       localStorage.removeItem("token");
       setToken("");
+      setCartItems({});
     }
     return data;
   }, []);
