@@ -13,10 +13,14 @@ const TESTIMONIALS = [
 ];
 
 const Home = () => {
-  const { food_list, menu_list } = useContext(StoreContext);
+  const { food_list, menu_list, reviewSummary } = useContext(StoreContext);
   const best = food_list.filter((f) => f.bestSeller).slice(0, 8);
   const combos = food_list.filter((f) => f.category === "Combo").slice(0, 4);
   const popular = food_list.slice(0, 6);
+  const topRated = [...food_list]
+    .filter((f) => (reviewSummary[String(f._id)]?.count || 0) > 0)
+    .sort((a, b) => (reviewSummary[String(b._id)]?.avg || 0) - (reviewSummary[String(a._id)]?.avg || 0))
+    .slice(0, 4);
 
   return (
     <>
@@ -70,6 +74,28 @@ const Home = () => {
           ))}
         </div>
       </section>
+
+      {topRated.length > 0 && (
+        <section className="home-section">
+          <div className="home-section-head">
+            <h2>🏆 Top Rated by You</h2>
+            <Link to="/menu?sort=rating">See all →</Link>
+          </div>
+          <div className="home-grid">
+            {topRated.map((item) => (
+              <FoodItem
+                key={item._id}
+                image={item.image}
+                name={item.name}
+                desc={item.description}
+                price={item.price}
+                id={item._id}
+                food={item}
+              />
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="home-section">
         <div className="home-section-head">

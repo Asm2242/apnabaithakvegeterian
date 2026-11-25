@@ -9,14 +9,17 @@ const SORTS = [
   { key: "price-asc", label: "💸 Price: Low → High" },
   { key: "price-desc", label: "💰 Price: High → Low" },
   { key: "name", label: "🔤 Name: A → Z" },
+  { key: "rating", label: "⭐ Top Rated" },
 ];
 
 // Separate full menu page: search + category pills + sort + all dishes
 const Menu = () => {
-  const { food_list, menu_list } = useContext(StoreContext);
+  const { food_list, menu_list, reviewSummary } = useContext(StoreContext);
   const [params, setParams] = useSearchParams();
   const [query, setQuery] = useState(params.get("q") || "");
-  const [sort, setSort] = useState("popular");
+  const [sort, setSort] = useState(
+    SORTS.some((s) => s.key === params.get("sort")) ? params.get("sort") : "popular"
+  );
 
   // navbar search se aayi query bhi uthao
   useEffect(() => {
@@ -51,11 +54,16 @@ const Menu = () => {
       case "name":
         list = [...list].sort((a, b) => a.name.localeCompare(b.name));
         break;
+      case "rating":
+        list = [...list].sort((a, b) =>
+          (reviewSummary[String(b._id)]?.avg || 0) - (reviewSummary[String(a._id)]?.avg || 0)
+        );
+        break;
       default:
         list = [...list].sort((a, b) => (b.bestSeller ? 1 : 0) - (a.bestSeller ? 1 : 0));
     }
     return list;
-  }, [food_list, active, query, sort]);
+  }, [food_list, active, query, sort, reviewSummary]);
 
   return (
     <div className="menu-page">
