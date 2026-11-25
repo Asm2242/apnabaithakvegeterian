@@ -18,9 +18,16 @@ const Splash = ({ onDone }) => {
 
   return (
     <div className={`splash ${leaving ? "splash-leave" : ""}`}>
+      <div className="splash-foods" aria-hidden="true">
+        <span>🍛</span><span>🍲</span><span>🫓</span><span>🥘</span>
+      </div>
       <div className="splash-mark">
         <div className="splash-glow" />
-        <div className="splash-ring" />
+        <div className="splash-ring splash-ring-a" />
+        <div className="splash-ring splash-ring-b" />
+        <div className="splash-spark splash-spark-1">✦</div>
+        <div className="splash-spark splash-spark-2">✦</div>
+        <div className="splash-spark splash-spark-3">✧</div>
         <div className="splash-logo">
           <img src={assets.baithakLogo} alt="Apna Baithak" />
         </div>

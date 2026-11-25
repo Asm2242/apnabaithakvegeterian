@@ -1,173 +1,261 @@
-﻿.otp-gate{
-    position: fixed;
-    inset: 0;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background:
-      url('/header_img.png') center/cover no-repeat,
-      radial-gradient(900px 400px at 50% 110%, rgba(255, 111, 0, 0.35), transparent 60%),
-      radial-gradient(600px 300px at 15% 100%, rgba(255, 79, 160, 0.2), transparent 60%),
-      linear-gradient(160deg, #150521 0%, #2a0a33 40%, #4a0e1e 75%, #6e1b0a 120%);
-    padding: 20px;
-    animation: fadeIn 0.5s;
-}
-.otp-gate::before{
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: rgba(21, 5, 33, 0.45);
-}
-.otp-gate-card{
-    position: relative;
-    z-index: 1;
-    background: #fff;
-    border-radius: 20px;
-    padding: 32px 28px;
-    width: 100%;
-    max-width: 380px;
-    text-align: center;
-    border-top: 6px solid #FFD54F;
-}
-.otp-gate-logo{
-    font-size: 30px;
-    font-weight: 700;
-    color: #FF6F00;
-}
-.otp-gate-sub{
-    font-size: 12px;
-    color: #8A7A6C;
-    margin-bottom: 16px;
-}
-.otp-gate-card h2{
-    font-size: 18px;
-    margin-bottom: 16px;
-}
-.otp-gate-phone{
-    display: flex;
-    align-items: center;
-    border: 1px solid #c9c9c9;
-    border-radius: 10px;
-    overflow: hidden;
-    margin-bottom: 12px;
-}
-.otp-gate-phone span{
-    background: #f5f5f5;
-    padding: 12px;
-    font-weight: 700;
-    color: #FF6F00;
-}
-.otp-gate-phone input{
-    border: none;
-    outline: none;
-    padding: 12px;
-    font-size: 16px;
-    width: 100%;
-}
-.otp-gate-input{
-    width: 100%;
-    border: 1px solid #c9c9c9;
-    border-radius: 10px;
-    padding: 12px;
-    font-size: 15px;
-    margin-bottom: 12px;
-    outline: none;
-    box-sizing: border-box;
-}
-.otp-gate-new{
-    color: #FF6F00;
-    font-weight: 700;
-    letter-spacing: 1px;
-    margin: 4px 0 8px 0;
-}
-.otp-gate-boxes{
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-    margin-bottom: 12px;
-}
-.otp-gate-boxes input{
-    width: 44px;
-    height: 50px;
-    text-align: center;
-    font-size: 20px;
-    font-weight: 700;
-    border: 1px solid #c9c9c9;
-    border-radius: 10px;
-    outline: none;
-    color: #FF6F00;
-}
-.otp-gate-btn{
-    width: 100%;
-    background: #FF6F00;
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    padding: 13px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    margin-bottom: 8px;
-}
-.otp-gate-btn:disabled{
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-.otp-gate-link{
-    background: none;
-    border: none;
-    color: #8A7A6C;
-    text-decoration: underline;
-    font-size: 14px;
-    cursor: pointer;
-    margin-top: 6px;
-}
-.otp-gate-link:disabled{
-    opacity: 0.5;
-    text-decoration: none;
-}
-.otp-gate-mode{
-    display: flex;
-    gap: 8px;
-    margin-bottom: 14px;
-}
-.otp-gate-mode button{
-    flex: 1;
-    background: #fff;
-    color: #FF6F00;
-    border: 1px solid #FF6F00;
-    border-radius: 10px;
-    padding: 10px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.25s ease;
-}
-.otp-gate-mode button.active{
-    background: #FF6F00;
-    color: #fff;
-}
-.auth-switch{
-    text-align: center;
-    font-size: 13px;
-}
-.login-mode-toggle{
-    display: flex;
-    gap: 8px;
-}
-.login-mode-toggle button{
-    flex: 1;
-    background: #fff;
-    color: #FF6F00;
-    border: 1px solid #FF6F00;
-    border-radius: 8px;
-    padding: 10px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.25s ease;
-}
-.login-mode-toggle button.active{
-    background: #FF6F00;
-    color: #fff;
+﻿.otp-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 20px;
+  background:
+    linear-gradient(120deg, rgba(20, 8, 4, .86), rgba(59, 29, 12, .82) 55%, rgba(124, 45, 18, .78)),
+    url('/eldeco-city.jpg') center/cover no-repeat;
+  animation: fadeIn .5s ease;
 }
 
+/* soft glowing orbs drifting behind the card */
+.gate-orbs span {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(20px);
+  pointer-events: none;
+  animation: orbFloat 9s ease-in-out infinite;
+}
+.gate-orbs span:nth-child(1) {
+  width: 320px; height: 320px;
+  left: -80px; top: -60px;
+  background: radial-gradient(circle, rgba(255, 213, 79, .40), transparent 70%);
+}
+.gate-orbs span:nth-child(2) {
+  width: 380px; height: 380px;
+  right: -100px; bottom: -100px;
+  background: radial-gradient(circle, rgba(255, 111, 0, .38), transparent 70%);
+  animation-delay: -3s;
+}
+.gate-orbs span:nth-child(3) {
+  width: 240px; height: 240px;
+  left: 45%; bottom: -120px;
+  background: radial-gradient(circle, rgba(255, 213, 79, .22), transparent 70%);
+  animation-delay: -6s;
+}
+@keyframes orbFloat {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(24px, -26px, 0) scale(1.12); }
+}
+
+/* floating food emojis */
+.gate-float {
+  position: absolute;
+  font-size: 42px;
+  opacity: .55;
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, .5));
+  pointer-events: none;
+  animation: foodFloat 6s ease-in-out infinite;
+}
+.gate-float-1 { left: 12%; top: 22%; animation-delay: -.5s; }
+.gate-float-2 { right: 14%; top: 30%; animation-delay: -2s; font-size: 52px; }
+.gate-float-3 { left: 18%; bottom: 18%; animation-delay: -3.5s; }
+.gate-float-4 { right: 18%; bottom: 22%; animation-delay: -4.5s; font-size: 38px; }
+@keyframes foodFloat {
+  0%, 100% { transform: translateY(0) rotate(-6deg); }
+  50% { transform: translateY(-18px) rotate(6deg); }
+}
+@media (max-width: 900px) { .gate-float { display: none; } }
+
+/* ---- glass card ---- */
+.otp-gate-card {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 420px;
+  padding: 34px 32px 26px;
+  text-align: center;
+  border-radius: 28px;
+  background: linear-gradient(160deg, rgba(255, 253, 249, .97), rgba(255, 241, 220, .95));
+  border: 1px solid rgba(255, 213, 79, .75);
+  box-shadow: 0 30px 80px -24px rgba(20, 5, 2, .85), 0 0 0 6px rgba(255, 213, 79, .10), inset 0 1px 0 #fff;
+  backdrop-filter: blur(16px);
+  animation: cardIn .65s cubic-bezier(.34, 1.56, .64, 1) both;
+}
+.otp-gate-card::before {
+  content: "";
+  position: absolute;
+  left: 32px; right: 32px; top: 0;
+  height: 4px;
+  border-radius: 0 0 6px 6px;
+  background: linear-gradient(90deg, transparent, #FFD54F, #FF6F00, #FFD54F, transparent);
+  box-shadow: 0 0 18px rgba(255, 179, 0, .8);
+}
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(28px) scale(.92); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.gate-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  text-align: left;
+  margin-bottom: 8px;
+}
+.gate-logo-wrap {
+  width: 62px; height: 62px;
+  flex: none;
+  border-radius: 18px;
+  background: linear-gradient(145deg, #fffaf0, #ffe0b2);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 10px 24px -8px rgba(255, 111, 0, .7), inset 0 1px 0 #fff;
+  animation: logoBob 3s ease-in-out infinite;
+}
+.gate-logo-wrap img { width: 44px; height: 44px; }
+@keyframes logoBob {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50% { transform: translateY(-5px) rotate(3deg); }
+}
+.otp-gate-logo {
+  font-family: "Baloo 2", "Outfit", sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.1;
+  margin: 0;
+  background: linear-gradient(90deg, #E65100, #FF6F00, #FFB300);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.otp-gate-sub { font-size: 11px; letter-spacing: 1.4px; text-transform: uppercase; color: #8A7A6C; margin: 4px 0 0; }
+
+.gate-welcome {
+  font-size: 13px;
+  font-weight: 700;
+  color: #9a3412;
+  margin: 14px 0 18px;
+  letter-spacing: .3px;
+}
+.gate-welcome span { color: #FFB300; }
+
+.otp-gate-mode {
+  display: flex;
+  gap: 6px;
+  padding: 5px;
+  margin-bottom: 18px;
+  border-radius: 999px;
+  background: rgba(255, 111, 0, .10);
+  border: 1px solid rgba(255, 111, 0, .22);
+}
+.otp-gate-mode button {
+  flex: 1;
+  background: transparent;
+  color: #9a3412;
+  border: none;
+  border-radius: 999px;
+  padding: 11px;
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all .3s cubic-bezier(.34, 1.56, .64, 1);
+}
+.otp-gate-mode button.active {
+  background: linear-gradient(135deg, #FF8F00, #E65100);
+  color: #fff;
+  box-shadow: 0 8px 20px -8px rgba(255, 111, 0, .9);
+  transform: scale(1.03);
+}
+
+.gate-fields { display: flex; flex-direction: column; gap: 10px; }
+.gate-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(255, 111, 0, .25);
+  border-radius: 14px;
+  padding: 0 14px;
+  background: #fff;
+  transition: border-color .2s, box-shadow .2s, transform .2s;
+}
+.gate-field:focus-within {
+  border-color: #FF6F00;
+  box-shadow: 0 0 0 4px rgba(255, 111, 0, .14);
+  transform: translateY(-1px);
+}
+.gate-field > span { font-size: 17px; }
+.otp-gate-input {
+  width: 100%;
+  border: none;
+  outline: none;
+  padding: 14px 0;
+  font-size: 15px;
+  background: transparent;
+  color: #3B1D0C;
+}
+.otp-gate-input::placeholder { color: #b3a08d; }
+
+.otp-gate-btn {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  margin-top: 18px;
+  background: linear-gradient(135deg, #FFB300, #FF6F00 50%, #E65100);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  padding: 15px;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: .3px;
+  cursor: pointer;
+  box-shadow: 0 14px 30px -10px rgba(255, 111, 0, .95);
+  transition: transform .18s, filter .2s, box-shadow .2s;
+}
+.otp-gate-btn::after {
+  content: "";
+  position: absolute; top: 0; left: -80%;
+  width: 45%; height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,.55), transparent);
+  transform: skewX(-20deg);
+  animation: btnShine 3.2s ease-in-out infinite;
+}
+@keyframes btnShine { 0%, 55% { left: -80%; } 100% { left: 140%; } }
+.otp-gate-btn:hover { transform: translateY(-2px); filter: brightness(1.06); box-shadow: 0 18px 36px -10px rgba(255, 111, 0, 1); }
+.otp-gate-btn:active { transform: scale(.98); }
+.otp-gate-btn:disabled { opacity: .6; cursor: not-allowed; }
+
+.otp-gate-link {
+  background: none;
+  border: none;
+  color: #8A7A6C;
+  font-size: 13px;
+  cursor: pointer;
+  margin-top: 14px;
+  transition: color .2s;
+}
+.otp-gate-link:hover { color: #E65100; text-decoration: underline; }
+.gate-footnote { margin: 16px 0 0; font-size: 11px; color: #a8937f; letter-spacing: .4px; }
+
+/* legacy helpers kept for compatibility */
+.otp-gate-phone { display: flex; align-items: center; border: 1px solid #ddd; border-radius: 10px; overflow: hidden; }
+.otp-gate-phone span { padding: 12px; background: #f5f5f5; font-weight: 700; color: #FF6F00; }
+.otp-gate-phone input { border: none; outline: none; padding: 12px; width: 100%; }
+.otp-gate-new { color: #FF6F00; font-weight: 700; letter-spacing: 1px; margin: 4px 0 8px; }
+.otp-gate-boxes { display: flex; gap: 8px; justify-content: center; }
+.otp-gate-boxes input {
+  width: 44px; height: 50px; text-align: center; font-size: 20px; font-weight: 700;
+  border: 1px solid #ddd; border-radius: 10px; outline: none; color: #FF6F00;
+}
+
+html[data-theme="dark"] .otp-gate-card {
+  background: linear-gradient(160deg, rgba(36, 24, 18, .97), rgba(28, 19, 12, .96));
+  border-color: rgba(255, 213, 79, .5);
+}
+html[data-theme="dark"] .otp-gate-logo { background: linear-gradient(90deg, #FFD54F, #FF8F00); -webkit-background-clip: text; background-clip: text; }
+html[data-theme="dark"] .otp-gate-sub,
+html[data-theme="dark"] .gate-footnote { color: #B9A88F; }
+html[data-theme="dark"] .gate-welcome { color: #FFD54F; }
+html[data-theme="dark"] .gate-field { background: #2E2015; border-color: #5A4028; }
+html[data-theme="dark"] .otp-gate-input { color: #F6ECDD; }
+html[data-theme="dark"] .otp-gate-mode button { color: #FFD54F; }
+
+@media (prefers-reduced-motion: reduce) {
+  .otp-gate *, .otp-gate *::before, .otp-gate *::after { animation: none !important; }
+}

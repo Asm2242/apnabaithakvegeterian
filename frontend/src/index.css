@@ -119,6 +119,19 @@ a {
   color: inherit;
 }
 
+/* headings get the rounded, friendly display face */
+h1, h2, h3 {
+  font-family: 'Baloo 2', 'Outfit', sans-serif;
+  letter-spacing: 0.2px;
+}
+
+body { background-attachment: fixed; }
+
+@keyframes sectionIn {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .app {
   width: 80%;
   margin: auto;

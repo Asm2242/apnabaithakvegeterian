@@ -41,7 +41,13 @@
 }
 .home-section{
     margin-top: 44px;
+    animation: sectionIn 0.7s ease both;
 }
+.home-section:nth-of-type(2) { animation-delay: 0.08s; }
+.home-section:nth-of-type(3) { animation-delay: 0.16s; }
+.home-section:nth-of-type(4) { animation-delay: 0.24s; }
+.home-section:nth-of-type(5) { animation-delay: 0.32s; }
+.home-section:nth-of-type(6) { animation-delay: 0.4s; }
 .home-section-head{
     display: flex;
     justify-content: space-between;
