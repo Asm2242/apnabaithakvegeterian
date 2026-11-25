@@ -18,6 +18,9 @@ const listCustomers = async (req, res) => {
 // POST /api/admin/customer/active  { id, active } — enable/disable account
 const setCustomerActive = async (req, res) => {
     try {
+        if (String(req.body.id) === String(req.body.userId)) {
+            return res.json({ success: false, message: "You cannot disable your own account" });
+        }
         await userModel.findByIdAndUpdate(req.body.id, { active: !!req.body.active });
         res.json({ success: true, message: "Updated" });
     } catch (error) {
