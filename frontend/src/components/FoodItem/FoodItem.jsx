@@ -29,10 +29,11 @@ const FoodItem = ({ image, name, price, desc, id, food, index }) => {
   const [size, setSize] = useState(defaultSize(item));
   const key = `${itemId}__${size}`;
   const qty = cartItems[key] || 0;
+  const soldOut = item.available === false;
   const rating = reviewSummary[String(itemId)];
 
   return (
-    <div className="food-item" style={{ animationDelay: `${(index || 0) * 60}ms` }}>
+    <div className={`food-item ${soldOut ? "is-sold-out" : ""}`} style={{ animationDelay: `${(index || 0) * 60}ms` }}>
       <button
         type="button"
         aria-label="wishlist"
@@ -49,9 +50,10 @@ const FoodItem = ({ image, name, price, desc, id, food, index }) => {
           loading="lazy"
           decoding="async"
         />
-        {qty > 0 && (
+        {qty > 0 && !soldOut && (
           <div className="food-item-qty-badge">{qty} in cart</div>
         )}
+        {soldOut && <div className="sold-out-badge">SOLD OUT</div>}
       </div>
       <div className="food-item-info">
         <div className="food-item-name-rating">
@@ -86,8 +88,9 @@ const FoodItem = ({ image, name, price, desc, id, food, index }) => {
               type="button"
               className="add-cart-btn"
               onClick={() => addToCart(itemId, size)}
+              disabled={soldOut}
             >
-              <span className="add-cart-plus">+</span> ADD
+              {soldOut ? "SOLD OUT" : <><span className="add-cart-plus">+</span> ADD</>}
             </button>
           ) : (
             <div className="add-cart-stepper">
