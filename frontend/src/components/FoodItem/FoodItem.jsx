@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { assets } from "../../assets/assets";
+import { Link } from "react-router-dom";
 import { StoreContext } from "../../Context/StoreContext";
 import ReviewBox from "../ReviewBox/ReviewBox";
 import "./FoodItem.css";
@@ -33,92 +33,88 @@ const FoodItem = ({ image, name, price, desc, id, food, index }) => {
   const rating = reviewSummary[String(itemId)];
 
   return (
-    <div className={`food-item ${soldOut ? "is-sold-out" : ""}`} style={{ animationDelay: `${(index || 0) * 60}ms` }}>
-      <button
-        type="button"
-        aria-label="wishlist"
-        className={wished ? "wish-btn active" : "wish-btn"}
-        onClick={() => toggleWish(itemId)}
-      >
-        {wished ? "❤️" : "🤍"}
-      </button>
-      <div className="food-item-img-container">
+    <article
+      className={`food-item food-card ${soldOut ? "is-sold-out" : ""}`}
+      style={{ animationDelay: `${(index || 0) * 60}ms` }}
+    >
+      <div className="food-card-media">
         <img
-          className="food-item-image"
+          className="food-card-img"
           src={imgUrl(image)}
           alt={name}
           loading="lazy"
           decoding="async"
         />
-        {qty > 0 && !soldOut && (
-          <div className="food-item-qty-badge">{qty} in cart</div>
+        <Link to={`/food/${itemId}`} className="food-card-open" aria-label={`View ${name} details`} />
+        <div className="food-card-tags">
+          {item.bestSeller && <span className="food-tag best">⭐ Bestseller</span>}
+          {item.category && <span className="food-tag cat">{item.category}</span>}
+        </div>
+        <button
+          type="button"
+          aria-label="wishlist"
+          className={`food-card-wish ${wished ? "active" : ""}`}
+          onClick={() => toggleWish(itemId)}
+        >
+          {wished ? "❤️" : "🤍"}
+        </button>
+        {rating?.count > 0 && (
+          <span className="food-card-rating">★ {rating.avg}</span>
         )}
+        {qty > 0 && !soldOut && <span className="food-card-qty">{qty} in cart</span>}
         {soldOut && <div className="sold-out-badge">SOLD OUT</div>}
       </div>
-      <div className="food-item-info">
-        <div className="food-item-name-rating">
-          <p>
-            <span className="veg-dot" title="Pure vegetarian" /> {name}
-          </p>
-          {rating?.count > 0 ? (
-            <span className="food-rating">★ {rating.avg} <small>({rating.count})</small></span>
-          ) : (
-            <img src={assets.rating_starts} alt="" />
-          )}
-        </div>
-        <p className="food-item-desc">{desc}</p>
+
+      <div className="food-card-body">
+        <h3 className="food-card-name">
+          <span className="veg-dot" title="Pure vegetarian" /> {name}
+        </h3>
+        <p className="food-card-desc">{desc}</p>
+
         {dual && (
-          <div className="food-item-sizes">
+          <div className="food-card-sizes" role="group" aria-label="Choose size">
             {options.map((s) => (
               <button
                 key={s}
                 type="button"
-                className={size === s ? "size-btn active" : "size-btn"}
+                className={size === s ? "size-chip active" : "size-chip"}
                 onClick={() => setSize(s)}
               >
-                {s} ₹{priceFor(item, s)}
+                {s} <span>₹{priceFor(item, s)}</span>
               </button>
             ))}
           </div>
         )}
-        <div className="food-item-buy">
-          <p className="food-item-price">₹{priceFor(item, size)}</p>
+
+        <div className="food-card-bottom">
+          <div className="food-card-price">
+            <small>Price</small>
+            <b>₹{priceFor(item, size)}</b>
+          </div>
           {qty === 0 ? (
             <button
               type="button"
-              className="add-cart-btn"
+              className="food-card-add"
               onClick={() => addToCart(itemId, size)}
               disabled={soldOut}
             >
-              {soldOut ? "SOLD OUT" : <><span className="add-cart-plus">+</span> ADD</>}
+              {soldOut ? "SOLD OUT" : <><span>+</span> ADD</>}
             </button>
           ) : (
-            <div className="add-cart-stepper">
-              <button
-                type="button"
-                className="step-minus"
-                aria-label="remove"
-                onClick={() => removeFromCart(itemId, size)}
-              >
-                −
-              </button>
-              <span className="step-qty">{qty}</span>
-              <button
-                type="button"
-                className="step-plus"
-                aria-label="add"
-                onClick={() => addToCart(itemId, size)}
-              >
-                +
-              </button>
+            <div className="food-card-stepper">
+              <button type="button" aria-label="remove one" onClick={() => removeFromCart(itemId, size)}>−</button>
+              <b>{qty}</b>
+              <button type="button" aria-label="add one" onClick={() => addToCart(itemId, size)}>+</button>
             </div>
           )}
         </div>
+
+        <Link to={`/food/${itemId}`} className="food-card-details">View details →</Link>
         <div className="food-item-review">
           <ReviewBox foodId={String(itemId)} onRated={refreshReviews} />
         </div>
       </div>
-    </div>
+    </article>
   );
 };
 

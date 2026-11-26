@@ -25,6 +25,7 @@ import NotFound from "./pages/NotFound/NotFound";
 import MobileCartBar from "./components/MobileCartBar/MobileCartBar";
 import About from "./pages/About/About";
 import Contact from "./pages/Contact/Contact";
+import FoodDetail from "./pages/FoodDetail/FoodDetail";
 
 const App = () => {
   const { token, showLogin, setShowLogin, theme } = useContext(StoreContext);
@@ -94,6 +95,7 @@ const App = () => {
           <Route path="/profile" element={<Profile />} />
           <Route path="/track/:id" element={<Track />} />
           <Route path="/menu" element={<Menu />} />
+          <Route path="/food/:id" element={<FoodDetail />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/success/:id" element={<OrderSuccess />} />

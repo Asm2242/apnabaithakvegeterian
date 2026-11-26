@@ -81,6 +81,17 @@ const listFood = async (req, res) => {
 
 }
 
+// single dish by id (public) — used by the food detail page
+const getFoodById = async (req, res) => {
+    try {
+        const food = await foodModel.findById(req.params.id);
+        if (!food) return res.json({ success: false, message: "Dish nahi mila" });
+        res.json({ success: true, data: food });
+    } catch (error) {
+        res.json({ success: false, message: "Error" });
+    }
+}
+
 // add food
 const addFood = async (req, res) => {
     try {
@@ -157,7 +168,7 @@ const removeFood = async (req, res) => {
 
 }
 
-export { listFood, addFood, updateFood, removeFood, bulkPhotos, bulkConfirm }
+export { listFood, getFoodById, addFood, updateFood, removeFood, bulkPhotos, bulkConfirm }
 
 // POST /api/food/bulk-photos (admin) — photos.zip: match filenames to dishes.
 // "Paneer-Pizza.jpg" -> Paneer Pizza. Uploads to Cloudinary, updates DB.
