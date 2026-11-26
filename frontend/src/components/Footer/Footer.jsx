@@ -56,6 +56,7 @@ const Footer = () => {
       <p className="footer-copyright">
         Copyright {new Date().getFullYear()} © Apna Baithak Vegetarian Restaurant, Eldeco City, Lucknow - All Rights Reserved.
       </p>
+      <p className="footer-credit">Made with ❤️ by <b>ASM</b></p>
     </div>
   );
 };

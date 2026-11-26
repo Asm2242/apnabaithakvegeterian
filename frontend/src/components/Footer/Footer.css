@@ -103,3 +103,12 @@
         text-align: center;
     }
 }
+.footer-credit {
+    color: #E8D5B5;
+    font-size: 13px;
+    text-align: center;
+    position: relative;
+    letter-spacing: .4px;
+}
+.footer-credit b { color: var(--marigold); font-family: 'Baloo 2', 'Outfit', sans-serif; font-size: 16px; letter-spacing: 1px; }
+

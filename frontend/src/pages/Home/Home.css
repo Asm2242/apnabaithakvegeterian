@@ -269,3 +269,19 @@ html[data-theme="dark"] .home-cat{
         gap: 20px;
     }
 }
+.about-creator {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 20px;
+    padding: 10px 18px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(255,213,79,.16), rgba(255,111,0,.12));
+    border: 1px solid rgba(255,213,79,.55);
+}
+.about-creator > span { font-size: 24px; }
+.about-creator div { display: flex; flex-direction: column; line-height: 1.25; }
+.about-creator small { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-soft); }
+.about-creator b { font-family: 'Baloo 2', 'Outfit', sans-serif; font-size: 18px; color: var(--saffron); letter-spacing: 1px; }
+html[data-theme="dark"] .about-creator b { color: var(--marigold); }
+

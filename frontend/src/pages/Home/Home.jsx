@@ -136,6 +136,10 @@ const Home = () => {
               <div><b>14</b><span>Categories</span></div>
               <div><b>4.6★</b><span>Rating</span></div>
             </div>
+            <div className="about-creator">
+              <span>👨‍💻</span>
+              <div><small>Crafted with ❤️ by</small><b>ASM</b></div>
+            </div>
           </div>
           <div className="about-image">
             <div className="about-image-card">
