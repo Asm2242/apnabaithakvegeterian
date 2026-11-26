@@ -76,13 +76,22 @@ const Navbar = ({ setShowLogin }) => {
           </Link>
         </li>
         <li>
-          <a
-            href="#footer"
+          <Link
+            to="/about"
+            onClick={() => { setMenu("about"); close(); }}
+            className={`${menu === "about" ? "active" : ""}`}
+          >
+            About
+          </Link>
+        </li>
+        <li>
+          <Link
+            to="/contact"
             onClick={() => { setMenu("contact"); close(); }}
             className={`${menu === "contact" ? "active" : ""}`}
           >
             Contact us
-          </a>
+          </Link>
         </li>
       </ul>
       <div className="navbar-right">

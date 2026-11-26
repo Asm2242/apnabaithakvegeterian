@@ -23,6 +23,8 @@ import Splash from "./components/Splash/Splash";
 import ScrollTop from "./components/ScrollTop/ScrollTop";
 import NotFound from "./pages/NotFound/NotFound";
 import MobileCartBar from "./components/MobileCartBar/MobileCartBar";
+import About from "./pages/About/About";
+import Contact from "./pages/Contact/Contact";
 
 const App = () => {
   const { token, showLogin, setShowLogin, theme } = useContext(StoreContext);
@@ -92,6 +94,8 @@ const App = () => {
           <Route path="/profile" element={<Profile />} />
           <Route path="/track/:id" element={<Track />} />
           <Route path="/menu" element={<Menu />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="/success/:id" element={<OrderSuccess />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
