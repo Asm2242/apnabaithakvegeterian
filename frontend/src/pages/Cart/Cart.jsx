@@ -126,12 +126,18 @@ const Cart = () => {
                   <button type="button" aria-label="increase" onClick={() => addToCart(id, size)}>+</button>
                 </div>
                 <p>₹{price * qty}</p>
-                <p
+                <button
+                  type="button"
                   className="cart-items-remove-icon"
-                  onClick={() => removeFromCart(id, size)}
+                  aria-label={`Remove ${item.name}`}
+                  title="Remove item"
+                  onClick={() => {
+                    const n = qty;
+                    for (let i = 0; i < n; i++) removeFromCart(id, size);
+                  }}
                 >
-                  x
-                </p>
+                  🗑️
+                </button>
               </div>
               <hr />
             </div>
