@@ -233,6 +233,7 @@ function Foods({ token, imgBase }) {
   const [file, setFile] = useState(null);
   const [editing, setEditing] = useState(null);
   const [busy, setBusy] = useState(null);
+  const [query, setQuery] = useState("");
 
   const load = async () => {
     const res = await axios.get(API + "/api/food/list");
@@ -347,9 +348,18 @@ function Foods({ token, imgBase }) {
         </div>
       </form>
 
-      <h3 className="list-head">All dishes ({foods.length})</h3>
+      <div className="food-toolbar">
+        <h3 className="list-head">All dishes ({foods.length})</h3>
+        <input
+          className="food-search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="🔍 Search dishes or categories…"
+          aria-label="Search dishes"
+        />
+      </div>
       <div className="food-list">
-        {foods.map((f) => (
+        {foods.filter((f) => `${f.name} ${f.category || ""}`.toLowerCase().includes(query.trim().toLowerCase())).map((f) => (
           <div key={f._id} className={`food-item-card ${!f.available ? "soldout" : ""}`}>
             <div className="food-item-img">
               <img src={foodImg(f.image)} alt={f.name} />
