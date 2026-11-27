@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
+import "./overview.css";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:4000";
 const FLOW = ["PLACED", "CONFIRMED", "PREPARING", "READY", "OUT_FOR_DELIVERY", "DELIVERED", "CANCELLED"];
@@ -783,6 +784,121 @@ function Chat({ token }) {
   );
 }
 
+function Overview({ token, onTab }) {
+  const [orders, setOrders] = useState([]);
+  const [stats, setStats] = useState({});
+
+  useEffect(() => {
+    Promise.all([
+      api(token).get("/api/order/list"),
+      api(token).get("/api/admin/stats"),
+    ])
+      .then(([o, s]) => {
+        if (o.data.success) setOrders(o.data.data || []);
+        if (s.data.success) setStats(s.data.data);
+      })
+      .catch(() => toast.error("Dashboard load nahi hua"));
+  }, [token]);
+
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const todays = orders.filter((o) => new Date(o.date).toISOString().slice(0, 10) === todayKey);
+  const paidToday = todays.filter((o) => o.paymentStatus === "PAID");
+  const onlineRevenue = paidToday.reduce((s, o) => s + (o.amount || 0), 0);
+  const codRevenue = todays.filter((o) => o.paymentStatus === "COD").reduce((s, o) => s + (o.amount || 0), 0);
+  const totalRevenue = onlineRevenue + codRevenue;
+
+  const statusCounts = FLOW.map((s) => ({ label: s, n: orders.filter((o) => o.status === s).length }));
+  const maxStatus = Math.max(1, ...statusCounts.map((s) => s.n));
+
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (6 - i));
+    const key = d.toISOString().slice(0, 10);
+    return {
+      label: d.toLocaleDateString("en-IN", { weekday: "short" }),
+      n: orders.filter((o) => new Date(o.date).toISOString().slice(0, 10) === key).length,
+    };
+  });
+  const maxDay = Math.max(1, ...days.map((d) => d.n));
+
+  return (
+    <div className="overview">
+      <div className="ov-head">
+        <div>
+          <h2>Dashboard</h2>
+          <p>Yeh raha aaj ka Apna Baithak overview.</p>
+        </div>
+        <span className="ov-date">{new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" })}</span>
+      </div>
+
+      <div className="ov-stats">
+        <div className="ov-card revenue">
+          <span>💰</span>
+          <b>₹{totalRevenue}</b>
+          <small>Today's revenue</small>
+          <em>Online ₹{onlineRevenue} • COD ₹{codRevenue}</em>
+        </div>
+        <div className="ov-card">
+          <span>📦</span>
+          <b>{todays.length}</b>
+          <small>Orders today</small>
+        </div>
+        <div className="ov-card">
+          <span>🔥</span>
+          <b>{stats.pendingOrders ?? 0}</b>
+          <small>Live / pending</small>
+        </div>
+        <div className="ov-card">
+          <span>⭐</span>
+          <b>{stats.avgRating ? `${stats.avgRating}★` : "—"}</b>
+          <small>Avg rating ({stats.reviewCount ?? 0})</small>
+        </div>
+      </div>
+
+      <div className="ov-panels">
+        <section className="ov-panel">
+          <h3>📈 Last 7 days orders</h3>
+          <div className="ov-chart">
+            {days.map((d, i) => (
+              <div className="ov-bar-wrap" key={i} title={`${d.label}: ${d.n} orders`}>
+                <div className="ov-bar" style={{ height: `${Math.max(6, (d.n / maxDay) * 100)}%` }}>
+                  <span>{d.n}</span>
+                </div>
+                <small>{d.label}</small>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="ov-panel">
+          <h3>📊 Order status</h3>
+          <div className="ov-status-list">
+            {statusCounts.filter((s) => s.n > 0).map((s) => (
+              <div className="ov-status-row" key={s.label}>
+                <span>{s.label}</span>
+                <div className="ov-track"><i style={{ width: `${(s.n / maxStatus) * 100}%` }} /></div>
+                <b>{s.n}</b>
+              </div>
+            ))}
+            {statusCounts.every((s) => !s.n) && <p className="empty">Abhi koi order nahi hai.</p>}
+          </div>
+        </section>
+      </div>
+
+      <section className="ov-panel">
+        <h3>⚡ Quick actions</h3>
+        <div className="ov-actions">
+          <button onClick={() => onTab("orders")}>📦 Manage orders</button>
+          <button onClick={() => onTab("foods")}>🍲 Edit menu</button>
+          <button onClick={() => onTab("riders")}>🛵 Assign riders</button>
+          <button onClick={() => onTab("coupons")}>🎟️ Coupons</button>
+          <button onClick={() => onTab("chat")}>🤖 AI helper</button>
+        </div>
+      </section>
+    </div>
+  );
+}
+
 function App() {
   const [token, setToken] = useState(localStorage.getItem("ab_admin_token") || "");
   const [tab, setTab] = useState("orders");
@@ -808,9 +924,9 @@ function App() {
       <header>
         <b>Apna Baithak Admin</b>
         <nav>
-          {["orders", "requests", "foods", "riders", "customers", "coupons", "settings", "feedback", "reviews", "chat"].map((t) => (
+          {["overview", "orders", "requests", "foods", "riders", "customers", "coupons", "settings", "feedback", "reviews", "chat"].map((t) => (
             <button key={t} className={tab === t ? "active" : ""} onClick={() => setTab(t)}>
-              {t === "chat" ? "🤖 chat" : t === "settings" ? "⚙️ settings" : t === "reviews" ? "⭐ reviews" : t}
+              {t === "chat" ? "🤖 chat" : t === "settings" ? "⚙️ settings" : t === "reviews" ? "⭐ reviews" : t === "overview" ? "📊 overview" : t}
             </button>
           ))}
           <button className="theme-btn" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
@@ -820,6 +936,7 @@ function App() {
         </nav>
       </header>
       <main>
+        {tab === "overview" && <Overview token={token} onTab={setTab} />}
         {tab === "orders" && <Orders token={token} />}
         {tab === "requests" && <Requests token={token} />}
         {tab === "foods" && <Foods token={token} imgBase={API} />}

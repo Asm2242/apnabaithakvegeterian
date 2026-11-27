@@ -353,23 +353,66 @@ label input { width: auto; accent-color: var(--brand); }
   align-items: center;
   justify-content: center;
   padding: 20px;
+  position: relative;
+  overflow: hidden;
   background:
     radial-gradient(800px 400px at 20% 10%, rgba(245, 158, 11, 0.28), transparent 60%),
+    radial-gradient(600px 400px at 85% 85%, rgba(217, 119, 6, 0.3), transparent 60%),
     linear-gradient(155deg, #2b1508, #7c2d12 60%, #b45309);
+}
+.login-wrap::before {
+  content: "🍽️";
+  position: absolute;
+  font-size: 220px;
+  opacity: 0.06;
+  transform: rotate(-12deg);
+  pointer-events: none;
 }
 
 .login-card {
-  width: 360px;
+  width: 390px;
   max-width: 100%;
   text-align: center;
-  border: 1px solid var(--line);
-  border-radius: 22px;
-  box-shadow: var(--shadow-lg);
+  position: relative;
+  padding: 34px;
+  border: 1px solid rgba(255, 213, 79, 0.6);
+  border-radius: 26px;
+  background: linear-gradient(160deg, rgba(255, 253, 249, .97), rgba(255, 241, 220, .95));
+  box-shadow: 0 30px 80px -24px rgba(20, 5, 2, .85), 0 0 0 6px rgba(255, 213, 79, .1);
+  animation: adminCardIn 0.6s cubic-bezier(.34,1.56,.64,1) both;
 }
-
-.login-card h1 { margin: 0 0 6px; color: var(--brand-deep); font-size: 24px; }
+@keyframes adminCardIn {
+  from { opacity: 0; transform: translateY(24px) scale(.94); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.login-card::before {
+  content: "";
+  position: absolute;
+  left: 34px; right: 34px; top: 0; height: 4px;
+  border-radius: 0 0 6px 6px;
+  background: linear-gradient(90deg, transparent, var(--brand-2), var(--brand), transparent);
+  box-shadow: 0 0 18px rgba(245, 158, 11, .7);
+}
+.login-card h1 { margin: 0 0 6px; color: var(--brand-deep); font-size: 26px; }
 .login-card h1 span { color: var(--brand); }
-.login-card button { width: 100%; margin-top: 14px; }
+.login-card input { border-radius: 11px !important; padding: 13px 14px !important; }
+.login-card button {
+  width: 100%;
+  margin-top: 14px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--brand-2), var(--brand), var(--brand-deep));
+  color: #fff;
+  font-weight: 800;
+  padding: 14px;
+  cursor: pointer;
+  box-shadow: 0 12px 26px -10px rgba(217, 119, 6, .9);
+  transition: transform .18s, filter .2s;
+}
+.login-card button:hover { transform: translateY(-2px); filter: brightness(1.06); }
+body[data-theme="dark"] .login-card {
+  background: linear-gradient(160deg, rgba(36,24,18,.97), rgba(28,19,12,.97));
+}
 .err { color: var(--bad); font-weight: 700; font-size: 13px; }
 
 /* ---------- filters / badges ---------- */
