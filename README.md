@@ -138,6 +138,15 @@ npm run dev
 
 ---
 
+📱 OTP Login
+- Customer app and sign-in dialog both offer a **📱 OTP** tab (mobile number → 6-digit code → JWT login).
+- `POST /api/otp/start` sends the code; `POST /api/otp/login` verifies it and returns the normal JWT.
+- Codes are hashed with `OTP_PEPPER`, expire in 5 minutes, allow 5 attempts, and are rate-limited per number/IP.
+- SMS gateway is chosen with `OTP_PROVIDER` (`msg91`, `twofactor`, `textlocal`, `fast2sms`, `console`).
+- **Demo mode:** if no gateway key is configured — or the gateway rejects the request — the OTP is returned as `devOtp` in the API response and shown on screen, so the flow works without SMS credits. Set `OTP_DEMO_FALLBACK=0` to disable this behaviour in production.
+
+---
+
 📸 Screenshots
 
 * ✅ Responsive Design
