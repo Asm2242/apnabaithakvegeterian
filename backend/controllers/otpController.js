@@ -24,13 +24,9 @@ const sendOtpSms = async (phone, otp) => {
 
 // no SMS provider + OTP_DEV_SHOW=1 -> return the code in the response so the
 // app can show it (testing only). Never enable this in production.
-const devOtpEnabled = () =>
-    process.env.OTP_DEV_SHOW === "1" &&
-    (sms.smsProviderName() === "console" ||
-        (!process.env.MSG91_API_KEY &&
-            !process.env.TWO_FACTOR_API_KEY &&
-            !process.env.TEXTLOCAL_USERNAME &&
-            !process.env.FAST2SMS_API_KEY));
+// In demo mode (no SMS gateway keys) the OTP is returned in the response so
+// the login flow still works. Set a real provider key to send actual SMS.
+const devOtpEnabled = () => process.env.OTP_DEV_SHOW === "1" || sms.isDemoOtp();
 
 // POST /api/otp/request  { phone } — needs login (same as checkout)
 const requestOtp = async (req, res) => {

@@ -225,3 +225,16 @@ html[data-theme="dark"] .login-mode-toggle button { color: var(--marigold); }
     font-weight: 500;
     cursor: pointer;
 }
+
+.dev-otp {
+    padding: 10px;
+    border-radius: 10px;
+    background: rgba(255, 213, 79, 0.16);
+    border: 1px dashed rgba(255, 179, 0, 0.7);
+    color: #9a3412;
+    font-size: 13px;
+    font-weight: 700;
+}
+.dev-otp b { font-size: 18px; letter-spacing: 4px; color: #E65100; }
+html[data-theme="dark"] .dev-otp { color: var(--marigold); }
+

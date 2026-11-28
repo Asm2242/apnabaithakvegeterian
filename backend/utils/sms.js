@@ -6,6 +6,21 @@
 //   console    -> dev only, prints the OTP in server logs
 const provider = () => (process.env.OTP_PROVIDER || "msg91").toLowerCase();
 
+// True only when the chosen gateway actually has credentials configured.
+const hasProviderConfig = () => {
+    switch (provider()) {
+        case "twofactor": return !!process.env.TWO_FACTOR_API_KEY;
+        case "textlocal": return !!(process.env.TEXTLOCAL_USERNAME && process.env.TEXTLOCAL_PASSWORD);
+        case "fast2sms": return !!process.env.FAST2SMS_API_KEY;
+        case "console": return false;
+        default: return !!(process.env.MSG91_API_KEY && process.env.MSG91_SENDER);
+    }
+};
+
+// Demo mode: no SMS gateway configured, so the code is shown on screen
+// instead of being sent as a real text message.
+export const isDemoOtp = () => !hasProviderConfig();
+
 const stripPlus = (p) => String(p || "").replace(/\D/g, "");
 
 let lastRaw = "";
@@ -111,6 +126,10 @@ const viaFast2Sms = async (phone, otp) => {
 export const sendOtpSms = async (phone, otp) => {
     const p = provider();
     const num = stripPlus(phone).slice(-10);
+    if (!hasProviderConfig()) {
+        console.log(`[OTP demo] ${num}: ${otp}`);
+        return "demo";
+    }
     if (p === "twofactor") return viaTwoFactor(num, otp);
     if (p === "textlocal") return viaTextlocal(num, otp);
     if (p === "fast2sms") return viaFast2Sms(num, otp);
