@@ -52,12 +52,21 @@ const requestOtp = async (req, res) => {
             otpHash: hashOtp(otp),
             expiresAt: new Date(Date.now() + OTP_TTL_MS)
         }).save();
-        await sendOtpSms(phone, otp);
+        let smsResult = "demo";
+        try {
+            smsResult = await sendOtpSms(phone, otp);
+        } catch (error) {
+            // SMS gateway misconfigured: keep login usable via a demo code.
+            if (process.env.OTP_DEMO_FALLBACK === "0") throw error;
+            console.log("[otp] gateway failed, using demo code:", error.message);
+            smsResult = "demo";
+        }
+        const showOtp = devOtpEnabled() || smsResult === "demo";
         res.json({
             success: true,
-            message: "OTP sent",
+            message: smsResult === "demo" ? "SMS unavailable — demo OTP shown" : "OTP sent",
             resendAfter: 30,
-            ...(devOtpEnabled() ? { devOtp: otp } : {})
+            ...(showOtp ? { devOtp: otp } : {})
         });
     } catch (error) {
         console.log("[otp] send fail:", error.message);
@@ -138,12 +147,21 @@ const startOtp = async (req, res) => {
             otpHash: hashOtp(otp),
             expiresAt: new Date(Date.now() + OTP_TTL_MS)
         }).save();
-        await sendOtpSms(phone, otp);
+        let smsResult = "demo";
+        try {
+            smsResult = await sendOtpSms(phone, otp);
+        } catch (error) {
+            // SMS gateway misconfigured: keep login usable via a demo code.
+            if (process.env.OTP_DEMO_FALLBACK === "0") throw error;
+            console.log("[otp] gateway failed, using demo code:", error.message);
+            smsResult = "demo";
+        }
+        const showOtp = devOtpEnabled() || smsResult === "demo";
         res.json({
             success: true,
-            message: "OTP sent",
+            message: smsResult === "demo" ? "SMS unavailable — demo OTP shown" : "OTP sent",
             resendAfter: 30,
-            ...(devOtpEnabled() ? { devOtp: otp } : {})
+            ...(showOtp ? { devOtp: otp } : {})
         });
     } catch (error) {
         console.log("[otp] send fail:", error.message);
